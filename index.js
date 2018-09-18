@@ -56,6 +56,7 @@ program
                 try {
                     deployParams = JSON.parse(deployParams);
                     await controller.deploy(deployParams, {wd: wd});
+                    console.log('done');
                 } catch (e) {
                     if (e) {
                         console.error(e);

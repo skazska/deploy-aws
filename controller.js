@@ -20,25 +20,36 @@ class Controller {
         this.roleController = new RoleController();
     }
 
-    roles (params) {
+    deployRoles (params, options, deployment, final) {
         const policies = params.policies; //TODO policies processing
 
-        return this.roleController.deploy(params.awsProperties, {inlinePolicy: params.inlinePolicy, policies: policies});
+        return this.roleController.deploy(
+            params.awsProperties,
+            {inlinePolicy: params.inlinePolicy, policies: policies},
+            final
+        );
     }
 
-    lambda (params, options, deployment) {
+    deployLambda (params, options, deployment) {
         const properties = resolvePropertiesPromise(params.awsProperties, deployment);
-        return this.lambdaController.deploy(properties, {wd: options.wd, codeEntries: params.codeEntries});
+        return this.lambdaController.deploy(
+            params.awsProperties.FunctionName,
+            properties,
+            {wd: options.wd, codeEntries: params.codeEntries},
+            final
+        );
     }
 
     deploy (deployParams, options) {
         const deployment = {};
+        const final = [];
 
         DPKO.forEach(groupKey => {
-            if (typeof this[groupKey] === 'function') {
+            const meth = 'deploy' + groupKey[0].toUpperCase() + groupKey.substr(1);
+            if (typeof this[meth] === 'function') {
                 // deployment[groupKey] = {};
                 Object.keys(deployParams[groupKey]).forEach(key => {
-                    deployment[groupKey + '.' + key] = this[groupKey](deployParams[groupKey][key], options, deployment);
+                    deployment[groupKey + '.' + key] = this[meth](deployParams[groupKey][key], options, deployment, final);
                 });
             }
         });
