@@ -53,9 +53,11 @@ program
             if (!deployParams) {
                 console.error('can\'t read from ' + cfgPath);
             } else {
+                const final = [];
                 try {
                     deployParams = JSON.parse(deployParams);
-                    await controller.deploy(deployParams, {wd: wd});
+                    await controller.deploy(deployParams, {wd: wd}, final);
+                    await Promise.all(final);
                     console.log('done');
                 } catch (e) {
                     if (e) {

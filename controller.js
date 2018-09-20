@@ -1,7 +1,7 @@
 const AWSGlobal = require('aws-sdk/global');
 const LambdaController = require('./lambda/controller');
 const RoleController = require('./iam/role/controller');
-const { resolvePropertiesPromise } = require('./utils/dependencies');
+const { resolvePropertiesPromise, resolveArrayPromise } = require('./utils/dependencies');
 
 const DPKO = [
     'roles',
@@ -21,7 +21,8 @@ class Controller {
     }
 
     deployRoles (params, options, deployment, final) {
-        const policies = params.policies; //TODO policies processing
+        // TODO const policies = resolvePropertiesPromise(params.policies, deployment);
+        const policies = params.policies;
 
         return this.roleController.deploy(
             params.awsProperties,
@@ -30,7 +31,7 @@ class Controller {
         );
     }
 
-    deployLambda (params, options, deployment) {
+    deployLambda (params, options, deployment, final) {
         const properties = resolvePropertiesPromise(params.awsProperties, deployment);
         return this.lambdaController.deploy(
             params.awsProperties.FunctionName,
@@ -40,9 +41,9 @@ class Controller {
         );
     }
 
-    deploy (deployParams, options) {
+    deploy (deployParams, options, final) {
         const deployment = {};
-        const final = [];
+        if (Array.isArray(final)) final = [];
 
         DPKO.forEach(groupKey => {
             const meth = 'deploy' + groupKey[0].toUpperCase() + groupKey.substr(1);

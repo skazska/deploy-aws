@@ -1,6 +1,9 @@
 const AWSGlobal = require('aws-sdk/global');
 const Iam = require('aws-sdk/clients/iam');
 
+const { Transition } = require('../../utils/arraysProcessor');
+
+
 let defaultConfig = {
 
 };
@@ -74,24 +77,38 @@ class Controller {
      * @return {Promise<PromiseResult<IAM.UpdateRoleResponse, AWSError>>}
      */
     update (awsProperties) {
-        var params = {
-            RoleName: 'STRING_VALUE', /* required */
-            Description: 'STRING_VALUE',
-            MaxSessionDuration: 0
-        };
+        // var params = {
+        //     RoleName: 'STRING_VALUE', /* required */
+        //     Description: 'STRING_VALUE',
+        //     MaxSessionDuration: 0
+        // };
         return this.iam.updateRole(params).promise();
     }
 
     /**
      * invokes aws iam deleteRole
-     * @param {string} name
+     * @param {string} awsProperties
      * @return {Promise<PromiseResult<{}, AWSError>>}
      */
-    delete (name) {
-        var params = {
-            RoleName: 'STRING_VALUE' /* required */
-        };
-        return this.iam.deleteRole(params).promise();
+    delete (awsProperties) {
+        // var params = {
+        //     RoleName: 'STRING_VALUE' /* required */
+        // };
+        return this.iam.deleteRole(awsProperties).promise();
+    }
+
+    /**
+     * invokes aws iam listRolePolicy
+     * @param {IAM.Types.ListRolePoliciesRequest} awsProperties
+     * @return {Promise<PromiseResult<IAM.ListRolePoliciesResponse, AWSError>>}
+     */
+    listPolicies (awsProperties) {
+        // var params = {
+        //     RoleName: 'STRING_VALUE', /* required */
+        //     Marker: 'STRING_VALUE',
+        //     MaxItems: 0
+        // };
+        return this.iam.listRolePolicies(awsProperties).promise();
     }
 
     /**
@@ -111,42 +128,57 @@ class Controller {
     }
 
     /**
-     * invokes aws iam  deleteRolePolicy
-     * @param {IAM.Types.DeleteRolePolicyRequest} params
+     * invokes aws iam deleteRolePolicy
+     * @param {IAM.Types.DeleteRolePolicyRequest} awsProperties
      * @return {Promise<PromiseResult<{}, AWSError>>}
      */
-    deletePolicy (params) {
-        var params = {
-            PolicyName: "ExamplePolicy",
-            RoleName: "Test-Role"
-        };
-        return this.iam.deleteRolePolicy(params).promise();
+    deletePolicy (awsProperties) {
+        // var params = {
+        //     PolicyName: "ExamplePolicy",
+        //     RoleName: "Test-Role"
+        // };
+        return this.iam.deleteRolePolicy(awsProperties).promise();
+    }
+
+    /**
+     * invokes aws iam listAttachedRolePolicies
+     * @param {IAM.Types.ListAttachedRolePoliciesRequest} awsProperties
+     * @return {Promise<PromiseResult<IAM.ListAttachedRolePoliciesResponse, AWSError>>}
+     */
+    listAttachedPolicies (awsProperties) {
+        // var params = {
+        //     RoleName: 'STRING_VALUE', /* required */
+        //     Marker: 'STRING_VALUE',
+        //     MaxItems: 0,
+        //     PathPrefix: 'STRING_VALUE'
+        // };
+        return this.iam.listAttachedRolePolicies(awsProperties).promise();
     }
 
     /**
      * invokes aws iam attachRolePolicy
-     * @param {IAM.Types.AttachRolePolicyRequest} params
+     * @param {IAM.Types.AttachRolePolicyRequest} awsProperties
      * @return {Promise<PromiseResult<{}, AWSError>>}
      */
-    attachPolicy (params) {
-        var params = {
-            PolicyArn: "arn:aws:iam::aws:policy/ReadOnlyAccess",
-            RoleName: "ReadOnlyRole"
-        };
-        return this.iam.attachRolePolicy(params).promise();
+    attachPolicy (awsProperties) {
+        // var params = {
+        //     PolicyArn: "arn:aws:iam::aws:policy/ReadOnlyAccess",
+        //     RoleName: "ReadOnlyRole"
+        // };
+        return this.iam.attachRolePolicy(awsProperties).promise();
     }
 
     /**
      * invokes aws iam detachRolePolicy
-     * @param {IAM.Types.DetachRolePolicyRequest} params
+     * @param {IAM.Types.DetachRolePolicyRequest} awsProperties
      * @return {Promise<PromiseResult<{}, AWSError>>}
      */
-    detachPolicy (params) {
-        var params = {
-            PolicyArn: 'STRING_VALUE', /* required */
-            RoleName: 'STRING_VALUE' /* required */
-        };
-        return this.iam.detachRolePolicy(params).promise();
+    detachPolicy (awsProperties) {
+        // var params = {
+        //     PolicyArn: 'STRING_VALUE', /* required */
+        //     RoleName: 'STRING_VALUE' /* required */
+        // };
+        return this.iam.detachRolePolicy(awsProperties).promise();
     }
 
     /**
@@ -163,19 +195,20 @@ class Controller {
      */
     async deploy (properties, options, final) {
         let roleName = properties.RoleName;
-        let role = {};
+        let role = null;
+        let policies = null;
+        let attached = null;
         //try get role by name first
         try {
             role = await this.get(roleName);
             //get inline policies
-            //TODO
             //get policies
-            //TODO
+            [policies, attached]= await Promise.all([
+                this.listPolicies({RoleName: roleName}),
+                this.listAttachedPolicies({RoleName: roleName})
+            ]);
         } catch (e) {
-            if (e.code !== 'NoSuchEntity') {
-                console.error(e);
-                return Promise.reject(e);
-            } else {
+            if (role === null && e.code === 'NoSuchEntity') {
                 //if no role by such name found - create
                 try {
                     role = await this.create(properties);
@@ -183,28 +216,34 @@ class Controller {
                     console.error(e);
                     return Promise.reject(e);
                 }
-
-
+            } else if (e.code !== 'NoSuchEntity') {
+                console.error(e);
+                return Promise.reject(e);
             }
         }
 
         //role received/created
         const result = [];
-        //remove inline policies gone
-        //TODO
-
-        //put inline policy
+        //remove/add/update inline policies
         let inlines = Array.isArray(options.inlinePolicy) ? options.inlinePolicy : [options.inlinePolicy];
-        inlines = inlines.map(inline => {
-            return this.putPolicy(Object.assign({RoleName: roleName}, inline));
-        });
-        result.push(Promise.all(inlines));
+        let transition = new Transition((left, right) => left === right.PolicyName)
+            .setRemover(name => this.deletePolicy({RoleName: roleName, PolicyName: name}))
+            .setAdjustor((name, policy) => this.putPolicy(Object.assign({RoleName: roleName}, policy)))
+            .setCreator(policy => this.putPolicy(Object.assign({RoleName: roleName}, policy)))
+            .perform(policies.PolicyNames, inlines);
 
-        //detach policies gone
-        //TODO
+        result.push(Promise.all(Object.values(transition).map(set => Promise.all(set))));
 
-        //attach new policies
-        //TODO
+        //attch/detach policies
+        //wait for all data get resolved
+        const attachedPolicies = await Promise.all(options.policies);
+
+        transition = new Transition((left, right) => left.PolicyArn === right)
+            .setRemover(policy => this.detachPolicy({RoleName: roleName, PolicyArn: policy.PolicyArn}))
+            .setCreator(arn => this.attachPolicy({RoleName: roleName, PolicyArn: arn}))
+            .perform(attached.AttachedPolicies, attachedPolicies);
+
+        result.push(Promise.all(Object.values(transition).map(set => Promise.all(set))));
 
         //add to final processings
         final.push(Promise.all(result));

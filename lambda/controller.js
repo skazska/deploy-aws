@@ -253,6 +253,8 @@ class Controller {
      * @return {Promise<PromiseResult<Lambda.FunctionConfiguration, AWSError>|*>}
      */
     async deploy (name, properties, options, final) {
+        let result = null;
+
         //wait for all data get resolved
         const [existing, codeBuffer, params] = await Promise.all([
             this.getConfig(name),
@@ -266,10 +268,10 @@ class Controller {
 
         if (existing) {
             //function exists
-            const result = [];
+            const results = [];
 
             if (hasDifferences(params, existing)) {
-                result.push(this.updateConfig(params));
+                results.push(this.updateConfig(params));
             }
 
             //TODO checking hash is actually useless unless adm-zip stop use current time in entry headers
@@ -278,13 +280,21 @@ class Controller {
                 .digest('base64');
 
             if (hash !== existing.CodeSha256) {
-                result.push(this.updateCode(params.FunctionName, true, {ZipFile: codeBuffer}));
+                results.push(this.updateCode(params.FunctionName, true, {ZipFile: codeBuffer}));
             }
-            return Promise.all(result);
+
+            result = Promise.all(results).then(() => {
+                return existing;
+            });
+
         } else {
             params.Code = {ZipFile: codeBuffer};
-            return this.create(params);
+            result = this.create(params);
         }
+
+        // final.push(result); no postprocessing here
+
+        return result;
     }
 }
 
