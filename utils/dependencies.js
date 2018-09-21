@@ -59,7 +59,7 @@ function fill (properties, deployment) {
             return fill(properties, deployment);
         });
     }
-    if (typeof properties !== 'object') return {};
+    if (typeof properties !== 'object') return properties;
     return Object.keys(properties).reduce((result, key) => {
         if (key === 'aws-deploy') return deployment[properties[key]];
         if (properties[key]['aws-deploy']) {

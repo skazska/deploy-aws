@@ -1,4 +1,8 @@
-const expect = require('chai').expect;
+const chai = require('chai');
+const chaiAsPromised = require("chai-as-promised");
+chai.use(chaiAsPromised);
+const expect = chai.expect;
+
 const { collect, bind, fill, resolvePropertiesPromise } = require('../dependencies');
 
 describe('dependencies', () => {
@@ -40,12 +44,22 @@ describe('dependencies', () => {
         });
     });
 
-    describe('#resolvePropertiesPromise()', () => {
-        it('should return Promise', () => {
-            expect(resolvePropertiesPromise({}, {})).an.instanceof(Promise);
-        });
-        it('should fill placeholders from resolved data', () => {
-            //TODO
+    describe('#resolvePropertiesPromise(data, deployment)', () => {
+        it('should fill placeholders from data resolved by Promises', () => {
+            return Promise.all([
+                expect(resolvePropertiesPromise(
+                    {'aws-deploy':'expecting'},
+                    {expecting: new Promise(resolve => resolve('result'))})
+                ).to.eventually.eql('result'),
+                expect(resolvePropertiesPromise(
+                    {expecting: {'aws-deploy':'expecting'}, fixed: 'value'},
+                    {expecting: new Promise(resolve => resolve('result'))})
+                ).to.eventually.eql({expecting: 'result', fixed: 'value'}),
+                expect(resolvePropertiesPromise(
+                    [{expecting: {'aws-deploy':'expecting'}, fixed: 'value'}, {'aws-deploy':'other'}, 'value'],
+                    {expecting: new Promise(resolve => resolve('result')), other: Promise.resolve('other')})
+                ).to.eventually.eql([{expecting: 'result', fixed: 'value'}, 'other', 'value'])
+            ]);
         });
     });
 });
