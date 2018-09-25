@@ -8,6 +8,7 @@ const readFileSync = require('fs').readFileSync;
 const program = require('commander');
 // Require logic.js file and extract controller functions using JS destructuring assignment
 const Controller = require('./controller');
+const Inform = require('@skazska/inform');
 
 const defaultConfigFilePath = '.deploy-aws';
 
@@ -57,6 +58,7 @@ program
                 try {
                     deployParams = JSON.parse(deployParams);
                     await controller.deploy(deployParams, {wd: wd}, final);
+
                     await Promise.all(final);
                     console.log('done');
                 } catch (e) {

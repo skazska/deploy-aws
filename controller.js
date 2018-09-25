@@ -2,6 +2,7 @@ const AWSGlobal = require('aws-sdk/global');
 const LambdaController = require('./lambda/controller');
 const RoleController = require('./iam/role/controller');
 const { resolvePropertiesPromise, resolveArrayPromise } = require('./utils/dependencies');
+const inform = require
 
 const DPKO = [
     'roles',
