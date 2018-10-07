@@ -249,10 +249,10 @@ class Controller {
      * @param {string} name function name
      * @param {Promise<Lambda.Types.CreateFunctionRequest>} properties
      * @param {object} options,
-     * @param {Promise<*>[]} [final]
+     * @param {Promise<*>[]} [informGroup]
      * @return {Promise<PromiseResult<Lambda.FunctionConfiguration, AWSError>|*>}
      */
-    async deploy (name, properties, options, final) {
+    async deploy (name, properties, options, informGroup) {
         let result = null;
 
         //wait for all data get resolved
