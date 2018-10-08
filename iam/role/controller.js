@@ -201,17 +201,22 @@ class Controller {
 
         //try get role by name first
         try {
-            role = this.get(roleName);
-            informGroup.addInformer(role, {text: 'getting role ' + roleName});
-            role = await role;
+            const roleInformer = informGroup.addInformer(null, {text: 'getting role ' + roleName});
+            roleInformer.inProcess('...');
+            role = await this.get(roleName);
+            roleInformer.done('done');
 
             //get inline policies
             policies = this.listPolicies({RoleName: roleName});
-            informGroup.addInformer(policies, {text: 'getting inline policies for role ' + roleName});
+            const policiesInformer = informGroup.addInformer(policies, {
+                text: 'getting inline policies for role ' + roleName
+            });
 
             //get policies
-            attached =  this.listAttachedPolicies({RoleName: roleName});
-            informGroup.addInformer(attached, {text: 'getting attached policies for role ' + roleName});
+            attached = this.listAttachedPolicies({RoleName: roleName});
+            const attachedInformer = informGroup.addInformer(attached, {
+                text: 'getting attached policies for role ' + roleName
+            });
 
             [policies, attached] = await Promise.all([policies, attached]);
         } catch (e) {
@@ -219,15 +224,14 @@ class Controller {
 
                 //if no role by such name found - create
                 try {
-                    role = this.create(properties);
-                    informGroup.addInformer(role, {text: 'creating role ' + roleName});
-                    role = await role;
+                    const roleInformer = informGroup.addInformer(null, {text: 'creating role ' + roleName});
+                    role = await this.create(properties);
+                    roleInformer.done('done');
                 } catch (e) {
-                    informGroup.abort();
+                    roleInformer.failed('failed!');
                     return Promise.reject(e);
                 }
             } else if (e.code !== 'NoSuchEntity') {
-                informGroup.abort();
                 return Promise.reject(e);
             }
         }
@@ -242,7 +246,12 @@ class Controller {
             .setCreator(policy => this.putPolicy(Object.assign({RoleName: roleName}, policy)))
             .perform(policies.PolicyNames, inlines);
 
-        result.push(Promise.all(Object.values(transition).map(set => Promise.all(set))));
+        informGroup.addInformer(
+            Promise.all(Object.values(transition).map(set => Promise.all(set))),
+            {
+                text: 'remove/add/update inline policies'
+            }
+        );
 
         //attch/detach policies
         //wait for all data get resolved
@@ -253,10 +262,12 @@ class Controller {
             .setCreator(arn => this.attachPolicy({RoleName: roleName, PolicyArn: arn}))
             .perform(attached.AttachedPolicies, attachedPolicies);
 
-        result.push(Promise.all(Object.values(transition).map(set => Promise.all(set))));
-
-        //add to final processings
-        final.push(Promise.all(result));
+        informGroup.addInformer(
+            Promise.all(Object.values(transition).map(set => Promise.all(set))),
+            {
+                text: 'attch/detach policies'
+            }
+        );
 
         //returning role
         return Promise.resolve(role.Role);

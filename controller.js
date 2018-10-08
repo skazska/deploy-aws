@@ -56,8 +56,9 @@ class Controller {
             if (typeof this[meth] === 'function') {
                 // deployment[groupKey] = {};
                 Object.keys(deployParams[groupKey]).forEach(key => {
-                    const informGroup = inform.addGroup({text: groupKey + ' - ' + key});
+                    const informGroup = inform.addGroup(null, {text: groupKey + '.' + key});
                     deployment[groupKey + '.' + key] = this[meth](deployParams[groupKey][key], options, deployment, informGroup);
+                    informGroup.task = deployment[groupKey + '.' + key];
                     // informGroup.addInformer(deployment[groupKey + '.' + key], {
                     //     text: key
                     // });
