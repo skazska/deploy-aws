@@ -200,11 +200,11 @@ class Controller {
         let attached = null;
 
         //try get role by name first
+        const getRoleInformer = informGroup.addInformer(null, {text: 'getting role ' + roleName});
         try {
-            const roleInformer = informGroup.addInformer(null, {text: 'getting role ' + roleName});
-            roleInformer.inProcess('...');
+            getRoleInformer.inProcess('...');
             role = await this.get(roleName);
-            roleInformer.done('done');
+            getRoleInformer.done(role);
 
             //get inline policies
             policies = this.listPolicies({RoleName: roleName});
@@ -221,17 +221,18 @@ class Controller {
             [policies, attached] = await Promise.all([policies, attached]);
         } catch (e) {
             if (role === null && e.code === 'NoSuchEntity') {
+                const roleInformer = informGroup.addInformer(null, {text: 'creating role ' + roleName});
 
                 //if no role by such name found - create
                 try {
-                    const roleInformer = informGroup.addInformer(null, {text: 'creating role ' + roleName});
                     role = await this.create(properties);
-                    roleInformer.done('done');
+                    roleInformer.done(role);
                 } catch (e) {
-                    roleInformer.failed('failed!');
+                    roleInformer.failed(e);
                     return Promise.reject(e);
                 }
             } else if (e.code !== 'NoSuchEntity') {
+                getRoleInformer.failed(e);
                 return Promise.reject(e);
             }
         }
