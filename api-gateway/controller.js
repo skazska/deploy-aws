@@ -37,7 +37,25 @@ class Controller {
         this.ag.getRestApi(params).promise();
     }
 
-    getResources ()
+    getResources (id) {
+        // var params = {
+        //     restApiId: 'STRING_VALUE', /* required */
+        //     embed: [
+        //         'STRING_VALUE',
+        //         /* more items */
+        //     ],
+        //     limit: 0,
+        //     position: 'STRING_VALUE'
+        // };
+        // apigateway.getResources(params, function(err, data) {
+        //     if (err) console.log(err, err.stack); // an error occurred
+        //     else     console.log(data);           // successful response
+        // });
+        const params = {
+            restApiId: id
+        };
+        this.ag.getResources(params).promise();
+    }
 }
 
 module.exports = Controller;
