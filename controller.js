@@ -2,7 +2,6 @@ const AWSGlobal = require('aws-sdk/global');
 const LambdaController = require('./lambda/controller');
 const RoleController = require('./iam/role/controller');
 const { resolvePropertiesPromise, resolveArrayPromise } = require('./utils/dependencies');
-const inform = require
 
 const DPKO = [
     'roles',
@@ -21,37 +20,45 @@ class Controller {
         this.roleController = new RoleController();
     }
 
-    deployRoles (params, options, deployment, final) {
+    deployRoles (params, options, deployment, informGroup) {
         // TODO const policies = resolvePropertiesPromise(params.policies, deployment);
         const policies = params.policies;
 
         return this.roleController.deploy(
             params.awsProperties,
             {inlinePolicy: params.inlinePolicy, policies: policies},
-            final
+            informGroup
         );
     }
 
-    deployLambda (params, options, deployment, final) {
+    deployLambda (params, options, deployment, informGroup) {
         const properties = resolvePropertiesPromise(params.awsProperties, deployment);
         return this.lambdaController.deploy(
             params.awsProperties.FunctionName,
             properties,
             {wd: options.wd, codeEntries: params.codeEntries},
-            final
+            informGroup
         );
     }
 
-    deploy (deployParams, options, final) {
+    /**
+     *
+     * @param deployParams
+     * @param options
+     * @param {Inform} inform
+     * @return {Promise<[any , any , any , any , any , any , any , any , any , any]>}
+     */
+    deploy (deployParams, options, inform) {
         const deployment = {};
-        if (Array.isArray(final)) final = [];
 
         DPKO.forEach(groupKey => {
             const meth = 'deploy' + groupKey[0].toUpperCase() + groupKey.substr(1);
             if (typeof this[meth] === 'function') {
                 // deployment[groupKey] = {};
                 Object.keys(deployParams[groupKey]).forEach(key => {
-                    deployment[groupKey + '.' + key] = this[meth](deployParams[groupKey][key], options, deployment, final);
+                    const informGroup = inform.addGroup(null, {text: 'Deploying ' + groupKey + '.' + key});
+                    deployment[groupKey + '.' + key] = this[meth](deployParams[groupKey][key], options, deployment, informGroup);
+                    informGroup.task = deployment[groupKey + '.' + key];
                 });
             }
         });

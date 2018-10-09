@@ -27,7 +27,7 @@ class Controller {
      * @param {IAM.Types.CreateRoleRequest} params
      * @return {Promise<PromiseResult<IAM.CreateRoleResponse, AWSError>>}
      */
-    create (params) {
+    create (params, informer) {
         var defaultParams = {
             AssumeRolePolicyDocument: {
                 "Version": "2012-10-17",
@@ -190,34 +190,49 @@ class Controller {
      * deploys role changes
      * @param {IAM.Types.CreateRoleRequest} properties
      * @param {Controller.deploy~options} options
-     * @param {Promise<*>[]} final
+     * @param {Group} informGroup
      * @return {Promise<*>}
      */
-    async deploy (properties, options, final) {
+    async deploy (properties, options, informGroup) {
         let roleName = properties.RoleName;
         let role = null;
         let policies = null;
         let attached = null;
+
         //try get role by name first
+        const getRoleInformer = informGroup.addInformer(null, {text: 'getting role ' + roleName});
         try {
+            getRoleInformer.inProcess('...');
             role = await this.get(roleName);
+            getRoleInformer.done(role);
+
             //get inline policies
+            policies = this.listPolicies({RoleName: roleName});
+            const policiesInformer = informGroup.addInformer(policies, {
+                text: 'getting inline policies for role ' + roleName
+            });
+
             //get policies
-            [policies, attached]= await Promise.all([
-                this.listPolicies({RoleName: roleName}),
-                this.listAttachedPolicies({RoleName: roleName})
-            ]);
+            attached = this.listAttachedPolicies({RoleName: roleName});
+            const attachedInformer = informGroup.addInformer(attached, {
+                text: 'getting attached policies for role ' + roleName
+            });
+
+            [policies, attached] = await Promise.all([policies, attached]);
         } catch (e) {
             if (role === null && e.code === 'NoSuchEntity') {
+                const roleInformer = informGroup.addInformer(null, {text: 'creating role ' + roleName});
+
                 //if no role by such name found - create
                 try {
                     role = await this.create(properties);
+                    roleInformer.done(role);
                 } catch (e) {
-                    console.error(e);
+                    roleInformer.failed(e);
                     return Promise.reject(e);
                 }
             } else if (e.code !== 'NoSuchEntity') {
-                console.error(e);
+                getRoleInformer.failed(e);
                 return Promise.reject(e);
             }
         }
@@ -232,7 +247,12 @@ class Controller {
             .setCreator(policy => this.putPolicy(Object.assign({RoleName: roleName}, policy)))
             .perform(policies.PolicyNames, inlines);
 
-        result.push(Promise.all(Object.values(transition).map(set => Promise.all(set))));
+        informGroup.addInformer(
+            Promise.all(Object.values(transition).map(set => Promise.all(set))),
+            {
+                text: 'remove/add/update inline policies'
+            }
+        );
 
         //attch/detach policies
         //wait for all data get resolved
@@ -243,10 +263,12 @@ class Controller {
             .setCreator(arn => this.attachPolicy({RoleName: roleName, PolicyArn: arn}))
             .perform(attached.AttachedPolicies, attachedPolicies);
 
-        result.push(Promise.all(Object.values(transition).map(set => Promise.all(set))));
-
-        //add to final processings
-        final.push(Promise.all(result));
+        informGroup.addInformer(
+            Promise.all(Object.values(transition).map(set => Promise.all(set))),
+            {
+                text: 'attch/detach policies'
+            }
+        );
 
         //returning role
         return Promise.resolve(role.Role);

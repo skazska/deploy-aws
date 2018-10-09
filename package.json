@@ -6,6 +6,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "demo": "node index.js service --aws-config-file=.aws-cfg.json ~/work/timetables-api-clients",
     "test": "npm run test-utils",
     "test-utils": "mocha utils/test/*.js"
   },
@@ -20,14 +21,15 @@
   },
   "homepage": "https://github.com/skazska/deploy-aws#readme",
   "dependencies": {
+    "@skazska/inform": "0.0.3",
     "adm-zip": "^0.4.11",
-    "aws-sdk": "^2.311.0",
+    "aws-sdk": "^2.329.0",
     "commander": "^2.18.0",
     "inquirer": "^6.2.0",
     "log-update": "^2.3.0"
   },
   "devDependencies": {
-    "chai": "^4.1.2",
+    "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "mocha": "^5.2.0"
   }

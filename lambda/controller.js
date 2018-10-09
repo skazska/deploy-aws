@@ -249,23 +249,26 @@ class Controller {
      * @param {string} name function name
      * @param {Promise<Lambda.Types.CreateFunctionRequest>} properties
      * @param {object} options,
-     * @param {Promise<*>[]} [final]
+     * @param {Group} [informGroup]
      * @return {Promise<PromiseResult<Lambda.FunctionConfiguration, AWSError>|*>}
      */
-    async deploy (name, properties, options, final) {
+    async deploy (name, properties, options, informGroup) {
         let result = null;
 
         //wait for all data get resolved
+        const waitPropsInformer = informGroup.addInformer(null, {text: 'Waiting dependencies to complete'});
         const [existing, codeBuffer, params] = await Promise.all([
             this.getConfig(name),
             this.preparePackage(options.wd, options.codeEntries),
             properties
         ]);
+        waitPropsInformer.done();
 
         if (params.Role && typeof params.Role !== 'string') {
             params.Role = params.Role.Arn;
         }
 
+        const informerOptions = {};
         if (existing) {
             //function exists
             const results = [];
@@ -287,12 +290,15 @@ class Controller {
                 return existing;
             });
 
+            informerOptions.text = 'waiting lambda update';
         } else {
             params.Code = {ZipFile: codeBuffer};
             result = this.create(params);
+
+            informerOptions.text = 'waiting lambda update';
         }
 
-        // final.push(result); no postprocessing here
+        informGroup.addInformer(result, informerOptions);
 
         return result;
     }
