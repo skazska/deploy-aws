@@ -1,0 +1,74 @@
+{
+  "role": {
+    "timetables-api-clients": {
+      "inlinePolicy": [
+        {
+          "PolicyName": "timetables-api-clients-inline",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "dynamodb:BatchGetItem",
+                  "dynamodb:BatchWriteItem",
+                  "dynamodb:PutItem",
+                  "dynamodb:DeleteItem",
+                  "dynamodb:GetItem",
+                  "dynamodb:UpdateItem"
+                ],
+                "Resource": "arn:aws:dynamodb:eu-west-1:266895356213:table/timetables-clients"
+              }
+            ]
+          }
+        }
+      ],
+      "policies": [
+        "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      ],
+      "awsProperties": {
+        "Path": "/service-role/timetables/",
+        "RoleName": "timetables-api-clients"
+      }
+    }
+  },
+  "lambda": {
+    "timetables-api-clients": {
+      "codeEntries": [
+        "methods",
+        "schemas",
+        "services",
+        "node_modules",
+        "aws.js",
+        "index.js"
+      ],
+      "awsProperties": {
+        "FunctionName": "timetables-api-clients",
+        "Handler": "aws.handler",
+        "Timeout": 10,
+        "Role": {
+          "aws-deploy": "roles.timetables-api-clients"
+        }
+      }
+    }
+  },
+  "restApi": {
+    "timetables-api-clients": {
+      "awsProperties": {
+        "restApiId": "vp2mwxx5c2"
+      },
+      "resources": {
+        "clients": {
+          "awsProperties": {
+            "pathPart": "clients"
+          },
+          "methods": {
+            "GET": {
+
+            }
+          }
+        }
+      }
+    }
+  }
+}

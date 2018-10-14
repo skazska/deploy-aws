@@ -4,6 +4,7 @@
 const resolvePath = require('path').resolve;
 const statSync = require('fs').statSync;
 const readFileSync = require('fs').readFileSync;
+const { readFromFile } = require('../config');
 
 const program = require('commander');
 
@@ -49,37 +50,19 @@ program
         const controller = new Controller(config);
         const inform = new Inform('Deploy service from location ' + wd);
 
-        const p = statSync(cfgPath);
-        if (p.isFile()) {
-            //deployment params from file
-            let deployParams = readFileSync(cfgPath, 'utf8');
-            if (!deployParams) {
-                console.error('can\'t read from ' + cfgPath);
+        try {
+            const deployParams = await readFromFile(cfgPath);
+
+            await controller.deploy(deployParams, {wd: wd}, inform);
+
+            await inform.promise();
+            console.log('all done');
+        } catch (e) {
+            if (e) {
+                console.error(e);
             } else {
-                try {
-                    deployParams = JSON.parse(deployParams);
-
-                    await controller.deploy(deployParams, {wd: wd}, inform);
-
-                    await inform.promise();
-                    console.log('all done');
-                } catch (e) {
-                    if (e) {
-                        console.error(e);
-                    } else {
-                        console.error('can\'t parse ' + cfgPath);
-                    }
-                }
+                console.error('can\'t parse ' + cfgPath);
             }
-        } else {
-            //deployment params interactively
-            console.error('can\'t find ' + config);
-
-            // try {
-            //     params = await createLambdaPrompt(params);
-            // } catch ( err ) {
-            //     console.error(err);
-            // }
         }
     });
 

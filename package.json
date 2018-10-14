@@ -7,7 +7,8 @@
   "main": "index.js",
   "scripts": {
     "demo": "node index.js service --aws-config-file=.aws-cfg.json ~/work/timetables-api-clients",
-    "test": "npm run test-utils",
+    "test": "npm run test-utils && npm run test-main",
+    "test-main": "mocha test/*.js",
     "test-utils": "mocha utils/test/*.js"
   },
   "repository": {
@@ -31,6 +32,8 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
-    "mocha": "^5.2.0"
+    "mocha": "^5.2.0",
+    "sinon": "^6.3.5",
+    "sinon-chai": "^3.2.0"
   }
 }

@@ -1,22 +1,35 @@
 class CommonConnectorEntity {
-    constructor (api, informer) {
+    constructor (api, informer, id, properties) {
         this.api = api;
         this.informer = informer;
+        this.id = id;
+        this.properties = properties
     }
 
-    create (id, options) {
+    /**
+     * creates entity through api
+     * @param {string} id
+     * @param options
+     */
+    create (id, properties) {
 
     }
 
+    /**
+     * gets entity data from api
+     * @param {string} id
+     * @param {Object} options
+     */
     read (id) {
 
     }
+
 
     list (options) {
 
     }
 
-    update (id, options) {
+    update (id, properties) {
 
     }
 
@@ -24,3 +37,5 @@ class CommonConnectorEntity {
 
     }
 }
+
+module.exports = CommonConnectorEntity;

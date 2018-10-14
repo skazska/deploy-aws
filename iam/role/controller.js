@@ -188,13 +188,13 @@ class Controller {
      */
     /**
      * deploys role changes
+     * @param {string} roleName
      * @param {IAM.Types.CreateRoleRequest} properties
      * @param {Controller.deploy~options} options
      * @param {Group} informGroup
      * @return {Promise<*>}
      */
-    async deploy (properties, options, informGroup) {
-        let roleName = properties.RoleName;
+    async deploy (roleName, properties, options, informGroup) {
         let role = null;
         let policies = null;
         let attached = null;

@@ -10,4 +10,4 @@ function hasDifferences(object1, object2) {
 module.exports = {
     hasDifferences: hasDifferences,
     pick: pick
-}
+};
