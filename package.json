@@ -7,7 +7,7 @@
   "main": "index.js",
   "scripts": {
     "demo": "node index.js service --aws-config-file=.aws-cfg.json ~/work/timetables-api-clients",
-    "test": "npm run test-utils && npm run test-main",
+    "test": "mocha test/*.js */test/*.js",
     "test-main": "mocha test/*.js",
     "test-utils": "mocha utils/test/*.js"
   },
