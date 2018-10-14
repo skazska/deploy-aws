@@ -22,10 +22,10 @@
   },
   "homepage": "https://github.com/skazska/deploy-aws#readme",
   "dependencies": {
-    "@skazska/inform": "0.0.3",
+    "@skazska/inform": "^0.0.4",
     "adm-zip": "^0.4.11",
-    "aws-sdk": "^2.329.0",
-    "commander": "^2.18.0",
+    "aws-sdk": "^2.334.0",
+    "commander": "^2.19.0",
     "inquirer": "^6.2.0",
     "log-update": "^2.3.0"
   },
