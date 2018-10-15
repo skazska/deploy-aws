@@ -2,11 +2,11 @@ const { statSync, readdirSync } = require('fs');
 const { createHash } = require('crypto');
 
 const Lambda = require('aws-sdk/clients/lambda');
+const { hasDifferences } = require('../utils/properties');
 
-const AdmZip = require('../custom_modules/adm-zip/adm-zip.js');
+const AdmZip = require('../custom_modules/adm-zip');
 //const AdmZip = require('adm-zip');
 
-const { hasDifferences } = require('../utils/properties');
 
 class Controller {
 
