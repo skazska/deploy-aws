@@ -4,4 +4,4 @@ node_js:
 git:
   depth: 3
 before_script:
-  - git clone --depth=1 --branch=master https://github.com/skazska/adm-zip.git
+  - git clone --depth=1 --branch=master https://github.com/skazska/adm-zip.git common_modules/adm-zip
