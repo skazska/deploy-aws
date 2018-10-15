@@ -1,4 +1,9 @@
 const AWSGlobal = require('aws-sdk/global');
+const awsDefaultConfig = {
+    "accessKeyId": "ACCESS_KEY_ID",
+    "secretAccessKey": "SECRET_ACCESS_KEY",
+    "region": "eu-west-1"
+};
 const LambdaController = require('./lambda/controller');
 const RoleController = require('./iam/role/controller');
 const RestApiController = require('./api-gateway/controller');
@@ -14,7 +19,7 @@ class Controller {
         if (typeof config === 'string') {
             AWSGlobal.config.loadFromPath(config);
         } else if (typeof config === 'object') {
-            AWSGlobal.config.update(Object.assign({}, defaultConfig, config));
+            AWSGlobal.config.update(Object.assign({}, awsDefaultConfig, config));
         }
 
         this.lambdaController = new LambdaController();
