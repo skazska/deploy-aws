@@ -4,7 +4,7 @@
 const resolvePath = require('path').resolve;
 const statSync = require('fs').statSync;
 const readFileSync = require('fs').readFileSync;
-const { readFromFile } = require('../config');
+const { readFromFile } = require('./utils/config');
 
 const program = require('commander');
 
@@ -55,7 +55,7 @@ program
 
             await controller.deploy(deployParams, {wd: wd}, inform);
 
-            await inform.promise();
+            await inform.promise;
             console.log('all done');
         } catch (e) {
             if (e) {
