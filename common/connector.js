@@ -1,6 +1,5 @@
 class CommonAwsConnector {
     constructor(defaults) {
-        //defaults for aws lambda configuration
         this.defaults = Object.assign({
             // name: 'STRING_VALUE', /* required */
             // apiKeySource: HEADER | AUTHORIZER,

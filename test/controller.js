@@ -42,13 +42,13 @@ describe('Controller', () => {
     });
 
     describe('#deploy(task, options)', () => {
-        after(() => {
+        let inform;
+        afterEach(() => {
             sinon.restore();
         });
-        it('should call deployEntryString methods for every EntryString in Controller.DPKO, should add groups in inform', async () => {
-            const inform = new Inform('Deploy service');
-            sinon.replace(inform, 'renderText', sinon.fake());
-            sinon.replace(inform, 'addGroup', sinon.fake());
+        beforeEach(() => {
+            inform = new Inform(sinon.fake(), 'Deploy service');
+            sinon.spy(inform, 'addGroup');
             Controller.DPKO.forEach(entry => {
                 sinon.replace(controller, Controller.deployMethodName(entry), sinon.fake(
                     (params, options, deployment, informGroup) => {
@@ -57,21 +57,33 @@ describe('Controller', () => {
                     }
                 ))
             });
+
+        });
+        it('should call deployEntryString methods for every EntryString in Controller.DPKO', async () => {
             try {
                 const deployParams = await readFromFile(cfgPath);
                 await controller.deploy(deployParams, {wd: 'workdir'}, inform);
                 Controller.DPKO
                     .map(entry => controller[Controller.deployMethodName(entry)])
                     .forEach(meth => {
-                        expect(meth).to.be.calledOnce();
+                        expect(meth).to.be.calledOnce;
                     });
-                await inform.promise();
-                expect(inform.addGroup.callCount).to.be.equal(2);
-                expect(inform.renderText).to.be.called;
             } catch (e) {
-
+                throw e;
             }
-        })
+        });
+        it('should add groups in inform', async () => {
+            try {
+                const deployParams = await readFromFile(cfgPath);
+                await controller.deploy(deployParams, {wd: 'workdir'}, inform);
+                await inform.promise;
+                expect(inform.addGroup.callCount).to.be.equal(2);
+                expect(inform.renderer).to.be.called;
+            } catch (e) {
+                throw e;
+            }
+        });
+
     });
     describe('#deployRoles(params, options, deployment, informGroup)', () => {
         after(() => {

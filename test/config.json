@@ -1,9 +1,9 @@
 {
   "role": {
-    "timetables-api-clients": {
+    "aws-deploy-test": {
       "inlinePolicy": [
         {
-          "PolicyName": "timetables-api-clients-inline",
+          "PolicyName": "aws-deploy-test-inline",
           "PolicyDocument": {
             "Version": "2012-10-17",
             "Statement": [
@@ -33,7 +33,7 @@
     }
   },
   "lambda": {
-    "timetables-api-clients": {
+    "aws-deploy-test": {
       "codeEntries": [
         "methods",
         "schemas",
@@ -43,7 +43,7 @@
         "index.js"
       ],
       "awsProperties": {
-        "FunctionName": "timetables-api-clients",
+        "FunctionName": "aws-deploy-test",
         "Handler": "aws.handler",
         "Timeout": 10,
         "Role": {
