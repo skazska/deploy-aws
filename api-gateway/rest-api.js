@@ -1,4 +1,4 @@
-const Entity = require('../common/connector/entity');
+const Entity = require('../common/entity');
 
 class RestApi extends Entity {
     constructor (connector, informer, id, properties) {
@@ -49,3 +49,5 @@ class RestApi extends Entity {
 
     }
 }
+
+module.exports = RestApi;

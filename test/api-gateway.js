@@ -16,7 +16,7 @@ const cfgPath = __dirname + '/config.json';
 const controllers = {
     lambda: require('../lambda/controller'),
     role: require('../iam/role/controller'),
-    restapi: require('../api-gateway/controller')
+    restapi: require('../api-gateway')
 };
 
 describe('Controller', () => {

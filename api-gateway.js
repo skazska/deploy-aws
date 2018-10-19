@@ -7,7 +7,7 @@ class Controller {
         const connector = new Connector();
         this.restApi = new RestApi(connector);
     }
-    
+
     /**
      * deploys role changes
      * @param {} properties
@@ -29,3 +29,5 @@ class Controller {
 
     }
 }
+
+module.exports = Controller;

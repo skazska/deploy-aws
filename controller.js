@@ -6,7 +6,7 @@ const awsDefaultConfig = {
 };
 const LambdaController = require('./lambda/controller');
 const RoleController = require('./iam/role/controller');
-const RestApiController = require('./api-gateway/controller');
+const RestApiController = require('./api-gateway');
 const { resolvePropertiesPromise, resolveArrayPromise } = require('./utils/dependencies');
 
 const DPKO = [
