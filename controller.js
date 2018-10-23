@@ -11,7 +11,8 @@ const { resolvePropertiesPromise, resolveArrayPromise } = require('./utils/depen
 
 const DPKO = [
     'role',
-    'lambda'
+    'lambda',
+    'restApi'
 ];
 
 class Controller {

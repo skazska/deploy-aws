@@ -16,13 +16,13 @@ const cfgPath = __dirname + '/config.json';
 const controllers = {
     lambda: require('../lambda/controller'),
     role: require('../iam/role/controller'),
-    restapi: require('../api-gateway')
+    restApi: require('../api-gateway')
 };
 
 describe('Controller', () => {
     const controller = new Controller(awsCfg);
     it('should have DPKO property containing names of deployables', () => {
-        expect(Controller.DPKO).to.be.eql([ 'role', 'lambda' ]);
+        expect(Controller.DPKO).to.be.eql([ 'role', 'lambda' , 'restApi']);
     });
 
     Controller.DPKO.forEach(entry => {
@@ -77,7 +77,7 @@ describe('Controller', () => {
                 const deployParams = await readFromFile(cfgPath);
                 await controller.deploy(deployParams, {wd: 'workdir'}, inform);
                 await inform.promise;
-                expect(inform.addGroup.callCount).to.be.equal(2);
+                expect(inform.addGroup.callCount).to.be.equal(3);
                 expect(inform.renderer).to.be.called;
             } catch (e) {
                 throw e;

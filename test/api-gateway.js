@@ -5,19 +5,27 @@ chai.use(sinonChai);
 
 const expect = chai.expect;
 
-const Inform = require('@skazska/inform');
-const Controller = require('../controller');
-const { readFromFile } = require('../utils/config');
-// const awsCfg = __dirname + '/.aws-cfg.json';
-const awsCfg = {};
-
-const cfgPath = __dirname + '/config.json';
-
-const controllers = {
-    lambda: require('../lambda/controller'),
-    role: require('../iam/role/controller'),
-    restapi: require('../api-gateway')
-};
+const ApiGw = require('../api-gateway');
+const RestApi = require('../api-gateway/rest-api');
+const Connector = require('../api-gateway/connector');
 
 describe('Controller', () => {
+    describe('#create', () => {
+        it('should instantiate Connector ', () => {
+            const apiGw = new ApiGw();
+            expect(apiGw).to.have.property('restApi');
+            expect(apiGw.restApi).to.be.instanceof(RestApi);
+            expect(apiGw.restApi).to.have.property('connector');
+            expect(apiGw.restApi.connector).to.be.instanceof(Connector);
+        });
+    });
+    describe('#deploy', () => {
+        const apiGw = new ApiGw();
+        before(() => {
+
+        });
+        it('should', () => {
+
+        })
+    });
 });

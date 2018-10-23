@@ -7,5 +7,8 @@ const expect = chai.expect;
 
 const Inform = require('@skazska/inform');
 
+const RestApi = require('../rest-api');
+
 describe('Controller', () => {
+
 });
