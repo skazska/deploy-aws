@@ -19,7 +19,7 @@ const controllers = {
     restApi: require('../api-gateway')
 };
 
-describe('Controller', () => {
+describe('deploy-aws Controller', () => {
     const controller = new Controller(awsCfg);
     it('should have DPKO property containing names of deployables', () => {
         expect(Controller.DPKO).to.be.eql([ 'role', 'lambda' , 'restApi']);

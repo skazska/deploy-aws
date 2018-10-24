@@ -9,6 +9,6 @@ const Inform = require('@skazska/inform');
 const Controller = require('../rest-api');
 
 
-describe('Controller', () => {
+describe('ApiGateway Controller', () => {
 
 });

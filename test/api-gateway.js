@@ -9,7 +9,7 @@ const ApiGw = require('../api-gateway');
 const RestApi = require('../api-gateway/rest-api');
 const Connector = require('../api-gateway/connector');
 
-describe('Controller', () => {
+describe('ApiGatewayController', () => {
     describe('#create', () => {
         it('should instantiate Connector ', () => {
             const apiGw = new ApiGw();
