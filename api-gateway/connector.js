@@ -32,7 +32,7 @@ class ApiGatewayConnector extends CommonAwsConnector {
     }
 
     createRestApi (properties) {
-        // var params = {
+        const defaults = {
         //     name: 'STRING_VALUE', /* required */
         //     apiKeySource: HEADER | AUTHORIZER,
         //     binaryMediaTypes: [
@@ -50,10 +50,9 @@ class ApiGatewayConnector extends CommonAwsConnector {
         //     minimumCompressionSize: 0,
         //     policy: 'STRING_VALUE',
         //     version: 'STRING_VALUE'
-        // };
+        };
         return this.api.createRestApi(Object.assign(
-            {},
-            this.defaults,
+            defaults,
             properties)
         ).promise();
     }
@@ -158,6 +157,78 @@ class ApiGatewayConnector extends CommonAwsConnector {
      * METHODS
      **************************************************************/
 
+    getMethod (restApiId, resourceId, httpMethod) {
+        const params = {
+            resourceId: resourceId, /* required */
+            restApiId: restApiId, /* required */
+            httpMethod: httpMethod  /* required */
+        };
+        return this.api.getMethod(params).promise();
+    }
+
+    createMethod (restApiId, resourceId, httpMethod, properties) {
+        const defaults = {
+            authorizationType: 'NONE', /* required */ // AWS_IAM, CUSTOM, COGNITO_USER_POOLS
+        //     httpMethod: 'STRING_VALUE', /* required */
+        //     resourceId: 'STRING_VALUE', /* required */
+        //     restApiId: 'STRING_VALUE', /* required */
+        //     apiKeyRequired: true || false,
+        //     authorizationScopes: [
+        //         'STRING_VALUE',
+        //         /* more items */
+        //     ],
+        //     authorizerId: 'STRING_VALUE',
+        //     operationName: 'STRING_VALUE',
+        //     requestModels: {
+        //         '<String>': 'STRING_VALUE',
+        //         /* '<String>': ... */
+        //     },
+        //     requestParameters: {
+        //         '<String>': true || false,
+        //         /* '<String>': ... */
+        //     },
+        //     requestValidatorId: 'STRING_VALUE'
+        };
+        return this.api.putMethod(Object.assign(
+            defaults,
+            properties,
+            {
+                restApiId: restApiId,
+                resourceId: resourceId,
+                httpMethod: httpMethod
+            })
+        ).promise();
+    }
+
+    deleteMethod (restApiId, resourceId, httpMethod) {
+        const params = {
+            resourceId: resourceId, /* required */
+            restApiId: restApiId, /* required */
+            httpMethod: httpMethod  /* required */
+        };
+        return this.api.deleteMethod(params).promise();
+    }
+
+    updateMethod (restApiId, resourceId, httpMethod, changes) {
+        const params = {
+            resourceId: resourceId, /* required */
+            restApiId: restApiId, /* required */
+            httpMethod: httpMethod  /* required */
+            // patchOperations: [
+            //     {
+            //         from: 'STRING_VALUE',
+            //         op: add | remove | replace | move | copy | test,
+            //         path: 'STRING_VALUE',
+            //         value: 'STRING_VALUE'
+            //     },
+            //     /* more items */
+            // ]
+        };
+        if (changes) {
+            params.patchOperations = changes;
+        }
+        return this.api.updateMethod(params).promise();
+    }
 
 }
 

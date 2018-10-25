@@ -8,27 +8,24 @@ const expect = chai.expect;
 const AWSGlobal = require('aws-sdk/global');
 const ConnectorRestApi = require('../connector');
 
-const awsResponse = (response) => {
-    return {
-        promise: () => { return new Promise(resolve => setImmediate(resolve, response)) }
-    };
-};
+const API_NAME = 'aws-deploy-test-api';
 
 describe('AWS Api Gateway Connector - RestApi methods', () => {
     AWSGlobal.config.loadFromPath('./.aws-cfg.json');
     const connector = new ConnectorRestApi();
     let restApiId = null;
+
     it('#createRestApi should result in new rest-api data with name aws-deploy-test-api', async () => {
         let result = null;
         try {
-            result = await connector.createRestApi({name: 'aws-deploy-test-api'});
+            result = await connector.createRestApi({name: API_NAME});
         } catch (e) {
             result = e;
         }
         expect(result).not.to.be.equal(null);
         expect(result).not.to.be.instanceof(Error);
         expect(result).to.have.property('id').that.is.a('string');
-        expect(result).to.have.property('name').that.is.equal('aws-deploy-test-api');
+        expect(result).to.have.property('name').that.is.equal(API_NAME);
         restApiId = result.id;
         expect(result).to.have.property('createdDate').that.is.a('date');
         expect(result).to.have.property('apiKeySource').that.is.a('string');
@@ -59,7 +56,7 @@ describe('AWS Api Gateway Connector - RestApi methods', () => {
         expect(result).not.to.be.equal(null);
         expect(result).not.to.be.instanceof(Error);
         expect(result).to.have.property('id').that.is.a('string');
-        expect(result).to.have.property('name').that.is.equal('aws-deploy-test-api');
+        expect(result).to.have.property('name').that.is.equal(API_NAME);
         restApiId = result.id;
         expect(result).to.have.property('createdDate').that.is.a('date');
         expect(result).to.have.property('apiKeySource').that.is.a('string');
@@ -77,6 +74,7 @@ describe('AWS Api Gateway Connector - RestApi methods', () => {
         xit('should treat params right', async () => {
         });
     });
+
     it('#deleteRestApi should should result in some data', async () => {
         let result = 'initial';
         try {
@@ -88,12 +86,21 @@ describe('AWS Api Gateway Connector - RestApi methods', () => {
         expect(result).not.to.be.instanceof(Error);
         expect(result).to.have.nested.property('$response.requestId').that.is.a('string');
     });
+
     after(async () => {
         try {
             let apis = await connector.getRestApis(null, 5);
-            apis.items.forEach()
+            apis.items.reduce(async (result, item) => {
+                if (item.name !== API_NAME) return result;
+                console.log('there is some apis named ' + API_NAME + ' wait for delete');
+                console.log('result: ', JSON.stringify(result));
+                await new Promise(resolve => setTimeout(resolve, 60000));
+                result = await connector.deleteRestApi(item.id);
+                console.log(item.id, JSON.stringify(result));
+                return result;
+            }, true)
         } catch (e) {
-            result = e;
+            console.error(e);
         }
 
     })
