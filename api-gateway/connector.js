@@ -31,7 +31,13 @@ class ApiGatewayConnector extends CommonAwsConnector {
         return this.api.getRestApi(params).promise();
     }
 
-    createRestApi (properties) {
+    /**
+     *
+     * @param {string} name
+     * @param properties
+     * @return {Promise<PromiseResult<APIGateway.RestApi, AWSError>>}
+     */
+    createRestApi (name, properties) {
         const defaults = {
         //     name: 'STRING_VALUE', /* required */
         //     apiKeySource: HEADER | AUTHORIZER,
@@ -53,7 +59,10 @@ class ApiGatewayConnector extends CommonAwsConnector {
         };
         return this.api.createRestApi(Object.assign(
             defaults,
-            properties)
+            properties,
+            {
+                name: name
+            })
         ).promise();
     }
 
@@ -228,6 +237,86 @@ class ApiGatewayConnector extends CommonAwsConnector {
             params.patchOperations = changes;
         }
         return this.api.updateMethod(params).promise();
+    }
+
+
+    /**************************************************************
+     * METHODS
+     **************************************************************/
+
+    getIntegration (restApiId, resourceId, httpMethod) {
+        const params = {
+            resourceId: resourceId, /* required */
+            restApiId: restApiId, /* required */
+            httpMethod: httpMethod  /* required */
+        };
+        return this.api.getIntegration(params).promise();
+    }
+
+    createIntegration (restApiId, resourceId, httpMethod, properties) {
+        const defaults = {
+            type: 'AWS_PROXY', //HTTP | AWS | MOCK | HTTP_PROXY | AWS_PROXY, /* required */
+            // cacheKeyParameters: [
+            //     'STRING_VALUE',
+            //     /* more items */
+            // ],
+            // cacheNamespace: 'STRING_VALUE',
+            // connectionId: 'STRING_VALUE',
+            // connectionType: INTERNET | VPC_LINK,
+            // contentHandling: CONVERT_TO_BINARY | CONVERT_TO_TEXT,
+            // credentials: 'STRING_VALUE',
+            // integrationHttpMethod: 'STRING_VALUE',
+            // passthroughBehavior: 'STRING_VALUE',
+            // requestParameters: {
+            //     '<String>': 'STRING_VALUE',
+            //     /* '<String>': ... */
+            // },
+            // requestTemplates: {
+            //     '<String>': 'STRING_VALUE',
+            //     /* '<String>': ... */
+            // },
+            // timeoutInMillis: 0,
+            // uri: 'STRING_VALUE'
+        };
+        return this.api.putIntegration(Object.assign(
+            defaults,
+            properties,
+            {
+                restApiId: restApiId,
+                resourceId: resourceId,
+                httpMethod: httpMethod
+            })
+        ).promise();
+    }
+
+    deleteIntegration (restApiId, resourceId, httpMethod) {
+        const params = {
+            resourceId: resourceId, /* required */
+            restApiId: restApiId, /* required */
+            httpMethod: httpMethod  /* required */
+        };
+        return this.api.deleteIntegration(params).promise();
+    }
+
+    updateIntegration (restApiId, resourceId, httpMethod, changes) {
+        const params = {
+            resourceId: resourceId, /* required */
+            restApiId: restApiId, /* required */
+            httpMethod: httpMethod  /* required */
+            // patchOperations: [
+            //     {
+            //         from: 'STRING_VALUE',
+            //         op: add | remove | replace | move | copy | test,
+            //         path: 'STRING_VALUE',
+            //         value: 'STRING_VALUE'
+            //     },
+            //     /* more items */
+            // ]
+        };
+        if (changes) {
+            params.patchOperations = changes;
+        }
+        return this.api.updateIntegration(params).promise();
     }
 
 }

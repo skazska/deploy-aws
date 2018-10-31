@@ -1,7 +1,4 @@
-const sinon = require('sinon');
 const chai = require('chai');
-const sinonChai = require("sinon-chai");
-chai.use(sinonChai);
 
 const expect = chai.expect;
 
@@ -18,7 +15,7 @@ describe('AWS Api Gateway Connector - RestApi methods', () => {
     it('#createRestApi should result in new rest-api data with name aws-deploy-test-api', async () => {
         let result = null;
         try {
-            result = await connector.createRestApi({name: API_NAME});
+            result = await connector.createRestApi(API_NAME, {});
         } catch (e) {
             result = e;
         }

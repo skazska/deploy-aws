@@ -1,8 +1,4 @@
-const sinon = require('sinon');
 const chai = require('chai');
-const sinonChai = require("sinon-chai");
-chai.use(sinonChai);
-
 const expect = chai.expect;
 
 const AWSGlobal = require('aws-sdk/global');
@@ -16,7 +12,7 @@ describe('AWS Api Gateway Connector - Resource methods', () => {
     let resourceId = null;
     before(async () => {
         try {
-            let result = await connector.createRestApi({name: 'aws-deploy-test-api'});
+            let result = await connector.createRestApi('aws-deploy-test-api',{});
             restApiId = result.id;
         } catch (e) {
             throw e;

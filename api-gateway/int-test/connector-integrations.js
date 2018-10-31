@@ -4,7 +4,7 @@ const expect = chai.expect;
 const AWSGlobal = require('aws-sdk/global');
 const ConnectorRestApi = require('../connector');
 
-describe('AWS Api Gateway Connector - Resource methods', () => {
+describe('AWS Api Gateway Connector - Integration integrations', () => {
     AWSGlobal.config.loadFromPath('./.aws-cfg.json');
     const connector = new ConnectorRestApi();
     let restApiId = null;
@@ -20,10 +20,10 @@ describe('AWS Api Gateway Connector - Resource methods', () => {
         }
     });
 
-    it('#createMethod should result in new method data ', async () => {
+    it('#createIntegration should result in new integration data ', async () => {
         let result = null;
         try {
-            result = await connector.createMethod(restApiId, resourceId, 'ANY', {
+            result = await connector.createIntegration(restApiId, resourceId, 'ANY', {
 
             });
         } catch (e) {
@@ -31,25 +31,25 @@ describe('AWS Api Gateway Connector - Resource methods', () => {
         }
         expect(result).not.to.be.equal(null);
         expect(result).not.to.be.instanceof(Error);
-        expect(result).to.have.property('httpMethod').that.is.a('string');
+        expect(result).to.have.property('httpIntegration').that.is.a('string');
     });
 
-    it('#getMethod should result in new method data ', async () => {
+    it('#getIntegration should result in new integration data ', async () => {
         let result = null;
         try {
-            result = await connector.getMethod(restApiId, resourceId, 'ANY');
+            result = await connector.getIntegration(restApiId, resourceId, 'ANY');
         } catch (e) {
             result = e;
         }
         expect(result).not.to.be.equal(null);
         expect(result).not.to.be.instanceof(Error);
-        expect(result).to.have.property('httpMethod').that.is.a('string');
+        expect(result).to.have.property('httpIntegration').that.is.a('string');
     });
 
 
-    xdescribe('#updateMethod', () => {
-        xit('should call AWS SDK AG method updateMethod transforming input params to properties', async () => {
-            const result = await connector.updateMethod('id', {name: 'name'});
+    xdescribe('#updateIntegration', () => {
+        xit('should call AWS SDK AG integration updateIntegration transforming input params to properties', async () => {
+            const result = await connector.updateIntegration('id', {name: 'name'});
             expect(apiCall).to.be.calledOnceWith({restApiId: 'id', patchOperations: {name: 'name'}});
             expect(result).to.be.equal('response');
         });
@@ -57,10 +57,10 @@ describe('AWS Api Gateway Connector - Resource methods', () => {
         });
     });
 
-    it('#deleteMethod should should result in some data', async () => {
+    it('#deleteIntegration should should result in some data', async () => {
         let result = 'initial';
         try {
-            result = await connector.deleteMethod(restApiId, resourceId, 'ANY');
+            result = await connector.deleteIntegration(restApiId, resourceId, 'ANY');
         } catch (e) {
             result = e;
         }
