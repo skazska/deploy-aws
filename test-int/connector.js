@@ -23,7 +23,7 @@ describe('AWS Lambda Connector ', () => {
     it('#createFunction should result in new function data with name aws-deploy-test-api', async () => {
         let result = null;
         try {
-            const codeBuffer = await preparePackage(path.resolve(cd, '../lambda-code'), ['index.js']);
+            const codeBuffer = await preparePackage(path.resolve(cd, './lambda-code'), ['index.js']);
             funcParams.Code = {ZipFile: codeBuffer};
             result = await connector.createFunction(FUNC_NAME, funcParams);
         } catch (e) {
@@ -92,7 +92,7 @@ describe('AWS Lambda Connector ', () => {
     it('#updateFunctionCode should result in function aws-deploy-test-api new config data', async () => {
         let result = null;
         try {
-            const codeBuffer = await preparePackage(path.resolve(cd, '../lambda-code'), ['index.js']);
+            const codeBuffer = await preparePackage(path.resolve(cd, './lambda-code'), ['index.js']);
             funcParams.Code = {ZipFile: codeBuffer};
             result = await connector.updateFunctionCode(FUNC_NAME, {MemorySize: connector.defaults.MemorySize + 100}, true);
         } catch (e) {

@@ -1,9 +1,25 @@
+/**
+ * @property {LambdaConnector} connector
+ * @property {Inform} informer
+ * @property {string} id
+ * @property {*} properties
+ */
+
 class CommonConnectorEntity {
+    /**
+     * constructor
+     * @param {CommonAwsConnector} connector
+     * @param {Inform} informer
+     * @param {*} id
+     * @param {*} properties
+     */
     constructor (connector, informer, id, properties) {
         this.connector = connector;
-        this.informer = informer;
         this.id = id;
-        this.properties = properties
+        this.properties = properties || null;
+        if (informer) {
+            this.informer = informer;
+        }
     }
 
     /**
@@ -11,16 +27,16 @@ class CommonConnectorEntity {
      * @param {string} id
      * @param {Object} options
      */
-    create (id, properties) {
-
+    create (properties) {
+        this.properties = properties;
     }
 
     /**
      * gets entity data from api
      * @param {string} id
      */
-    read (id) {
-
+    read () {
+        this.properties = null;
     }
 
     /**
@@ -28,7 +44,7 @@ class CommonConnectorEntity {
      * @param {Object} options
      */
     list (options) {
-
+        return [];
     }
 
     /**
@@ -36,16 +52,16 @@ class CommonConnectorEntity {
      * @param id
      * @param properties
      */
-    update (id, properties) {
-
+    update (properties) {
+        this.properties = properties;
     }
 
     /**
      * delete entity
      * @param {string} id
      */
-    delete (id) {
-
+    delete () {
+        this.properties = null;
     }
 }
 

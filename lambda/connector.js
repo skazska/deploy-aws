@@ -108,6 +108,23 @@ class LambdaConnector extends CommonAwsConnector {
     }
 
     /**
+     * gets function
+     * @param name
+     * @param qualifier
+     */
+    getFunction (name, qualifier) {
+        var params = {
+            FunctionName: name
+        };
+        if (qualifier) params.Qualifier = qualifier;
+
+        return this.api.getFunction(params).promise().catch(err => {
+            if (err.code === 'ResourceNotFoundException') return Promise.resolve(null);
+            return Promise.reject(err);
+        });
+    }
+
+    /**
      * gets function configuration
      * @param {string} name lambda-function name
      * @param {string} [qualifier]
@@ -220,7 +237,7 @@ class LambdaConnector extends CommonAwsConnector {
      * invokes lambda-function code update
      * @param {string} name
      * @param {object} code
-     * @param {boolean} publish
+     * @param {boolean} [publish]
      * @return {Promise<PromiseResult<Lambda.FunctionConfiguration, AWSError>>}
      */
     updateFunctionCode (name, code, publish) {

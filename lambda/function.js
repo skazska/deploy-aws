@@ -1,31 +1,36 @@
 const { statSync, readdirSync } = require('fs');
 const Entity = require('../common/entity');
 const AdmZip = require('../custom_modules/adm-zip');
-
 //const AdmZip = require('adm-zip');
 
-class RestApi extends Entity {
+/**
+ * @property {LambdaConnector} connector
+ */
+class LambdaFunction extends Entity {
+    /**
+     * @param {LambdaConnector} connector
+     * @param {Inform} informer
+     * @param {string} id
+     * @param {*} properties
+     */
     constructor (connector, informer, id, properties) {
-        super(connector, informer, id, properties)
+        super(connector, informer, id, properties);
     }
     /**
      * creates entity through api
      * @param {string} id
      * @param {Object} options
      */
-    create (id, properties) {
-
+    create (properties) {
+        return this.connector.createFunction(id || this.id, properties)
     }
 
     /**
      * gets entity data from api
      * @param {string} id
      */
-    read (id) {
-        const params = {
-            restApiId: id
-        };
-        return this.connector.getRestApi(params);
+    read (version) {
+        return this.connector.getFunctionConfiguration(this.id, version);
     }
 
     /**
@@ -33,7 +38,7 @@ class RestApi extends Entity {
      * @param {Object} options
      */
     list (options) {
-
+        return super.list(options);
     }
 
     /**
@@ -41,16 +46,25 @@ class RestApi extends Entity {
      * @param id
      * @param properties
      */
-    update (id, properties) {
+    update (properties) {
+        return this.connector.updateFunctionConfiguration(this.id, properties);
+    }
 
+    /**
+     * updates entity
+     * @param id
+     * @param properties
+     */
+    updateCode (code) {
+        return this.connector.updateFunctionCode(this.id, code);
     }
 
     /**
      * delete entity
      * @param {string} id
      */
-    delete (id) {
-
+    delete () {
+        return this.connector.deleteFunction(this.id)
     }
 
     /**
@@ -79,4 +93,4 @@ class RestApi extends Entity {
 
 }
 
-module.exports = RestApi;
+module.exports = LambdaFunction;
