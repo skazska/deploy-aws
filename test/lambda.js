@@ -7,7 +7,7 @@ const expect = chai.expect;
 
 const Lambda = require('../lambda');
 const LambdaFunction = require('../lambda/function');
-const Connector = require('../api-gateway/connector');
+const Connector = require('../lambda/connector');
 
 describe('LambdaController', () => {
     describe('#create', () => {
