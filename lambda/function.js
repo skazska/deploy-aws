@@ -9,62 +9,66 @@ const AdmZip = require('../custom_modules/adm-zip');
 class LambdaFunction extends Entity {
     /**
      * @param {LambdaConnector} connector
-     * @param {Inform} informer
+     * @param {informGroup} informer
      * @param {string} id
      * @param {*} properties
      */
-    constructor (connector, informer, id, properties) {
-        super(connector, informer, id, properties);
+    constructor (id, properties, connector, informer) {
+        super(id, properties, connector, informer);
     }
+
     /**
      * creates entity through api
-     * @param {string} id
      * @param {Object} options
+     * @param {Boolean} publish
      */
-    create (properties) {
-        return this.connector.createFunction(id || this.id, properties)
+    create (properties, publish) {
+        return this.informCall(this.connector.createFunction, 'Create function ' + this.id, this.id,
+            properties, publish);
     }
 
     /**
      * gets entity data from api
-     * @param {string} id
+     * @param {string} [version]
      */
     read (version) {
-        return this.connector.getFunctionConfiguration(this.id, version);
+        return this.informCall(this.connector.getFunctionConfiguration, 'Get config for function ' + this.id,
+            this.id, version);
     }
 
     /**
      * gets list of entities
      * @param {Object} options
      */
-    list (options) {
-        return super.list(options);
-    }
+    // list (options) {
+    //     super.list(options);
+    // }
 
     /**
      * updates entity
-     * @param id
      * @param properties
      */
     update (properties) {
-        return this.connector.updateFunctionConfiguration(this.id, properties);
+        return this.informCall(this.connector.updateFunctionConfiguration, 'Update config for function ' + this.id,
+            this.id, properties);
     }
 
     /**
      * updates entity
-     * @param id
-     * @param properties
+     * @param code
+     * @param {Boolean} publish
      */
-    updateCode (code) {
-        return this.connector.updateFunctionCode(this.id, code);
+    updateCode (code, publish) {
+        return this.informCall(this.connector.updateFunctionCode, 'Update code for function ' + this.id, this.id,
+            code, publish);
     }
 
     /**
      * delete entity
-     * @param {string} id
+     * @param {string} [version]
      */
-    delete () {
-        return this.connector.deleteFunction(this.id)
+    delete (version) {
+        return this.informCall(this.connector.deleteFunction, 'Delete function ' + this.id, this.id, version);
     }
 
     /**

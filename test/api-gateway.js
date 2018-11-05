@@ -13,10 +13,12 @@ describe('ApiGatewayController', () => {
     describe('#create', () => {
         it('should instantiate Connector ', () => {
             const apiGw = new ApiGw();
-            expect(apiGw).to.have.property('restApi');
-            expect(apiGw.restApi).to.be.instanceof(RestApi);
-            expect(apiGw.restApi).to.have.property('connector');
-            expect(apiGw.restApi.connector).to.be.instanceof(Connector);
+            expect(apiGw).to.have.property('connector');
+            expect(apiGw.connector).to.be.instanceof(Connector);
+            // expect(apiGw).to.have.property('restApi');
+            // expect(apiGw.restApi).to.be.instanceof(RestApi);
+            // expect(apiGw.restApi).to.have.property('connector');
+            // expect(apiGw.restApi.connector).to.be.instanceof(Connector);
         });
     });
     describe('#deploy', () => {

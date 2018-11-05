@@ -4,8 +4,7 @@ const RestApi = require('./api-gateway/rest-api');
 class Controller {
 
     constructor () {
-        const connector = new Connector();
-        this.restApi = new RestApi(connector);
+        this.connector = new Connector();
     }
 
     /**
@@ -17,6 +16,8 @@ class Controller {
      */
     async deploy (restApiId, properties, options, informGroup) {
         let result = null;
+
+        this.restApi = new RestApi(id, {}, this.connector, informGroup);
 
         //wait for all data get resolved
         const waitPropsInformer = informGroup.addInformer(null, {text: 'Waiting dependencies to complete'});

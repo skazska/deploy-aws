@@ -6,7 +6,7 @@ chai.use(sinonChai);
 const expect = chai.expect;
 
 const Lambda = require('aws-sdk/clients/lambda');
-const ConnectorRestApi = require('../connector');
+const LambdaConnector = require('../connector');
 
 const awsResponse = (response) => {
     return {
@@ -15,7 +15,7 @@ const awsResponse = (response) => {
 };
 
 describe('AWS Lambda Connector', () => {
-    const connector = new ConnectorRestApi({default: 'prop'});
+    const connector = new LambdaConnector({default: 'prop'});
     describe('#constructor', () => {
         it('should have property api of type aws-sdk/clients/apigateway ', () => {
             expect(connector).to.have.property('api');

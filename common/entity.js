@@ -8,18 +8,22 @@
 class CommonConnectorEntity {
     /**
      * constructor
-     * @param {CommonAwsConnector} connector
-     * @param {Inform} informer
      * @param {*} id
      * @param {*} properties
+     * @param {CommonAwsConnector} connector
+     * @param {Inform} informer
      */
-    constructor (connector, informer, id, properties) {
+    constructor (id, properties, connector, informer) {
         this.connector = connector;
         this.id = id;
         this.properties = properties || null;
         if (informer) {
             this.informer = informer;
         }
+    }
+
+    informCall (fn, text, ...args) {
+        return this.informer.wrapInformer(fn.apply(this.connector, args), {text: text});
     }
 
     /**

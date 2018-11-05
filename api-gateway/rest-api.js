@@ -1,7 +1,7 @@
 const Entity = require('../common/entity');
 
 class RestApi extends Entity {
-    constructor (connector, informer, id, properties) {
+    constructor (id, properties, connector, informer) {
         super(connector, informer, id, properties)
     }
     /**
