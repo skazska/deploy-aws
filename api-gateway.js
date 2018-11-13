@@ -1,5 +1,6 @@
 const Connector = require('./api-gateway/connector');
 const RestApi = require('./api-gateway/rest-api');
+const preparePackage = require('./utils/fs').preparePackage;
 
 class Controller {
 
@@ -23,7 +24,7 @@ class Controller {
         const waitPropsInformer = informGroup.addInformer(null, {text: 'Waiting dependencies to complete'});
         const [api, resource, method, params] = await Promise.all([
             this.getConfig(name),
-            this.preparePackage(options.wd, options.codeEntries),
+            preparePackage(options.wd, options.codeEntries),
             properties
         ]);
         waitPropsInformer.done();

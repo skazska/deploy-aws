@@ -6,7 +6,7 @@ const cd = path.dirname(__filename);
 
 const AWSGlobal = require('aws-sdk/global');
 const Connector = require('../connector');
-const preparePackage = require('../function').preparePackage;
+const preparePackage = require('../../utils/fs').preparePackage;
 
 const FUNC_NAME = 'aws-deploy-test-api';
 
@@ -94,7 +94,7 @@ describe('AWS Lambda Connector ', () => {
         try {
             const codeBuffer = await preparePackage(path.resolve(cd, './lambda-code'), ['index.js']);
             funcParams.Code = {ZipFile: codeBuffer};
-            result = await connector.updateFunctionCode(FUNC_NAME, {MemorySize: connector.defaults.MemorySize + 100}, true);
+            result = await connector.updateFunctionCode(FUNC_NAME, {ZipFile: codeBuffer}, true);
         } catch (e) {
             result = e;
         }

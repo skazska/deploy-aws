@@ -1,7 +1,4 @@
-const { statSync, readdirSync } = require('fs');
 const Entity = require('../common/entity');
-const AdmZip = require('../custom_modules/adm-zip');
-//const AdmZip = require('adm-zip');
 
 /**
  * @property {LambdaConnector} connector
@@ -12,6 +9,7 @@ class LambdaFunction extends Entity {
      * @param {informGroup} informer
      * @param {string} id
      * @param {*} properties
+     * @param {Function} packager
      */
     constructor (id, properties, connector, informer) {
         super(id, properties, connector, informer);
@@ -19,8 +17,8 @@ class LambdaFunction extends Entity {
 
     /**
      * creates entity through api
-     * @param {Object} options
-     * @param {Boolean} publish
+     * @param {Object} properties
+     * @param {Boolean} [publish]
      */
     create (properties, publish) {
         return this.informCall(this.connector.createFunction, 'Create function ' + this.id, this.id,
@@ -70,31 +68,6 @@ class LambdaFunction extends Entity {
     delete (version) {
         return this.informCall(this.connector.deleteFunction, 'Delete function ' + this.id, this.id, version);
     }
-
-    /**
-     * return zipfile Buffer promise
-     * @param {string} wd lambda package directory
-     * @param {string[]} codeEntries dirs and files in package directory to add to package
-     * @return {Promise<Buffer>}
-     */
-    static preparePackage (wd, codeEntries) {
-        return new Promise((resolve, reject) => {
-            const zip = new AdmZip();
-            (codeEntries || readdirSync(wd)).forEach(path => {
-                if (!codeEntries && ( path[0] === '.' || path[0] === '_')) return;
-                let fullPath = wd + '/' + path;
-                const p = statSync(fullPath);
-                if (p.isFile()) {
-                    zip.addLocalFile(fullPath);
-                } else if (p.isDirectory()) {
-                    zip.addLocalFolder(fullPath, path);
-                }
-            });
-            // zip.writeZip('zipFile.zip');
-            zip.toBuffer(resolve, reject);
-        });
-    }
-
 }
 
 module.exports = LambdaFunction;

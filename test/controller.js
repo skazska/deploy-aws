@@ -14,7 +14,7 @@ const awsCfg = {};
 const cfgPath = __dirname + '/config.json';
 
 const controllers = {
-    lambda: require('../lambda/controller'),
+    lambda: require('../lambda'),
     role: require('../iam/role/controller'),
     restApi: require('../api-gateway')
 };

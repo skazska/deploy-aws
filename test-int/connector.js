@@ -6,7 +6,7 @@ const cd = path.dirname(__filename);
 
 const AWSGlobal = require('aws-sdk/global');
 const Connector = require('../connector');
-const preparePackage = require('../function').preparePackage;
+const preparePackage = require('../utils/fs').preparePackage;
 
 const FUNC_NAME = 'aws-deploy-test-api';
 

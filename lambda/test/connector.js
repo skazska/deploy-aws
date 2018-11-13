@@ -84,15 +84,15 @@ describe('AWS Lambda Connector', () => {
             sinon.restore();
         });
         it('should call AWS SDK method updateFunctionConfiguration with props from name and code options', async () => {
-            const result = await connector.updateFunctionCode('name', {Code: {ZipFile: ''}});
+            const result = await connector.updateFunctionCode('name', {ZipFile: ''});
             const apiCall = connector.api.updateFunctionCode;
-            expect(apiCall).to.be.calledOnceWith({FunctionName: 'name', Publish: false, Code: {ZipFile: ''}});
+            expect(apiCall).to.be.calledOnceWith({FunctionName: 'name', Publish: false, ZipFile: ''});
             expect(result).to.be.equal('response');
         });
         it('should call AWS SDK method updateFunctionConfiguration with props from name, code options and publish', async () => {
-            const result = await connector.updateFunctionCode('name', {Code: {ZipFile: ''}}, true);
+            const result = await connector.updateFunctionCode('name', {ZipFile: ''}, true);
             const apiCall = connector.api.updateFunctionCode;
-            expect(apiCall).to.be.calledOnceWith({FunctionName: 'name', Code: {ZipFile: ''}, Publish: true});
+            expect(apiCall).to.be.calledOnceWith({FunctionName: 'name', ZipFile: '', Publish: true});
             expect(result).to.be.equal('response');
         });
     });

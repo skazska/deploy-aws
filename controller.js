@@ -4,7 +4,9 @@ const awsDefaultConfig = {
     "secretAccessKey": "SECRET_ACCESS_KEY",
     "region": "eu-west-1"
 };
-const LambdaController = require('./lambda/controller');
+// const LambdaController = require('./lambda/controller');
+const LambdaController = require('./lambda');
+
 const RoleController = require('./iam/role/controller');
 const RestApiController = require('./api-gateway');
 const { resolvePropertiesPromise, resolveArrayPromise } = require('./utils/dependencies');

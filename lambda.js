@@ -4,8 +4,9 @@ const { hasDifferences } = require('./utils/properties');
 
 const LambdaConnector = require('./lambda/connector');
 const LambdaFunction = require('./lambda/function');
+const preparePackage = require('./utils/fs').preparePackage;
 
-class Controller {
+class LambdaController {
 
     constructor () {
         this.connector = new LambdaConnector({
@@ -22,26 +23,43 @@ class Controller {
         // this.function = new Function(this.connector, informer);
     }
 
+    static get Controller() {
+        return LambdaFunction;
+    }
+
+    /**
+     * @typedef {Object} LambdaController~DeployOptions
+     * @property {string} wd deployment workdir - a lambda function directory
+     * @property {string[]} codeEntries array of file paths (relative to wd) to package
+     * @property {Function} [packager] a function returning promise with code package buffer
+     * @property {LambdaController} [lambdaController] instance of aws lambda controller
+     */
+
     /**
      * deploys lambda-function changes
      * @param {string} name function name
-     * @param {Promise<Lambda.Types.CreateFunctionRequest>} properties
-     * @param {object} options,
+     * @param {Promise<Lambda.Types.CreateFunctionRequest>} properties of lambda function
+     * @param {LambdaController~DeployOptions} options,
      * @param {InformGroup} [informGroup]
      * @return {Promise<PromiseResult<Lambda.FunctionConfiguration, AWSError>|*>}
      */
     async deploy (name, properties, options, informGroup) {
         let result = null;
 
-        const lambda = new LambdaFunction(name, {}, this.connector, informGroup);
+        const lambda = options.lambdaController || new LambdaFunction(name, {}, this.connector, informGroup);
 
-        //wait for all data get resolved
+        //wait for all data get resolved: properties, function read by name, code package
         informGroup.addInformer(properties, {text: 'Waiting dependencies to complete'});
         const [existing, codeBuffer, params] = await Promise.all([
             lambda.read(),
-            LambdaFunction.preparePackage(options.wd, options.codeEntries),
+            (options.packager || preparePackage)(options.wd, options.codeEntries),
             properties
         ]);
+
+        if (params.hasOwnProperty('FunctionName') && params['FunctionName'] !== name) {
+            throw new Error("lambda function properties contain FunctionName ant it's value isn't same to" + name);
+        }
+        // params["FunctionName"] = name;
 
         if (params.Role && typeof params.Role !== 'string') {
             params.Role = params.Role.Arn;
@@ -53,6 +71,8 @@ class Controller {
 
             if (hasDifferences(params, existing)) {
                 results.push(lambda.update(params));
+            } else {
+                results.push(null);
             }
 
             //TODO checking hash is actually useless unless adm-zip stop use current time in entry headers
@@ -62,17 +82,26 @@ class Controller {
 
             if (hash !== existing.CodeSha256) {
                 results.push(lambda.updateCode({ZipFile: codeBuffer}));
+            } else {
+                results.push(null)
             }
 
-            result = Promise.all(results).then(() => {
-                return existing;
+            result = Promise.all(results).then((results) => {
+                const result = {};
+                if (results[0]) {
+                    Object.assign(result, results[0]);
+                }
+                if (results[1]) {
+                    Object.assign(result, results[1]);
+                }
+                return result;
             });
         } else {
             params.Code = {ZipFile: codeBuffer};
-            result = this.function.create(name, params);
+            result = lambda.create(params);
         }
         return result;
     }
 }
 
-module.exports = Controller;
+module.exports = LambdaController;
