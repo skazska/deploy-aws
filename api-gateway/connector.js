@@ -241,7 +241,7 @@ class ApiGatewayConnector extends CommonAwsConnector {
 
 
     /**************************************************************
-     * METHODS
+     * INTEGRATIONS
      **************************************************************/
 
     getIntegration (restApiId, resourceId, httpMethod) {
