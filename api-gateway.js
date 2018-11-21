@@ -15,19 +15,21 @@ class Controller {
      * @param {Group} informGroup
      * @return {Promise<*>}
      */
-    async deploy (restApiId, properties, options, informGroup) {
+    async deploy (name, properties, options, informGroup) {
         let result = null;
+        let api = null;
+        let params = null;
 
-        this.restApi = new RestApi(id, {}, this.connector, informGroup);
+        const restApi = new RestApi(id, {}, this.connector, informGroup);
 
-        //wait for all data get resolved
-        const waitPropsInformer = informGroup.addInformer(null, {text: 'Waiting dependencies to complete'});
-        const [api, resource, method, params] = await Promise.all([
-            this.getConfig(name),
-            preparePackage(options.wd, options.codeEntries),
-            properties
-        ]);
-        waitPropsInformer.done();
+        //wait for all data get resolved: properties, function read by name, code package
+        informGroup.addInformer(properties, {text: 'Waiting dependencies to complete'});
+
+        try {
+            api = await restApi.findOrCreate(name, params);
+        } catch (e) {
+            return;
+        }
 
     }
 }

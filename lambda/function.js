@@ -17,7 +17,7 @@ class LambdaFunction extends Entity {
     }
 
     /**
-     * creates entity through api
+     * creates lambda function through api
      * @param {Object} properties
      * @param {Object} [options]
      * @param {boolean} [options.publish]

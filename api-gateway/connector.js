@@ -15,7 +15,7 @@ class ApiGatewayConnector extends CommonAwsConnector {
      **************************************************************/
 
     getRestApis (position, limit) {
-        var params = {
+        const params = {
             limit: limit || 25
         };
         if (typeof position !== 'undefined' && position !== null) {
