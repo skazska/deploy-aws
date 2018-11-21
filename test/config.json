@@ -59,12 +59,12 @@
       },
       "resources": {
         "clients": {
-          "awsProperties": {
-            "pathPart": "clients"
-          },
-          "methods": {
-            "GET": {
-
+          "pathPart": "clients",
+          "integrations": {
+            "ANY": {
+              "type": "AWS_PROXY",
+              "integrationMethod": "POST",
+              "lambda": { "aws-deploy": "lambda.aws-deploy-test", "aws-deploy-prop": "FunctionArn" }
             }
           }
         }

@@ -23,7 +23,9 @@ class CommonConnectorEntity {
     }
 
     informCall (fn, text, ...args) {
-        return this.informer.wrapInformer(fn.apply(this.connector, args), {text: text});
+        return this.informer
+            ? this.informer.wrapInformer(fn.apply(this.connector, args), {text: text})
+            : fn.apply(this.connector, args);
     }
 
     /**

@@ -1,28 +1,38 @@
 const Entity = require('../common/entity');
+const Connector = require('./connector');
+const preparePackage = require('../utils/fs').preparePackage;
 
 /**
  * @property {LambdaConnector} connector
  */
 class LambdaFunction extends Entity {
     /**
-     * @param {LambdaConnector} connector
-     * @param {informGroup} informer
      * @param {string} id
      * @param {*} properties
-     * @param {Function} packager
+     * @param {LambdaConnector} [connector]
+     * @param {informGroup} [informer]
      */
     constructor (id, properties, connector, informer) {
-        super(id, properties, connector, informer);
+        super(id, properties, connector || new Connector({}), informer || null);
     }
 
     /**
      * creates entity through api
      * @param {Object} properties
-     * @param {Boolean} [publish]
+     * @param {Object} [options]
+     * @param {boolean} [options.publish]
+     * @param {string} [options.wd]
+     * @param {string[]} [options.codeEntries]
+     * @param {Function} [options.packager]
      */
-    create (properties, publish) {
+    async create (properties, options) {
+        if (!options) options = {};
+        if (options.wd) {
+            let code = await (options.packager || preparePackage)(options.wd, options.codeEntries);
+            properties.Code = {ZipFile: code};
+        }
         return this.informCall(this.connector.createFunction, 'Create function ' + this.id, this.id,
-            properties, publish);
+            properties, options.publish);
     }
 
     /**

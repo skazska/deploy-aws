@@ -81,8 +81,12 @@ describe('LambdaFunction', () => {
             informer = await informer;
             expect(informer).to.be.called;
 
-            await lambda.create({prop: 'val'}, true);
+            await lambda.create({prop: 'val'}, {publish: true});
             expect(apiCall.args[1][0]).to.have.property("Publish", true);
+
+            await lambda.create({prop: 'val'}, {wd: 'wd', codeEntries: [], packager: sinon.fake.resolves('code')});
+            expect(apiCall.args[2][0]).to.have.property('Code').which.is.eql({ZipFile: 'code'});
+
 
         });
         it('#read() should return promise invoke lambdaApi(getFunctionConfiguration), addInformer which fires change and complete', async () => {
