@@ -28,7 +28,7 @@ class LambdaController {
     }
 
     /**
-     * @typedef {Object} LambdaController~DeployOptions
+     * @typedef {Object} LambdaFunction~DeployOptions
      * @property {string} wd deployment workdir - a lambda function directory
      * @property {string[]} codeEntries array of file paths (relative to wd) to package
      * @property {Function} [packager] a function returning promise with code package buffer
@@ -39,7 +39,7 @@ class LambdaController {
      * deploys lambda-function changes
      * @param {string} name function name
      * @param {Promise<Lambda.Types.CreateFunctionRequest>} properties of lambda function
-     * @param {LambdaController~DeployOptions} options,
+     * @param {LambdaFunction~DeployOptions} options,
      * @param {InformGroup} [informGroup]
      * @return {Promise<PromiseResult<Lambda.FunctionConfiguration, AWSError>|*>}
      */

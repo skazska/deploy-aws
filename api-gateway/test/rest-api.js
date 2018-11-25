@@ -153,11 +153,86 @@ describe('Controller', () => {
 
         });
         afterEach(() => {
-            sinon.reset();
+            sinon.restore();
         });
     });
 
-    describe('#find(options)', () => {
+    describe('#find(name, position, limit)', () => {
+        let informer;
+        beforeEach(() => {
+            infoCall = sinon.fake();
+            group = createInformer(infoCall);
+            informer = new Promise(resolve => {
+                const handler = sinon.spy();
+                group.on('change', handler);
+                group.on('end', () => {
+                    resolve(handler);
+                });
+            });
 
-    })
+            restApi = new RestApi('name', {}, connector, group);
+        });
+        it('should resolve record with given name', async () => {
+            apiCall = sinon.fake(() => { return awsResponse({items: [{name: 'first'}, {name: 'second'}]}); });
+            sinon.replace(connector.api, 'getRestApis', apiCall);
+            // sinon.replace(restApi, 'list', apiCall);
+
+            const result = await restApi.find('second');
+            expect(result).to.be.eql({name: 'second'});
+        });
+        it('should call list with next position until name found', async () => {
+            apiCall = sinon.stub();
+            apiCall.onFirstCall().returns(awsResponse({position: '1', items: [{name: 'first'}, {name: 'second'}]}));
+            apiCall.onSecondCall().returns(awsResponse({items: [{name: 'third'}, {name: 'forth'}]}));
+            sinon.replace(connector.api, 'getRestApis', apiCall);
+
+            const result = await restApi.find('third', 0, 2);
+            expect(result).to.be.eql({name: 'third'});
+            expect(apiCall.args[0][0]).to.eql({limit: 2});
+            expect(apiCall.args[1][0]).to.eql({limit: 2, position: '1'});
+        });
+        afterEach(() => {
+            sinon.restore();
+        });
+    });
+
+    describe('#findOrCreate(name, props)', () => {
+        let informer;
+        beforeEach(() => {
+            infoCall = sinon.fake();
+            group = createInformer(infoCall);
+            informer = new Promise(resolve => {
+                const handler = sinon.spy();
+                group.on('change', handler);
+                group.on('end', () => {
+                    resolve(handler);
+                });
+            });
+
+            restApi = new RestApi('name', {}, connector, group);
+        });
+        it('should resolve record with given name from list', async () => {
+            apiCall = sinon.fake(() => { return awsResponse({items: [{name: 'first'}, {name: 'second'}]}); });
+            sinon.replace(connector.api, 'getRestApis', apiCall);
+            // sinon.replace(restApi, 'list', apiCall);
+
+            const result = await restApi.findOrCreate('second', {});
+            expect(result).to.be.eql({name: 'second'});
+        });
+        it('should call list with next position until name found', async () => {
+            apiCall = sinon.fake(() => { return awsResponse({items: [{name: 'first'}, {name: 'second'}]}); });
+            sinon.replace(connector.api, 'getRestApis', apiCall);
+            const apiCallCreate = sinon.fake(() => { return awsResponse({name: 'third'}); });
+            sinon.replace(connector.api, 'createRestApi', apiCallCreate);
+
+            const result = await restApi.findOrCreate('third', {});
+            expect(result).to.be.eql({name: 'third'});
+            expect(apiCall.callCount).to.equal(1);
+            expect(apiCall.args[0][0]).to.eql({limit: 25});
+            expect(apiCallCreate).to.be.called;
+        });
+        afterEach(() => {
+            sinon.restore();
+        });
+    });
 });

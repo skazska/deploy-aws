@@ -31,9 +31,9 @@ class RestApi extends Entity {
 
     /**
      * gets list of entities
-     * @param {Object} options
-     * @param {Number} options.position
-     * @param {Number} options.limit
+     * @param {Object} [options]
+     * @param {String} [options.position]
+     * @param {Number} [options.limit]
      */
     list (options) {
         if (!options) options = {position: 0, limit: 25};
@@ -58,16 +58,30 @@ class RestApi extends Entity {
 
     }
 
+    /**
+     * lists restApis until stumble given name
+     * @param name
+     * @param {String} [position]
+     * @param {Number} [limit]
+     * @return {Promise<Promise<*>|*|number|BigInt|T>}
+     */
     async find(name, position, limit) {
+        const options = {limit: limit || 25};
         let undefined;
-        if (!limit) limit = 25;
-        if (typeof position !== 'number') position = 0;
-        let apis = await this.list({position: position, limit: limit});
-        let api = apis.find(api => api.name === name ? api : undefined);
-        if (apis.length < (limit)) return api;
-        return api || this.find(name, position + limit, limit);
+
+        if (position) options.position = position;
+        let result = await this.list(options);
+        let api = result.items.find(api => api.name === name ? api : undefined);
+        if (!result.position) return api;
+        return api || this.find(name, result.position, options.limit);
     }
 
+    /**
+     * searches restApi for given name, if not found - creates
+     * @param {String} name
+     * @param {Promise<Object>} properties
+     * @return {Promise<*>}
+     */
     async findOrCreate(name, properties) {
         let api = null;
         let params = null;

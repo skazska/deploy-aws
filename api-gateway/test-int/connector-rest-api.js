@@ -11,6 +11,7 @@ describe('AWS Api Gateway Connector - RestApi methods', () => {
     AWSGlobal.config.loadFromPath('./.aws-cfg.json');
     const connector = new ConnectorRestApi();
     let restApiId = null;
+    let position = null;
 
     it('#createRestApi should result in new rest-api data with name aws-deploy-test-api', async () => {
         let result = null;
@@ -34,6 +35,21 @@ describe('AWS Api Gateway Connector - RestApi methods', () => {
         let result = null;
         try {
             result = await connector.getRestApis(null, 1);
+        } catch (e) {
+            result = e;
+        }
+        expect(result).not.to.be.equal(null);
+        expect(result).not.to.be.instanceof(Error);
+        // result will not have position property if there are no more items left to get next
+        // expect(result).to.have.property('position').that.is.a('string');
+        // position = result.position;
+        expect(result).to.have.property('items').that.is.an('array').that.have.lengthOf(1);
+    });
+
+    xit('#getRestApis should result in position and list', async () => {
+        let result = null;
+        try {
+            result = await connector.getRestApis(position, 20);
         } catch (e) {
             result = e;
         }
