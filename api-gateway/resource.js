@@ -13,32 +13,42 @@ class ApiGwResource extends Entity {
     }
 
     /**
-     * creates restore
+     * creates resource
      * @param {Object} properties
      */
     create (properties) {
-        return this.informCall(this.connector.createResource, 'Create restore ' + this.id, this.id, properties);
+        return this.informCall(
+            this.connector.createResource, 'Create resource ' + properties.pathPart,
+            properties.restApiId,
+            properties.parentId,
+            properties.pathPart
+        );
     }
 
 
     /**
      * gets entity data from api
+     * @param {string} restApiId
      * @param {string} id
      */
-    read (id) {
-        return this.informCall(this.connector.getRestApi, 'Get restore ' + id, id);
+    read (restApiId, id) {
+        return this.informCall(this.connector.getResource, 'Get resource ' + id, restApiId, id);
     }
 
     /**
      * gets list of entities
      * @param {Object} [options]
+     * @param {String} [options.restApiId]
      * @param {String} [options.position]
      * @param {Number} [options.limit]
      */
     list (options) {
-        if (!options) options = {position: 0, limit: 25};
-        return this.informCall(this.connector.getRestApis, 'Get restores (' + options.position + ', ' + options.limit + ')',
-            options.position, options.limit);
+        if (!options) throw new Error('missing required arguments');
+        return this.informCall(
+            this.connector.getResources,
+            'Get resources for ' + options.restApiId + ' (' + options.position + ', ' + options.limit + ')',
+            options.restApiId, options.position, options.limit
+        );
     }
 
     /**
