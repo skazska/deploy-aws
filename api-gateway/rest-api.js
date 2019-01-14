@@ -1,23 +1,58 @@
-const Entity = require('../common/entity');
+const Api = require('../common/api');
+const Entity = require('../common/api-entity');
 const Connector = require('./connector');
 
-class RestApi extends Entity {
+class RestApiEntity extends Entity {
+
+    constructor (properties, connector, informer) {
+        super(properties, connector, informer, {idProperty: 'RestApiId'});
+    }
+
     /**
-     * @param {string} id
+     * updates entity
+     * @param properties
+     */
+    update (properties) {
+
+    }
+
+    /**
+     * delete entity
+     */
+    delete () {
+        return this._informCall(this.connector.deleteRestApi, 'Delete rest-api ' + this.id, this.id);
+    }
+}
+
+class RestApi extends Api {
+    /**
      * @param {*} properties
      * @param {ApiGatewayConnector} [connector]
      * @param {informGroup} [informer]
      */
-    constructor (id, properties, connector, informer) {
-        super(id, properties, connector || new Connector({}), informer || null);
+    constructor (properties, connector, informer) {
+        super(properties, connector || new Connector({}), informer || null);
+    }
+
+    _createEntity (properties) {
+        return super._createEntity(RestApiEntity, properties);
     }
 
     /**
      * creates rest-api
      * @param {Object} properties
      */
-    create (properties) {
-        return this.informCall(this.connector.createRestApi, 'Create rest-api ' + this.id, this.id, properties);
+    async create (properties) {
+        try {
+            const resp = await this._informCall(
+                this.connector.createRestApi,
+                'Create rest-api ' + properties.name,
+                properties);
+
+            return this._createEntity(resp);
+        } catch (e) {
+            throw e;
+        }
     }
 
 
@@ -25,8 +60,13 @@ class RestApi extends Entity {
      * gets entity data from api
      * @param {string} id
      */
-    read (id) {
-        return this.informCall(this.connector.getRestApi, 'Get rest-api ' + id, id);
+    async read (id) {
+        try {
+            const resp = await this._informCall(this.connector.getRestApi, 'Get rest-api ' + id, id);
+            return this._createEntity(resp);
+        } catch (e) {
+            throw e;
+        }
     }
 
     /**
@@ -37,25 +77,8 @@ class RestApi extends Entity {
      */
     list (options) {
         if (!options) options = {position: 0, limit: 25};
-        return this.informCall(this.connector.getRestApis, 'Get rest-apis (' + options.position + ', ' + options.limit + ')',
+        return this._informCall(this.connector.getRestApis, 'Get rest-apis (' + options.position + ', ' + options.limit + ')',
             options.position, options.limit);
-    }
-
-    /**
-     * updates entity
-     * @param id
-     * @param properties
-     */
-    update (id, properties) {
-
-    }
-
-    /**
-     * delete entity
-     * @param {string} id
-     */
-    delete (id) {
-
     }
 
     /**
@@ -80,7 +103,7 @@ class RestApi extends Entity {
      * searches restApi for given name, if not found - creates
      * @param {String} name
      * @param {Promise<Object>} properties
-     * @return {Promise<*>}
+     * @return {Promise<RestApiEntity>}
      */
     async findOrCreate(name, properties) {
         let api = null;
@@ -98,7 +121,7 @@ class RestApi extends Entity {
         if (!api) {
             return this.create(params);
         } else {
-            return api;
+            return this._createEntity(api);
         }
     }
 }

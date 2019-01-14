@@ -1,23 +1,77 @@
-const Entity = require('../common/entity');
+const Api = require('../common/api');
+const Entity = require('../common/api-entity');
 const Connector = require('./connector');
 const preparePackage = require('../utils/fs').preparePackage;
+
+class FunctionEntity extends Entity {
+
+    constructor (properties, connector, informer) {
+        super(properties, connector, informer, {idProperty: 'FunctionName'});
+    }
+
+    /**
+     * updates entity
+     * @param id
+     * @param properties
+     */
+    update (properties) {
+        return this._informCall(
+            this.connector.updateFunctionConfiguration,
+            'Update config for function ' + this.id,
+            this.id,
+            properties
+        );
+    }
+
+    /**
+     * updates entity
+     * @param code
+     * @param {Boolean} publish
+     */
+    updateCode (code, publish) {
+        return this._informCall(
+            this.connector.updateFunctionCode,
+            'Update code for function ' + this.id,
+            this.id,
+            code,
+            publish
+        );
+    }
+
+    /**
+     * delete entity
+     */
+    delete () {
+        return this._informCall(
+            this.connector.deleteFunction,
+            'Delete function ' + this.id,
+            this.id,
+            version
+        );
+    }
+}
 
 /**
  * @property {LambdaConnector} connector
  */
-class LambdaFunction extends Entity {
+class LambdaFunction extends Api {
     /**
      * @param {string} id
      * @param {*} properties
      * @param {LambdaConnector} [connector]
      * @param {informGroup} [informer]
      */
-    constructor (id, properties, connector, informer) {
-        super(id, properties, connector || new Connector({}), informer || null);
+    constructor (properties, connector, informer) {
+        super(properties, connector || new Connector({}), informer || null);
+    }
+
+    _createEntity (properties) {
+        return super._createEntity(FunctionEntity, properties);
     }
 
     /**
      * creates lambda function through api
+     * @param {String} name
      * @param {Object} properties
      * @param {Object} [options]
      * @param {boolean} [options.publish]
@@ -25,23 +79,26 @@ class LambdaFunction extends Entity {
      * @param {string[]} [options.codeEntries]
      * @param {Function} [options.packager]
      */
-    async create (properties, options) {
+    async create (name, properties, options) {
         if (!options) options = {};
         if (options.wd) {
             let code = await (options.packager || preparePackage)(options.wd, options.codeEntries);
             properties.Code = {ZipFile: code};
         }
-        return this.informCall(this.connector.createFunction, 'Create function ' + this.id, this.id,
+        const result = await this._informCall(this.connector.createFunction, 'Create function ' + name, name,
             properties, options.publish);
+        return this._createEntity(result);
     }
 
     /**
      * gets entity data from api
-     * @param {string} [version]
+     * @param {String} name
+     * @param {String} [version]
      */
-    read (version) {
-        return this.informCall(this.connector.getFunctionConfiguration, 'Get config for function ' + this.id,
-            this.id, version);
+    async read (name, version) {
+        const result = await this._informCall(this.connector.getFunctionConfiguration, 'Get config for function ' + name,
+            name, version);
+        return this._createEntity(result);
     }
 
     /**
@@ -52,32 +109,6 @@ class LambdaFunction extends Entity {
     //     super.list(options);
     // }
 
-    /**
-     * updates entity
-     * @param properties
-     */
-    update (properties) {
-        return this.informCall(this.connector.updateFunctionConfiguration, 'Update config for function ' + this.id,
-            this.id, properties);
-    }
-
-    /**
-     * updates entity
-     * @param code
-     * @param {Boolean} publish
-     */
-    updateCode (code, publish) {
-        return this.informCall(this.connector.updateFunctionCode, 'Update code for function ' + this.id, this.id,
-            code, publish);
-    }
-
-    /**
-     * delete entity
-     * @param {string} [version]
-     */
-    delete (version) {
-        return this.informCall(this.connector.deleteFunction, 'Delete function ' + this.id, this.id, version);
-    }
 }
 
 module.exports = LambdaFunction;

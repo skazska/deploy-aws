@@ -87,7 +87,7 @@ describe('AWS Api Gateway Connector - RestApi methods', () => {
             sinon.restore();
         });
         it('should call AWS SDK AG method createRestApi transforming input params to properties', async () => {
-            const result = await connector.createRestApi('name',{});
+            const result = await connector.createRestApi({name: 'name'});
             const apiCall = connector.api.createRestApi;
             expect(apiCall).to.be.calledOnceWith({name: 'name'});
             expect(result).to.be.equal('response');

@@ -54,8 +54,8 @@ describe('LambdaController', () => {
         beforeEach(() => {
             createStub = sinon.stub(LambdaFunction.prototype, 'create');
             readStub = sinon.stub(LambdaFunction.prototype, 'read');
-            updateStub = sinon.stub(LambdaFunction.prototype, 'update');
-            updateCodeStub = sinon.stub(LambdaFunction.prototype, 'updateCode');
+            // updateStub = sinon.stub(LambdaFunction.prototype, 'update');
+            // updateCodeStub = sinon.stub(LambdaFunction.prototype, 'updateCode');
 
             props = new Promise(resolve => { setImmediate(resolve, {Role: 'role'}) });
             group = createInformer(infoCall);

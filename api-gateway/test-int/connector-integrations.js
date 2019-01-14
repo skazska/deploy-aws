@@ -10,7 +10,7 @@ const ConnectorRestApi = require('../connector');
 describe('AWS Api Gateway Connector - Integration integrations', () => {
     AWSGlobal.config.loadFromPath('./.aws-cfg.json');
     const connector = new ConnectorRestApi();
-    const lambda = new LambdaFunction('aws-deploy-test-api-function', {});
+    const lambda = new LambdaFunction({});
 
     let funcName = null;
     let funcArn = null;
@@ -22,11 +22,11 @@ describe('AWS Api Gateway Connector - Integration integrations', () => {
 
     before(async () => {
         try {
-            let result = await connector.createRestApi('aws-deploy-test-api',{});
+            let result = await connector.createRestApi({name: 'aws-deploy-test-api'});
             restApiId = result.id;
             result = await connector.getResources(restApiId, null, 1);
             resourceId = result.items[0].id;
-            result = await lambda.create(
+            result = await lambda.create('aws-deploy-test-api',
                 {MemorySize: 128, Runtime: "nodejs8.10", Handler: "index.handler",
                     Role: "arn:aws:iam::266895356213:role/lambda_basic_execution"},
                 {wd: __dirname + '/lambda-code', codeEntries: ['index.js']}

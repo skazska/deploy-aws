@@ -27,7 +27,7 @@ function createInformer(renderer) {
     return new Inform(renderer, 'Deploy service').addGroup(null, groupOptions);
 }
 
-describe('Controller', () => {
+describe('API Resource Controller', () => {
     const connector = new ResourceConnector({default: 'value'});
     let infoCall;
     let apiCall;
@@ -37,11 +37,10 @@ describe('Controller', () => {
     describe('instance#constructor', () => {
         const informer = createInformer(sinon.fake());
         it('should have properties connector, informer, id, properties', () => {
-            resource = new Resource('name', {}, connector, informer);
+            resource = new Resource({id: 'name'}, connector, informer);
             expect(resource).to.eql({
                 connector: connector,
-                id: 'name',
-                properties: {},
+                properties: {id: 'name'},
                 informer: informer
             });
         })
@@ -60,14 +59,14 @@ describe('Controller', () => {
                 });
             });
 
-            resource = new Resource('name', {}, connector, group);
+            resource = new Resource({id: 'name'}, connector, group);
             apiCall = sinon.fake(() => { return awsResponse('response'); });
         });
         it('#create(properties) should return promise, invoke resource(createResource), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'createResource', apiCall);
 
             const result = await resource.create({restApiId: 'restApi', parentId: 'parentId', pathPart: 'pathPart'});
-            expect(result).to.be.equal('response');
+            expect(result.properties).to.be.equal('response');
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
@@ -75,8 +74,6 @@ describe('Controller', () => {
                 "parentId": "parentId",
                 "pathPart": "pathPart"
             });
-            expect(result).to.be.equal('response');
-
 
             expect(group.informers.length).to.equal(1);
             informer = await informer;
@@ -85,7 +82,7 @@ describe('Controller', () => {
         it('#read() should return promise invoke resource(getResource), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'getResource', apiCall);
             const result = await resource.read('restApiId', 'id');
-            expect(result).to.be.equal('response');
+            expect(result.properties).to.be.equal('response');
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({

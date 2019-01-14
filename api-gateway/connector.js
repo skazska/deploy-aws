@@ -33,11 +33,10 @@ class ApiGatewayConnector extends CommonAwsConnector {
 
     /**
      *
-     * @param {string} name
      * @param properties
      * @return {Promise<PromiseResult<APIGateway.RestApi, AWSError>>}
      */
-    createRestApi (name, properties) {
+    createRestApi (properties) {
         const defaults = {
         //     name: 'STRING_VALUE', /* required */
         //     apiKeySource: HEADER | AUTHORIZER,
@@ -59,10 +58,7 @@ class ApiGatewayConnector extends CommonAwsConnector {
         };
         return this.api.createRestApi(Object.assign(
             defaults,
-            properties,
-            {
-                name: name
-            })
+            properties)
         ).promise();
     }
 

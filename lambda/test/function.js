@@ -38,11 +38,10 @@ describe('LambdaFunction', () => {
     describe('instance#constructor', () => {
         const informer = createInformer(sinon.fake());
         it('should have properties connector, informer, id, properties', () => {
-            lambda = new LambdaFunction('name', {}, connector, informer);
+            lambda = new LambdaFunction({some: 'prop'}, connector, informer);
             expect(lambda).to.eql({
                 connector: connector,
-                id: 'name',
-                properties: {},
+                properties: {some: 'prop'},
                 informer: informer
             });
         })
@@ -60,14 +59,16 @@ describe('LambdaFunction', () => {
                 });
             });
 
-            lambda = new LambdaFunction('name', {}, connector, group);
-            apiCall = sinon.fake(() => { return awsResponse('response'); });
+            lambda = new LambdaFunction({some: 'prop'}, connector, group);
+            apiCall = sinon.fake(() => {
+                return awsResponse('response');
+            });
         });
-        it('#create(properties) should return promise, invoke lambdaApi(createFunction), addInformer which fires change and complete', async () => {
+        it('#create(name, properties) should return promise, invoke lambdaApi(createFunction), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'createFunction', apiCall);
 
-            const result = await lambda.create({prop: 'val'});
-            expect(result).to.be.equal('response');
+            const result = await lambda.create('name', {prop: 'val'});
+            expect(result.properties).to.be.equal('response');
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
@@ -81,18 +82,18 @@ describe('LambdaFunction', () => {
             informer = await informer;
             expect(informer).to.be.called;
 
-            await lambda.create({prop: 'val'}, {publish: true});
+            await lambda.create('name', {prop: 'val'}, {publish: true});
             expect(apiCall.args[1][0]).to.have.property("Publish", true);
 
-            await lambda.create({prop: 'val'}, {wd: 'wd', codeEntries: [], packager: sinon.fake.resolves('code')});
+            await lambda.create('name', {prop: 'val'}, {wd: 'wd', codeEntries: [], packager: sinon.fake.resolves('code')});
             expect(apiCall.args[2][0]).to.have.property('Code').which.is.eql({ZipFile: 'code'});
 
 
         });
-        it('#read() should return promise invoke lambdaApi(getFunctionConfiguration), addInformer which fires change and complete', async () => {
+        it('#read(name) should return promise invoke lambdaApi(getFunctionConfiguration), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'getFunctionConfiguration', apiCall);
-            const result = await lambda.read();
-            expect(result).to.be.equal('response');
+            const result = await lambda.read('name');
+            expect(result.properties).to.be.equal('response');
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
@@ -103,15 +104,45 @@ describe('LambdaFunction', () => {
             informer = await informer;
             expect(informer).to.be.called;
 
-            await lambda.read('v1');
+            await lambda.read('name', 'v1');
             expect(apiCall.args[1][0]).to.be.eql({
                 "FunctionName": "name",
                 "Qualifier": "v1"
             });
         });
+        afterEach(() => {
+            sinon.restore();
+        });
+    });
+
+    describe('methods', () => {
+        let informer;
+        let lambdaFunction;
+        beforeEach(async () => {
+            infoCall = sinon.fake();
+            group = createInformer(infoCall);
+            informer = new Promise(resolve => {
+                const handler = sinon.spy();
+                group.on('change', handler);
+                group.on('end', () => {
+                    resolve(handler);
+                });
+            });
+
+            lambda = new LambdaFunction({some: 'prop'}, connector, group);
+            sinon.replace(connector.api, 'createFunction', sinon.fake(() => {
+                return awsResponse({FunctionName: 'FunctionName'});
+            }));
+
+            lambdaFunction = await lambda.create('name', {prop: 'val'});
+        });
+
         it('#update(properties) should return promise invoke lambdaApi(updateFunctionConfiguration), addInformer which fires change and complete', async () => {
+            apiCall = sinon.fake(() => {
+                return awsResponse('response');
+            });
             sinon.replace(connector.api, 'updateFunctionConfiguration', apiCall);
-            const result = await lambda.update({prop: 'val'});
+            const result = await lambdaFunction.update({prop: 'val'});
             expect(result).to.be.equal('response');
 
             expect(apiCall).to.be.calledOnce;
@@ -126,8 +157,11 @@ describe('LambdaFunction', () => {
             expect(informer).to.be.called;
         });
         it('#updateCode(codeProps) should return promise invoke lambdaApi(updateFunctionCode), addInformer which fires change and complete', async () => {
+            apiCall = sinon.fake(() => {
+                return awsResponse('response');
+            });
             sinon.replace(connector.api, 'updateFunctionCode', apiCall);
-            const result = await lambda.updateCode({code: 'sas'});
+            const result = await lambdaFunction.updateCode({code: 'sas'});
             expect(result).to.be.equal('response');
 
             expect(apiCall).to.be.calledOnce;
@@ -141,12 +175,12 @@ describe('LambdaFunction', () => {
             informer = await informer;
             expect(informer).to.be.called;
 
-            await lambda.updateCode({code: 'sas'}, true);
+            await lambdaFunction.updateCode({code: 'sas'}, true);
             expect(apiCall.args[1][0]).to.have.property("Publish", true);
         });
         it('#delete(version) should return promise invoke lambdaApi(deleteFunction), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'deleteFunction', apiCall);
-            const result = await lambda.delete();
+            const result = await lambdaFunction.delete();
             expect(result).to.be.equal('response');
 
             expect(apiCall).to.be.calledOnce;
@@ -158,15 +192,16 @@ describe('LambdaFunction', () => {
             informer = await informer;
             expect(informer).to.be.called;
 
-            await lambda.delete('v1');
+            await lambdaFunction.delete('v1');
             expect(apiCall.args[1][0]).to.be.eql({
                 "FunctionName": "name",
                 "Qualifier": "v1"
             });
 
         });
+
         afterEach(() => {
-            sinon.reset();
+            sinon.restore();
         });
-    })
+    });
 });
