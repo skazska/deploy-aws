@@ -4,8 +4,8 @@ const Connector = require('./connector');
 
 class ApiGwResourceEntity extends Entity {
 
-    constructor (properties) {
-        super(properties, {idProperty: ['RestApiId', 'ResourceId']});
+    constructor (properties, connector, informer) {
+        super(properties, connector, informer, {idProperty: ['restApiId', 'resourceId']});
     }
 
     /**
@@ -22,7 +22,13 @@ class ApiGwResourceEntity extends Entity {
      * @param {string} id
      */
     delete () {
-
+        const idParam = this.id;
+        return this._informCall(
+            this.connector.deleteResource,
+            'Delete rest-api-resource ' + idParam.resourceId,
+            idParam.restApiId,
+            idParam.resourceId
+        );
     }
 }
 
@@ -37,18 +43,26 @@ class ApiGwResource extends Api {
         super(properties, connector || new Connector({}), informer || null);
     }
 
+    _createEntity (properties) {
+        return super._createEntity(ApiGwResourceEntity, properties);
+    }
+
     /**
      * creates resource
      * @param {Object} properties
      */
     async create (properties) {
-        const result = await this._informCall(
-            this.connector.createResource, 'Create resource ' + properties.pathPart,
-            properties.restApiId,
-            properties.parentId,
-            properties.pathPart
-        );
-        return new ApiGwResourceEntity(result);
+        try {
+            const result = await this._informCall(
+                this.connector.createResource, 'Create resource ' + properties.pathPart,
+                properties.restApiId,
+                properties.parentId,
+                properties.pathPart
+            );
+            return this._createEntity(result);
+        } catch (e) {
+            throw e;
+        }
     }
 
 
@@ -58,8 +72,16 @@ class ApiGwResource extends Api {
      * @param {string} id
      */
     async read (restApiId, id) {
-        const result = await this._informCall(this.connector.getResource, 'Get resource ' + id, restApiId, id);
-        return new ApiGwResourceEntity(result);
+        try {
+            const result = await this._informCall(this.connector.getResource, 'Get resource ' + id, restApiId, id);
+            return result ? this._createEntity(result) : null;
+        } catch (e) {
+            if (e.code === 'ResourceNotFoundException') {
+                return null;
+            } else {
+                throw e;
+            }
+        }
     }
 
     /**

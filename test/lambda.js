@@ -22,7 +22,9 @@ function createInformer(renderer) {
 }
 const awsResponse = (response) => {
     return {
-        promise: () => { return new Promise(resolve => setImmediate(resolve, response)) }
+        promise: () => {
+            return new Promise(resolve => setImmediate(resolve, response))
+        }
     };
 };
 
@@ -36,11 +38,12 @@ describe('LambdaController', () => {
         });
     });
     describe('#deploy(name, properties, options, informGroup)', () => {
-        const lambda = new Lambda();
-
         const preparePackageStub = sinon.stub();
         const opts = {wd: 'wd', codeEntries: ['1'], packager: preparePackageStub};
-        const infoCall = sinon.fake();
+
+        let infoCall;
+        let lambda;
+
 
         let createStub;
         let readStub;
@@ -52,12 +55,7 @@ describe('LambdaController', () => {
         let informer;
 
         beforeEach(() => {
-            createStub = sinon.stub(LambdaFunction.prototype, 'create');
-            readStub = sinon.stub(LambdaFunction.prototype, 'read');
-            // updateStub = sinon.stub(LambdaFunction.prototype, 'update');
-            // updateCodeStub = sinon.stub(LambdaFunction.prototype, 'updateCode');
-
-            props = new Promise(resolve => { setImmediate(resolve, {Role: 'role'}) });
+            infoCall = sinon.fake();
             group = createInformer(infoCall);
             informer = new Promise(resolve => {
                 const handler = sinon.spy();
@@ -66,15 +64,29 @@ describe('LambdaController', () => {
                     resolve(handler);
                 });
             });
+            lambda = new Lambda();
+
+            createStub = sinon.stub(lambda.connector.api, 'createFunction');
+            readStub = sinon.stub(lambda.connector.api, 'getFunctionConfiguration');
+
+            updateStub = sinon.stub(lambda.connector.api, 'updateFunctionConfiguration');
+            updateCodeStub = sinon.stub(lambda.connector.api, 'updateFunctionCode');
+
+            props = new Promise(resolve => { setImmediate(resolve, {Role: 'role'}) });
         });
         it('should call LambdaFunction methods create if read returned null', async () => {
-            readStub.resolves(null);
+            readStub.throws({code: 'ResourceNotFoundException', test: 'test'});
             preparePackageStub.resolves('code');
-            createStub.resolves({FunctionName: 'name', Role: 'role'});
-            const result = await lambda.deploy('name', props, opts, group);
-            expect(result).to.eql({FunctionName: 'name', Role: 'role'});
-            expect(createStub.args[0][0]).to.be.eql({
+            createStub.returns(awsResponse({FunctionName: 'name', Role: 'role'}));
+            const entity = await lambda.deploy('name', props, opts, group);
+            expect(entity.properties).to.eql({FunctionName: 'name', Role: 'role'});
+            expect(createStub.args[0][0]).to.deep.include({
+                "Description": "",
+                "FunctionName": "name",
+                "MemorySize": 128,
                 "Role": "role",
+                "Runtime": "nodejs8.10",
+                "Timeout": 15,
                 "Code": {
                     "ZipFile": "code"
                 }
@@ -82,43 +94,61 @@ describe('LambdaController', () => {
         });
         it('should call LambdaFunction methods update if read returned data and it differs from properties, updateCode if CodeSha256 differs', async () => {
             preparePackageStub.resolves('code');
-            readStub.resolves({FunctionName: 'name', CodeSha256: 'xxx'});
-            updateStub.resolves({FunctionName: 'name', Role: 'role'});
+            readStub.returns(awsResponse({FunctionName: 'name', CodeSha256: 'xxx'}));
+            updateStub.returns(awsResponse({FunctionName: 'name', Role: 'role'}));
+            updateCodeStub.returns(awsResponse({FunctionName: 'name', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcCs='}));
             const result = await lambda.deploy('name', props, opts, group);
-            expect(result).to.eql({FunctionName: 'name', Role: 'role'});
+            expect(result).to.eql({FunctionName: 'name', Role: 'role', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcCs='});
             expect(preparePackageStub.args[0][0]).to.be.eql('wd');
             expect(preparePackageStub.args[0][1]).to.be.eql(['1']);
             expect(updateStub.args[0][0]).to.be.eql({
-                "Role": "role"
+                "Description": "",
+                "FunctionName": "name",
+                "MemorySize": 128,
+                "Role": "role",
+                "Runtime": "nodejs8.10",
+                "Timeout": 15
             });
-            expect(updateCodeStub.args[0][0]).to.be.eql({ZipFile: 'code'});
+            expect(updateCodeStub.args[0][0]).to.be.eql({
+                "FunctionName": "name",
+                "Publish": false,
+                "ZipFile": "code"
+            });
         });
         it('should not call LambdaFunction method update if read returned data same to properties', async () => {
             preparePackageStub.resolves('code1');
-            readStub.resolves({FunctionName: 'name', Role: 'role', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcCs='});
-            updateStub.resolves({FunctionName: 'name', Role: 'role'});
-            updateCodeStub.resolves({FunctionName: 'name', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcCs='});
+            readStub.returns(awsResponse({FunctionName: 'name', Role: 'role', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcCs='}));
+            updateStub.returns(awsResponse({FunctionName: 'name', Role: 'role'}));
+            updateCodeStub.returns(awsResponse({FunctionName: 'name', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcC1='}));
             const result = await lambda.deploy('name', props, opts, group);
-            expect(result).to.eql({FunctionName: 'name', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcCs='});
+            expect(result).to.eql({FunctionName: 'name', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcC1='});
             expect(preparePackageStub.args[0][0]).to.be.eql('wd');
             expect(preparePackageStub.args[0][1]).to.be.eql(['1']);
             expect(updateStub).not.to.be.called;
-            expect(updateCodeStub.args[0][0]).to.be.eql({ZipFile: 'code1'});
+            expect(updateCodeStub.args[0][0]).to.be.eql({
+                "FunctionName": "name",
+                "Publish": false,
+                "ZipFile": "code1"
+            });
         });
         it('should not call LambdaFunction method updateCode if read returned CodeSha265 same with code', async () => {
             preparePackageStub.resolves('code');
-            readStub.resolves({FunctionName: 'name', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcCs='});
-            updateStub.resolves({FunctionName: 'name', Role: 'role'});
-            updateCodeStub.resolves({FunctionName: 'name', Role: 'role'});
+            readStub.returns(awsResponse({FunctionName: 'name', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcCs='}));
+            updateStub.returns(awsResponse({FunctionName: 'name', Role: 'role'}));
+            updateCodeStub.returns(awsResponse({FunctionName: 'name', Role: 'role'}));
             const result = await lambda.deploy('name', props, opts, group);
             expect(result).to.eql({FunctionName: 'name', Role: 'role'});
             expect(preparePackageStub.args[0][0]).to.be.eql('wd');
             expect(preparePackageStub.args[0][1]).to.be.eql(['1']);
             expect(updateCodeStub).not.to.be.called;
             expect(updateStub.args[0][0]).to.be.eql({
-                "Role": "role"
+                "Description": "",
+                "FunctionName": "name",
+                "MemorySize": 128,
+                "Role": "role",
+                "Runtime": "nodejs8.10",
+                "Timeout": 15
             });
-
         });
 
         afterEach(() => {

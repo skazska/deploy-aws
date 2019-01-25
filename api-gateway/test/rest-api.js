@@ -32,7 +32,7 @@ function createInformer(renderer) {
 describe('API Controller', () => {
     const connector = new RestApiConnector({default: 'value'});
 
-    xdescribe('instance#constructor', () => {
+    describe('instance#constructor', () => {
         const informer = createInformer(sinon.fake());
         it('should have properties connector, informer, id, properties', () => {
             restApi = new RestApi({}, connector, informer);
@@ -44,7 +44,7 @@ describe('API Controller', () => {
         })
     });
 
-    xdescribe('methods', () => {
+    describe('methods', () => {
         let infoCall;
         let apiCall;
         let restApi;
@@ -62,13 +62,13 @@ describe('API Controller', () => {
             });
 
             restApi = new RestApi({}, connector, group);
-            apiCall = sinon.fake(() => { return awsResponse('response'); });
+            apiCall = sinon.fake(() => { return awsResponse({id: 'id', prop: 'response'}); });
         });
         it('#create(properties) should return promise, invoke rest-api(createRestApi), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'createRestApi', apiCall);
 
             const result = await restApi.create({prop: 'val'});
-            expect(result.properties).to.be.equal('response');
+            expect(result.properties).to.be.eql({prop: 'response', "id": 'id'});
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
@@ -82,7 +82,7 @@ describe('API Controller', () => {
         it('#read() should return promise invoke rest-api(getRestApi), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'getRestApi', apiCall);
             const result = await restApi.read('id');
-            expect(result.properties).to.be.equal('response');
+            expect(result.properties).to.be.eql({prop: 'response', "id": 'id'});
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
@@ -96,7 +96,7 @@ describe('API Controller', () => {
         it('#list() should return promise invoke rest-api(getRestApis), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'getRestApis', apiCall);
             const result = await restApi.list({position: 1, limit: 2});
-            expect(result).to.be.equal('response');
+            expect(result).to.be.eql({prop: 'response', "id": 'id'});
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
@@ -189,7 +189,7 @@ describe('API Controller', () => {
         });
     });
 
-    xdescribe('#find(name, position, limit)', () => {
+    describe('#find(name, position, limit)', () => {
         let infoCall;
         let apiCall;
         let restApi;
@@ -262,11 +262,11 @@ describe('API Controller', () => {
         it('should call list with next position until name found', async () => {
             apiCall = sinon.fake(() => { return awsResponse({items: [{name: 'first'}, {name: 'second'}]}); });
             sinon.replace(connector.api, 'getRestApis', apiCall);
-            const apiCallCreate = sinon.fake(() => { return awsResponse({name: 'third'}); });
+            const apiCallCreate = sinon.fake(() => { return awsResponse({name: 'third', id: 'id'}); });
             sinon.replace(connector.api, 'createRestApi', apiCallCreate);
 
             const result = await restApi.findOrCreate('third', {});
-            expect(result.properties).to.be.eql({name: 'third'});
+            expect(result.properties).to.be.eql({name: 'third', id: 'id'});
             expect(apiCall.callCount).to.equal(1);
             expect(apiCall.args[0][0]).to.eql({limit: 25});
             expect(apiCallCreate).to.be.called;

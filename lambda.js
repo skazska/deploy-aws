@@ -46,61 +46,64 @@ class LambdaController {
     async deploy (name, properties, options, informGroup) {
         let result = null;
 
-        const lambda = options.lambdaController || new LambdaFunction(name, {}, this.connector, informGroup);
+        const lambda = options.lambdaController || new LambdaFunction({}, this.connector, informGroup);
 
         //wait for all data get resolved: properties, function read by name, code package
         informGroup.addInformer(properties, {text: 'Waiting dependencies to complete'});
-        const [existing, codeBuffer, params] = await Promise.all([
-            lambda.read(),
-            (options.packager || preparePackage)(options.wd, options.codeEntries),
-            properties
-        ]);
+        try {
+            const [existing, codeBuffer, params] = await Promise.all([
+                lambda.read(name),
+                (options.packager || preparePackage)(options.wd, options.codeEntries),
+                properties
+            ]);
 
-        if (params.hasOwnProperty('FunctionName') && params['FunctionName'] !== name) {
-            throw new Error("lambda function properties contain FunctionName ant it's value isn't same to" + name);
-        }
-        // params["FunctionName"] = name;
-
-        if (params.Role && typeof params.Role !== 'string') {
-            params.Role = params.Role.Arn;
-        }
-
-        if (existing) {
-            //function exists
-            const results = [];
-
-            if (hasDifferences(params, existing)) {
-                results.push(lambda.update(params));
-            } else {
-                results.push(null);
+            if (params.hasOwnProperty('FunctionName') && params['FunctionName'] !== name) {
+                throw new Error("lambda function properties contain FunctionName ant it's value isn't same to" + name);
             }
 
-            //TODO checking hash is actually useless unless adm-zip stop use current time in entry headers
-            const hash = createHash('sha256')
-                .update(codeBuffer)
-                .digest('base64');
-
-            if (hash !== existing.CodeSha256) {
-                results.push(lambda.updateCode({ZipFile: codeBuffer}));
-            } else {
-                results.push(null)
+            if (params.Role && typeof params.Role !== 'string') {
+                params.Role = params.Role.Arn;
             }
 
-            result = Promise.all(results).then((results) => {
-                const result = {};
-                if (results[0]) {
-                    Object.assign(result, results[0]);
+            if (existing) {
+                //function exists
+                const results = [];
+
+                if (hasDifferences(params, existing.properties)) {
+                    results.push(existing.update(params));
+                } else {
+                    results.push(null);
                 }
-                if (results[1]) {
-                    Object.assign(result, results[1]);
+
+                //TODO checking hash is actually useless unless adm-zip stop use current time in entry headers
+                const hash = createHash('sha256')
+                    .update(codeBuffer)
+                    .digest('base64');
+
+                if (hash !== existing.properties.CodeSha256) {
+                    results.push(existing.updateCode({ZipFile: codeBuffer}));
+                } else {
+                    results.push(null)
                 }
-                return result;
-            });
-        } else {
-            params.Code = {ZipFile: codeBuffer};
-            result = lambda.create(params);
+
+                result = Promise.all(results).then((results) => {
+                    const result = {};
+                    if (results[0]) {
+                        Object.assign(result, results[0]);
+                    }
+                    if (results[1]) {
+                        Object.assign(result, results[1]);
+                    }
+                    return result;
+                });
+            } else {
+                params.Code = {ZipFile: codeBuffer};
+                result = lambda.create(name, params);
+            }
+            return result;
+        } catch (e) {
+            throw e;
         }
-        return result;
     }
 }
 

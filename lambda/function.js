@@ -41,7 +41,7 @@ class FunctionEntity extends Entity {
     /**
      * delete entity
      */
-    delete () {
+    delete (version) {
         return this._informCall(
             this.connector.deleteFunction,
             'Delete function ' + this.id,
@@ -81,13 +81,17 @@ class LambdaFunction extends Api {
      */
     async create (name, properties, options) {
         if (!options) options = {};
-        if (options.wd) {
-            let code = await (options.packager || preparePackage)(options.wd, options.codeEntries);
-            properties.Code = {ZipFile: code};
+        try {
+            if (options.wd) {
+                let code = await (options.packager || preparePackage)(options.wd, options.codeEntries);
+                properties.Code = {ZipFile: code};
+            }
+            const result = await this._informCall(this.connector.createFunction, 'Create function ' + name, name,
+                Object.assign(this.properties, properties), options.publish);
+            return this._createEntity(result);
+        } catch (e) {
+            throw e;
         }
-        const result = await this._informCall(this.connector.createFunction, 'Create function ' + name, name,
-            properties, options.publish);
-        return this._createEntity(result);
     }
 
     /**
@@ -96,9 +100,17 @@ class LambdaFunction extends Api {
      * @param {String} [version]
      */
     async read (name, version) {
-        const result = await this._informCall(this.connector.getFunctionConfiguration, 'Get config for function ' + name,
-            name, version);
-        return this._createEntity(result);
+        try {
+            const result = await this._informCall(this.connector.getFunctionConfiguration, 'Get config for function ' + name,
+                name, version);
+            return result ? this._createEntity(result) : null;
+        } catch (e) {
+            if (e.code === 'ResourceNotFoundException') {
+                return null;
+            } else {
+                throw e;
+            }
+        }
     }
 
     /**

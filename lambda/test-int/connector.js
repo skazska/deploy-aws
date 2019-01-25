@@ -20,6 +20,16 @@ describe('AWS Lambda Connector ', () => {
 
     let funcArn = null;
 
+    it('#updateFunctionConfiguration should result in null if function not found', async () => {
+        let result = null;
+        try {
+            result = await connector.updateFunctionConfiguration(FUNC_NAME, {MemorySize: connector.defaults.MemorySize + 100});
+        } catch (e) {
+            result = e;
+        }
+        expect(e).to.have.property('code').that.is.equal('ResourceNotFoundException');
+    });
+
     it('#createFunction should result in new function data with name aws-deploy-test-api', async () => {
         let result = null;
         try {
