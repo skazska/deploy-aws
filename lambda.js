@@ -60,6 +60,7 @@ class LambdaController {
             if (params.hasOwnProperty('FunctionName') && params['FunctionName'] !== name) {
                 throw new Error("lambda function properties contain FunctionName ant it's value isn't same to" + name);
             }
+            params['FunctionName'] = name;
 
             if (params.Role && typeof params.Role !== 'string') {
                 params.Role = params.Role.Arn;
@@ -69,7 +70,7 @@ class LambdaController {
                 //function exists
                 const results = [];
 
-                if (hasDifferences(params, existing.properties)) {
+                if (hasDifferences(params, existing.properties, ['CodeSha256'])) {
                     results.push(existing.update(params));
                 } else {
                     results.push(null);

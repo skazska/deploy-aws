@@ -15,6 +15,17 @@ class ApiEntity extends ApiBase {
 
     /**
      *
+     * @param {Object} properties
+     * @return {*}
+     * @private
+     */
+    _updateEntity (properties) {
+        Object.assign(this.properties, properties); //TODO possibly need check for property removal
+        return this;
+    }
+
+    /**
+     *
      * @return {*}
      */
     get id () {

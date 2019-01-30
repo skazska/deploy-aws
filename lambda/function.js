@@ -14,13 +14,22 @@ class FunctionEntity extends Entity {
      * @param id
      * @param properties
      */
-    update (properties) {
-        return this._informCall(
-            this.connector.updateFunctionConfiguration,
-            'Update config for function ' + this.id,
-            this.id,
-            properties
-        );
+    async update (properties) {
+        try {
+            const result = await this._informCall(
+                this.connector.updateFunctionConfiguration,
+                'Update config for function ' + this.id,
+                this.id,
+                properties
+            );
+            return result ? this._updateEntity(result) : null;
+        } catch (e) {
+            if (e.code === 'ResourceNotFoundException') {
+                return null;
+            } else {
+                throw e;
+            }
+        }
     }
 
     /**
@@ -28,26 +37,44 @@ class FunctionEntity extends Entity {
      * @param code
      * @param {Boolean} publish
      */
-    updateCode (code, publish) {
-        return this._informCall(
-            this.connector.updateFunctionCode,
-            'Update code for function ' + this.id,
-            this.id,
-            code,
-            publish
-        );
+    async updateCode (code, publish) {
+        try {
+            const result = await this._informCall(
+                this.connector.updateFunctionCode,
+                'Update code for function ' + this.id,
+                this.id,
+                code,
+                publish
+            );
+            return result ? this._updateEntity(result) : null;
+        } catch (e) {
+            if (e.code === 'ResourceNotFoundException') {
+                return null;
+            } else {
+                throw e;
+            }
+        }
     }
 
     /**
      * delete entity
      */
-    delete (version) {
-        return this._informCall(
-            this.connector.deleteFunction,
-            'Delete function ' + this.id,
-            this.id,
-            version
-        );
+    async delete (version) {
+        try {
+            const resp = await this._informCall(
+                this.connector.deleteFunction,
+                'Delete function ' + this.id,
+                this.id,
+                version
+            );
+            return resp;
+        } catch (e) {
+            if (e.code === 'ResourceNotFoundException') {
+                return null;
+            } else {
+                throw e;
+            }
+        }
     }
 }
 

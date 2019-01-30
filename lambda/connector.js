@@ -101,10 +101,11 @@ class LambdaConnector extends CommonAwsConnector {
         };
         if (qualifier) params.Qualifier = qualifier;
 
-        return this.api.deleteFunction(params).promise().catch(err => {
-            if (err.code === 'ResourceNotFoundException') return Promise.resolve(null);
-            return Promise.reject(err);
-        });
+        return this.api.deleteFunction(params).promise();
+            // .catch(err => {
+            //     if (err.code === 'ResourceNotFoundException') return Promise.resolve(null);
+            //     return Promise.reject(err);
+            // });
     }
 
     /**
@@ -118,10 +119,11 @@ class LambdaConnector extends CommonAwsConnector {
         };
         if (qualifier) params.Qualifier = qualifier;
 
-        return this.api.getFunction(params).promise().catch(err => {
-            if (err.code === 'ResourceNotFoundException') return Promise.resolve(null);
-            return Promise.reject(err);
-        });
+        return this.api.getFunction(params).promise();
+            // .catch(err => {
+            //     if (err.code === 'ResourceNotFoundException') return Promise.resolve(null);
+            //     return Promise.reject(err);
+            // });
     }
 
     /**
@@ -136,10 +138,11 @@ class LambdaConnector extends CommonAwsConnector {
         };
         if (qualifier) params.Qualifier = qualifier;
 
-        return this.api.getFunctionConfiguration(params).promise().catch(err => {
-            if (err.code === 'ResourceNotFoundException') return Promise.resolve(null);
-            return Promise.reject(err);
-        });
+        return this.api.getFunctionConfiguration(params).promise();
+            // .catch(err => {
+            //     if (err.code === 'ResourceNotFoundException') return Promise.resolve(null);
+            //     return Promise.reject(err);
+            // });
         // successful response
         /*
         data = {

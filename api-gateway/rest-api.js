@@ -19,8 +19,17 @@ class RestApiEntity extends Entity {
     /**
      * delete entity
      */
-    delete () {
-        return this._informCall(this.connector.deleteRestApi, 'Delete rest-api ' + this.id, this.id);
+    async delete () {
+        try {
+            const resp = await this._informCall(this.connector.deleteRestApi, 'Delete rest-api ' + this.id, this.id);
+            return resp;
+        } catch (e) {
+            if (e.code === 'ResourceNotFoundException') {
+                return null;
+            } else {
+                throw e;
+            }
+        }
     }
 }
 

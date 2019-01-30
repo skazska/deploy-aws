@@ -2,10 +2,10 @@ const Api = require('../common/api');
 const Entity = require('../common/api-entity');
 const Connector = require('./connector');
 
-class ApiGwResourceEntity extends Entity {
+class ApiGwMethodEntity extends Entity {
 
     constructor (properties, connector, informer) {
-        super(properties, connector, informer, {idProperty: ['restApiId', 'resourceId']});
+        super(properties, connector, informer, {idProperty: ['restApiId', 'resourceId', 'httpMethod']});
     }
 
     /**
@@ -25,10 +25,11 @@ class ApiGwResourceEntity extends Entity {
         const idParam = this.id;
         try {
             const result = await this._informCall(
-                this.connector.deleteResource,
-                'Delete rest-api-resource ' + idParam.resourceId,
+                this.connector.deleteMethod,
+                'Delete rest-api-method ' + idParam.resourceId + idParam.httpMethod,
                 idParam.restApiId,
-                idParam.resourceId
+                idParam.resourceId,
+                idParam.httpMethod
             );
             return result;
         } catch (e) {
@@ -41,7 +42,7 @@ class ApiGwResourceEntity extends Entity {
     }
 }
 
-class ApiGwResource extends Api {
+class ApiGwMethod extends Api {
     /**
      * @param {string} id
      * @param {*} properties
@@ -53,7 +54,7 @@ class ApiGwResource extends Api {
     }
 
     _createEntity (properties) {
-        return super._createEntity(ApiGwResourceEntity, properties);
+        return super._createEntity(ApiGwMethodEntity, properties);
     }
 
     /**
@@ -63,10 +64,10 @@ class ApiGwResource extends Api {
     async create (properties) {
         try {
             const result = await this._informCall(
-                this.connector.createResource, 'Create resource ' + properties.pathPart,
+                this.connector.createMethod, 'Create method ' + properties.httpMethod,
                 properties.restApiId,
-                properties.parentId,
-                properties.pathPart
+                properties.resourceId,
+                properties.httpMethod
             );
             return this._createEntity(result);
         } catch (e) {
@@ -78,11 +79,12 @@ class ApiGwResource extends Api {
     /**
      * gets entity data from api
      * @param {string} restApiId
-     * @param {string} id
+     * @param resourceId
+     * @param httpMethod
      */
-    async read (restApiId, id) {
+    async read (restApiId, resourceId, httpMethod) {
         try {
-            const result = await this._informCall(this.connector.getResource, 'Get resource ' + id, restApiId, id);
+            const result = await this._informCall(this.connector.getMethod, 'Get method ' + httpMethod, restApiId, resourceId, httpMethod);
             return result ? this._createEntity(result) : null;
         } catch (e) {
             if (e.code === 'ResourceNotFoundException') {
@@ -92,22 +94,6 @@ class ApiGwResource extends Api {
             }
         }
     }
-
-    /**
-     * gets list of entities
-     * @param {Object} [options]
-     * @param {String} [options.restApiId]
-     * @param {String} [options.position]
-     * @param {Number} [options.limit]
-     */
-    list (options) {
-        if (!options) throw new Error('missing required arguments');
-        return this._informCall(
-            this.connector.getResources,
-            'Get resources for ' + options.restApiId + ' (' + options.position + ', ' + options.limit + ')',
-            options.restApiId, options.position, options.limit
-        );
-    }
 }
 
-module.exports = ApiGwResource;
+module.exports = ApiGwMethod;

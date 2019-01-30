@@ -157,7 +157,7 @@ describe('LambdaFunction', () => {
             });
             sinon.replace(connector.api, 'updateFunctionConfiguration', apiCall);
             const result = await lambdaFunction.update({prop: 'val'});
-            expect(result).to.be.eql({FunctionName: 'name', result: 'result'});
+            expect(result.properties).to.be.eql({FunctionName: 'name', result: 'result'});
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
@@ -176,7 +176,7 @@ describe('LambdaFunction', () => {
             });
             sinon.replace(connector.api, 'updateFunctionCode', apiCall);
             const result = await lambdaFunction.updateCode({code: 'sas'});
-            expect(result).to.be.eql({FunctionName: 'name', result: 'result'});
+            expect(result.properties).to.be.eql({FunctionName: 'name', result: 'result'});
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
