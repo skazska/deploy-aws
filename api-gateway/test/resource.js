@@ -194,5 +194,48 @@ describe('API Resource Controller', () => {
             sinon.restore();
         });
     });
+    
+    describe('#find(name, position, limit)', () => {
+        let infoCall;
+        let apiCall;
+        let resource;
+        let group;
+        let informer;
+        beforeEach(() => {
+            infoCall = sinon.fake();
+            group = createInformer(infoCall);
+            informer = new Promise(resolve => {
+                const handler = sinon.spy();
+                group.on('change', handler);
+                group.on('end', () => {
+                    resolve(handler);
+                });
+            });
+
+            resource = new Resource({id: 'name'}, connector, group);
+        });
+        it('should resolve record with given path', async () => {
+            apiCall = sinon.fake(() => { return awsResponse({items: [{path: 'first'}, {path: 'second'}]}); });
+            sinon.replace(connector.api, 'getResources', apiCall);
+            // sinon.replace(resource, 'list', apiCall);
+
+            const result = await resource.find('restApiId', 'second');
+            expect(result).to.be.eql({path: 'second'});
+        });
+        it('should call list with next position until path found', async () => {
+            apiCall = sinon.stub();
+            apiCall.onFirstCall().returns(awsResponse({position: '1', items: [{path: 'first'}, {path: 'second'}]}));
+            apiCall.onSecondCall().returns(awsResponse({items: [{path: 'third'}, {path: 'forth'}]}));
+            sinon.replace(connector.api, 'getResources', apiCall);
+
+            const result = await resource.find('restApiId', 'third', 0, 2);
+            expect(result).to.be.eql({path: 'third'});
+            expect(apiCall.args[0][0]).to.eql({restApiId: 'restApiId', limit: 2});
+            expect(apiCall.args[1][0]).to.eql({restApiId: 'restApiId', limit: 2, position: '1'});
+        });
+        afterEach(() => {
+            sinon.restore();
+        });
+    });
 
 });

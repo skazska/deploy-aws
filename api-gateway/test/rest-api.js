@@ -168,6 +168,27 @@ describe('API Controller', () => {
             // informer = await informer;
             // expect(informer).to.be.called;
         });
+
+        xit('#addResource(properties) should return promise, invoke rest-api(updateRestApi), addInformer which fires change and complete', async () => {
+            //TODO further way to implement update method and correct test
+            //sinon.replace(connector.api, 'updateRestApi', apiCall);
+            sinon.replace(entity, 'update', apiCall);
+
+            //TODO further way to implement update method and correct test
+            const result = await entity.update({prop: 'val1'}).promise();
+            expect(result).to.be.equal('response');
+
+            expect(apiCall).to.be.calledOnce;
+            expect(apiCall.args[0][0]).to.be.eql({
+                "prop": "val1"
+            });
+
+            //TODO further way to implement update method and correct test
+            // expect(group.informers.length).to.equal(1);
+            // informer = await informer;
+            // expect(informer).to.be.called;
+        });
+
         it('#delete() should return promise invoke rest-api(deleteRestApi), addInformer which fires change and complete', async () => {
             sinon.replace(entity.connector.api, 'deleteRestApi', apiCall);
             const result = await entity.delete();

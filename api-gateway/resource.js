@@ -108,6 +108,26 @@ class ApiGwResource extends Api {
             options.restApiId, options.position, options.limit
         );
     }
+
+    /**
+     * lists resources until stumble given name
+     * @param restApiId
+     * @param path
+     * @param {String} [position]
+     * @param {Number} [limit]
+     * @return {Promise<Promise<*>|*|number|BigInt|T>}
+     */
+    async find(restApiId, path, position, limit) {
+        const options = {restApiId: restApiId, limit: limit || 25};
+        let undefined;
+
+        if (position) options.position = position;
+        let result = await this.list(options);
+        let resource = result.items.find(resource => resource.path === path ? resource : undefined);
+        if (!result.position) return resource;
+        return resource || this.find(restApiId, path, result.position, options.limit);
+    }
+
 }
 
 module.exports = ApiGwResource;

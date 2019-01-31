@@ -1,11 +1,13 @@
 const Api = require('../common/api');
 const Entity = require('../common/api-entity');
 const Connector = require('./connector');
+const ApiGwResource = require('./resource');
 
 class RestApiEntity extends Entity {
 
     constructor (properties, connector, informer) {
         super(properties, connector, informer, {idProperty: 'RestApiId'});
+        this.resourceApi = new ApiGwResource({}, connector, informer);
     }
 
     /**
@@ -30,6 +32,18 @@ class RestApiEntity extends Entity {
                 throw e;
             }
         }
+    }
+
+    /**
+     * adds resource to rest-api
+     * @param pathPart
+     * @return {Promise<*|void>}
+     */
+    async addResource(pathPart) {
+        //get root resource id
+        const root = await this.resourceApi.find(this.id, '/', null, 5);
+        //add new
+        return this.resourceApi.create({restApiId: this.id, parentId: root.id, pathPart: pathPart})
     }
 }
 
