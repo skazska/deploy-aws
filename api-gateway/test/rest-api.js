@@ -154,7 +154,7 @@ describe('API Controller', () => {
             //sinon.replace(connector.api, 'updateRestApi', apiCall);
             sinon.replace(entity, 'update', apiCall);
 
-            //TODO further way to implement update method and correct test
+            //TODO further way to implement update method and correct test (.promice() wrong here)
             const result = await entity.update({prop: 'val1'}).promise();
             expect(result).to.be.equal('response');
 
@@ -169,24 +169,29 @@ describe('API Controller', () => {
             // expect(informer).to.be.called;
         });
 
-        xit('#addResource(properties) should return promise, invoke rest-api(updateRestApi), addInformer which fires change and complete', async () => {
-            //TODO further way to implement update method and correct test
-            //sinon.replace(connector.api, 'updateRestApi', apiCall);
-            sinon.replace(entity, 'update', apiCall);
+        it('#addResource(pathPart) should return promise, invoke resource(updateRestApi), addInformer which fires change and complete', async () => {
+            sinon.replace(entity.resourceApi.connector.api, 'createResource', apiCall);
+            const listApiCall = sinon.fake(() => { return awsResponse({items: [{path: 'first'}, {path: 'second'}, {path: '/', id: 'parentId'}]}); });
+            sinon.replace(entity.resourceApi.connector.api, 'getResources', listApiCall);
+            let result;
+            try {
+                result = await entity.addResource('res');
+            } catch (e) {
+                throw e;
+            }
 
-            //TODO further way to implement update method and correct test
-            const result = await entity.update({prop: 'val1'}).promise();
-            expect(result).to.be.equal('response');
+            expect(result.properties).to.be.equal('response');
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
-                "prop": "val1"
+                "restApiId": "1",
+                "parentId": "parentId",
+                "pathPart": "res"
             });
 
-            //TODO further way to implement update method and correct test
-            // expect(group.informers.length).to.equal(1);
-            // informer = await informer;
-            // expect(informer).to.be.called;
+            expect(group.informers.length).to.equal(2);
+            informer = await informer;
+            expect(informer).to.be.called;
         });
 
         it('#delete() should return promise invoke rest-api(deleteRestApi), addInformer which fires change and complete', async () => {

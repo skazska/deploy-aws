@@ -43,7 +43,7 @@ class RestApiEntity extends Entity {
         //get root resource id
         const root = await this.resourceApi.find(this.id, '/', null, 5);
         //add new
-        return this.resourceApi.create({restApiId: this.id, parentId: root.id, pathPart: pathPart})
+        return this.resourceApi.create({restApiId: this.id, parentId: root.id, pathPart: pathPart});
     }
 }
 

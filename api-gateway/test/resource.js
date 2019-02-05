@@ -173,6 +173,30 @@ describe('API Resource Controller', () => {
             // informer = await informer;
             // expect(informer).to.be.called;
         });
+
+        it('#addResource(pathPart) should return promise, invoke resource(updateRestApi), addInformer which fires change and complete', async () => {
+            sinon.replace(entity.connector.api, 'createResource', apiCall);
+            let result;
+            try {
+                result = await entity.addResource('res');
+            } catch (e) {
+                throw e;
+            }
+
+            expect(result.properties).to.be.equal('response');
+
+            expect(apiCall).to.be.calledOnce;
+            expect(apiCall.args[0][0]).to.be.eql({
+                "restApiId": "1",
+                "parentId": "2",
+                "pathPart": "res"
+            });
+
+            expect(group.informers.length).to.equal(2);
+            informer = await informer;
+            expect(informer).to.be.called;
+        });
+
         it('#delete() should return promise invoke rest-api(deleteRestApi), addInformer which fires change and complete', async () => {
             sinon.replace(entity.connector.api, 'deleteResource', apiCall);
             const result = await entity.delete();

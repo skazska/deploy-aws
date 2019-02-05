@@ -2,6 +2,25 @@ const Api = require('../common/api');
 const Entity = require('../common/api-entity');
 const Connector = require('./connector');
 
+/**
+ * creates resource (should be bound)
+ * @param {Object} properties
+ */
+async function createResource (properties) {
+    try {
+        const result = await this._informCall(
+            this.connector.createResource, 'Create resource ' + properties.pathPart,
+            properties.restApiId,
+            properties.parentId,
+            properties.pathPart
+        );
+        return result; //this._createEntity(result);
+    } catch (e) {
+        throw e;
+    }
+}
+
+
 class ApiGwResourceEntity extends Entity {
 
     constructor (properties, connector, informer) {
@@ -39,6 +58,22 @@ class ApiGwResourceEntity extends Entity {
             }
         }
     }
+
+    /**
+     * adds resource to rest-api
+     * @param pathPart
+     * @return {Promise<*|void>}
+     */
+    async addResource(pathPart) {
+        //add new
+        const result = await this._informCall(
+            createResource.bind(this),
+            'Add resource ' + pathPart,
+            {restApiId: this.id.restApiId, parentId: this.id.resourceId, pathPart: pathPart}
+        );
+        return new ApiGwResourceEntity(result, this.connector, this.informer);
+    }
+
 }
 
 class ApiGwResource extends Api {
@@ -61,17 +96,18 @@ class ApiGwResource extends Api {
      * @param {Object} properties
      */
     async create (properties) {
-        try {
-            const result = await this._informCall(
-                this.connector.createResource, 'Create resource ' + properties.pathPart,
-                properties.restApiId,
-                properties.parentId,
-                properties.pathPart
-            );
-            return this._createEntity(result);
-        } catch (e) {
-            throw e;
-        }
+        return this._createEntity(await createResource.call(this, properties));
+        // try {
+        //     const result = await this._informCall(
+        //         this.connector.createResource, 'Create resource ' + properties.pathPart,
+        //         properties.restApiId,
+        //         properties.parentId,
+        //         properties.pathPart
+        //     );
+        //     return this._createEntity(result);
+        // } catch (e) {
+        //     throw e;
+        // }
     }
 
 
