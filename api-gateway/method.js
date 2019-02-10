@@ -2,6 +2,46 @@ const Api = require('../common/api');
 const Entity = require('../common/api-entity');
 const Connector = require('./connector');
 
+class ApiGwIntegrationEntity extends Entity {
+
+    constructor (properties, connector, informer) {
+        super(properties, connector, informer, {idProperty: ['restApiId', 'resourceId', 'httpMethod']});
+    }
+
+    /**
+     * updates entity
+     * @param id
+     * @param properties
+     */
+    update (properties) {
+
+    }
+
+    /**
+     * delete entity
+     * @param {string} id
+     */
+    async delete () {
+        const idParam = this.id;
+        try {
+            const result = await this._informCall(
+                this.connector.deleteIntegration,
+                'Delete integration ' + idParam.resourceId + idParam.httpMethod,
+                idParam.restApiId,
+                idParam.resourceId,
+                idParam.httpMethod
+            );
+            return result;
+        } catch (e) {
+            if (e.code === 'ResourceNotFoundException') {
+                return null;
+            } else {
+                throw e;
+            }
+        }
+    }
+}
+
 class ApiGwMethodEntity extends Entity {
 
     constructor (properties, connector, informer) {
@@ -40,6 +80,22 @@ class ApiGwMethodEntity extends Entity {
             }
         }
     }
+
+    /**
+     * sets integration
+     * @param integrationOptions
+     * @return {Promise<*|void>}
+     */
+    async addIntegration(integrationOptions) {
+        //add new
+        const result = await this._informCall(
+            this.connector.createIntegration,
+            'Set integration: ' + 'type ' + integrationOptions.type + ', uri ' + integrationOptions.uri,
+            this.id.restApiId, this.id.resourceId, this.id.httpMethod, integrationOptions
+        );
+        return new ApiGwIntegrationEntity(result, this.connector, this.informer);
+    }
+
 }
 
 class ApiGwMethod extends Api {

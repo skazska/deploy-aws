@@ -189,7 +189,7 @@ describe('API Controller', () => {
                 "pathPart": "res"
             });
 
-            expect(group.informers.length).to.equal(2);
+            expect(group.informers.length).to.equal(3);
             informer = await informer;
             expect(informer).to.be.called;
         });

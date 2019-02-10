@@ -7,11 +7,13 @@ const LambdaFunction = require('../../lambda/function');
 
 const ConnectorRestApi = require('../connector');
 
-describe('AWS Api Gateway Connector - Integration integrations', () => {
+describe('AWS Api Gateway Connector - Integration methods', function () {
+    this.timeout(6000);
     AWSGlobal.config.loadFromPath('./.aws-cfg.json');
     const connector = new ConnectorRestApi();
-    const lambda = new LambdaFunction({});
+    const lambdaApi = new LambdaFunction({});
 
+    let lambdaFunction = null;
     let funcName = null;
     let funcArn = null;
     let restApiId = null;
@@ -26,13 +28,13 @@ describe('AWS Api Gateway Connector - Integration integrations', () => {
             restApiId = result.id;
             result = await connector.getResources(restApiId, null, 1);
             resourceId = result.items[0].id;
-            result = await lambda.create('aws-deploy-test-api',
+            lambdaFunction = await lambdaApi.create('aws-deploy-test-api',
                 {MemorySize: 128, Runtime: "nodejs8.10", Handler: "index.handler",
                     Role: "arn:aws:iam::266895356213:role/lambda_basic_execution"},
                 {wd: __dirname + '/lambda-code', codeEntries: ['index.js']}
             );
-            funcName = result.FunctionName;
-            funcArn = result.FunctionArn;
+            funcName = lambdaFunction.properties.FunctionName;
+            funcArn = lambdaFunction.properties.FunctionArn;
             result = await connector.createMethod(restApiId, resourceId, 'ANY', {});
         } catch (e) {
             throw e;
@@ -42,7 +44,7 @@ describe('AWS Api Gateway Connector - Integration integrations', () => {
     it('#createIntegration should result in new integration data ', async () => {
         let result = null;
         let uriPrefix = 'arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/';
-        funcArn = 'arn:aws:lambda:eu-west-1:266895356213:function:aws-deploy-test-api';
+//        funcArn = 'arn:aws:lambda:eu-west-1:266895356213:function:aws-deploy-test-api';
         try {
             result = await connector.createIntegration(restApiId, resourceId, 'ANY', {
                 type: 'AWS_PROXY', integrationHttpMethod: 'POST',
@@ -96,7 +98,7 @@ describe('AWS Api Gateway Connector - Integration integrations', () => {
     after(async () => {
         try {
             await connector.deleteRestApi(restApiId);
-            await lambda.delete();
+            await lambdaFunction.delete();
         } catch (e) {
             throw e;
         }

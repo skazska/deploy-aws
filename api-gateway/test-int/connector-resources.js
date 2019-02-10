@@ -4,7 +4,8 @@ const expect = chai.expect;
 const AWSGlobal = require('aws-sdk/global');
 const ConnectorRestApi = require('../connector');
 
-describe('AWS Api Gateway Connector - Resource methods', () => {
+describe('AWS Api Gateway Connector - Resource methods', function() {
+    this.timeout(6000);
     AWSGlobal.config.loadFromPath('./.aws-cfg.json');
     const connector = new ConnectorRestApi();
     let restApiId = null;
@@ -12,7 +13,7 @@ describe('AWS Api Gateway Connector - Resource methods', () => {
     let resourceId = null;
     before(async () => {
         try {
-            let result = await connector.createRestApi('aws-deploy-test-api',{});
+            let result = await connector.createRestApi({name: 'aws-deploy-test-api'});
             restApiId = result.id;
         } catch (e) {
             throw e;

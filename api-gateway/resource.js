@@ -1,6 +1,7 @@
 const Api = require('../common/api');
 const Entity = require('../common/api-entity');
 const Connector = require('./connector');
+const ApiGwMethod = require('./method');
 
 /**
  * creates resource (should be bound)
@@ -25,6 +26,7 @@ class ApiGwResourceEntity extends Entity {
 
     constructor (properties, connector, informer) {
         super(properties, connector, informer, {idProperty: ['restApiId', 'resourceId']});
+        this.methodApi = new ApiGwMethod({}, connector, informer);
     }
 
     /**
@@ -74,6 +76,20 @@ class ApiGwResourceEntity extends Entity {
         return new ApiGwResourceEntity(result, this.connector, this.informer);
     }
 
+    /**
+     * adds method to resource
+     * @param httpMethod
+     * @return {Promise<*|void>}
+     */
+    async addMethod(httpMethod) {
+        //add new
+        const result = await this._informCall(
+            this.methodApi.create.bind(this.methodApi),
+            'add method ' + httpMethod,
+            {restApiId: this.id.restApiId, resourceId: this.id.resourceId, httpMethod: httpMethod}
+        );
+        return result;
+    }
 }
 
 class ApiGwResource extends Api {

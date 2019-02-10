@@ -24,10 +24,10 @@ describe('AWS Lambda Connector ', () => {
         let result = null;
         try {
             result = await connector.updateFunctionConfiguration(FUNC_NAME, {MemorySize: connector.defaults.MemorySize + 100});
+            expect(result).not.to.be.defined;
         } catch (e) {
-            result = e;
+            expect(e).to.have.property('code').that.is.equal('ResourceNotFoundException');
         }
-        expect(e).to.have.property('code').that.is.equal('ResourceNotFoundException');
     });
 
     it('#createFunction should result in new function data with name aws-deploy-test-api', async () => {
@@ -135,7 +135,9 @@ describe('AWS Lambda Connector ', () => {
             let result = await connector.deleteFunction(FUNC_NAME);
             expect(result).to.be.a('null');
         } catch (e) {
-            console.error(e);
+            if (e.code !== "ResourceNotFoundException") {
+                console.error(e);
+            }
         }
     })
 

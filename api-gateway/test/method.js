@@ -152,6 +152,34 @@ describe('API Method Controller', () => {
             // informer = await informer;
             // expect(informer).to.be.called;
         });
+
+        it('#addIntegration(options) should return promise, invoke method(putIntegration), addInformer which fires change and complete', async () => {
+            sinon.replace(entity.connector.api, 'putIntegration', apiCall);
+            let result;
+            try {
+                result = await entity.addIntegration({type: 'AWS_PROXY', integrationHttpMethod: 'POST', uri: 'uri' });
+            } catch (e) {
+                throw e;
+            }
+
+            expect(result.properties).to.be.equal('response');
+
+            expect(apiCall).to.be.calledOnce;
+            expect(apiCall.args[0][0]).to.be.eql({
+                "restApiId": "1",
+                "resourceId": "2",
+                "httpMethod": "httpMethod",
+                "type": "AWS_PROXY",
+                "integrationHttpMethod": "POST",
+                "uri": "uri"
+            });
+
+            expect(group.informers.length).to.equal(1);
+            informer = await informer;
+            expect(informer).to.be.called;
+        });
+
+
         it('#delete() should return promise invoke rest-api(deleteRestApi), addInformer which fires change and complete', async () => {
             sinon.replace(entity.connector.api, 'deleteMethod', apiCall);
             const result = await entity.delete();
