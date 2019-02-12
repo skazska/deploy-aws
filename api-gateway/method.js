@@ -93,6 +93,9 @@ class ApiGwMethodEntity extends Entity {
             'Set integration: ' + 'type ' + integrationOptions.type + ', uri ' + integrationOptions.uri,
             this.id.restApiId, this.id.resourceId, this.id.httpMethod, integrationOptions
         );
+        result.restApiId = this.id.restApiId;
+        result.resourceId = this.id.resourceId;
+        result.httpMethod = this.id.httpMethod;
         return new ApiGwIntegrationEntity(result, this.connector, this.informer);
     }
 
@@ -123,8 +126,13 @@ class ApiGwMethod extends Api {
                 this.connector.createMethod, 'Create method ' + properties.httpMethod,
                 properties.restApiId,
                 properties.resourceId,
-                properties.httpMethod
+                properties.httpMethod,
+                properties
             );
+            result.restApiId = properties.restApiId;
+            result.resourceId = properties.resourceId;
+            result.httpMethod = properties.httpMethod;
+
             return this._createEntity(result);
         } catch (e) {
             throw e;

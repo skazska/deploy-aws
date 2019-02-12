@@ -15,6 +15,7 @@ async function createResource (properties) {
             properties.parentId,
             properties.pathPart
         );
+        result.restApiId = properties.restApiId;
         return result; //this._createEntity(result);
     } catch (e) {
         throw e;
@@ -25,7 +26,7 @@ async function createResource (properties) {
 class ApiGwResourceEntity extends Entity {
 
     constructor (properties, connector, informer) {
-        super(properties, connector, informer, {idProperty: ['restApiId', 'resourceId']});
+        super(properties, connector, informer, {idProperty: ['restApiId', 'id']});
         this.methodApi = new ApiGwMethod({}, connector, informer);
     }
 
@@ -71,22 +72,26 @@ class ApiGwResourceEntity extends Entity {
         const result = await this._informCall(
             createResource.bind(this),
             'Add resource ' + pathPart,
-            {restApiId: this.id.restApiId, parentId: this.id.resourceId, pathPart: pathPart}
+            {restApiId: this.id.restApiId, parentId: this.id.id, pathPart: pathPart}
         );
         return new ApiGwResourceEntity(result, this.connector, this.informer);
     }
 
     /**
      * adds method to resource
-     * @param httpMethod
+     * @param {string} httpMethod
+     * @param {Object} [properties]
      * @return {Promise<*|void>}
      */
-    async addMethod(httpMethod) {
+    async addMethod(httpMethod, properties) {
         //add new
         const result = await this._informCall(
             this.methodApi.create.bind(this.methodApi),
             'add method ' + httpMethod,
-            {restApiId: this.id.restApiId, resourceId: this.id.resourceId, httpMethod: httpMethod}
+            Object.assign(
+                {restApiId: this.id.restApiId, resourceId: this.id.id, httpMethod: httpMethod}
+                , properties || {}
+            )
         );
         return result;
     }
@@ -113,17 +118,6 @@ class ApiGwResource extends Api {
      */
     async create (properties) {
         return this._createEntity(await createResource.call(this, properties));
-        // try {
-        //     const result = await this._informCall(
-        //         this.connector.createResource, 'Create resource ' + properties.pathPart,
-        //         properties.restApiId,
-        //         properties.parentId,
-        //         properties.pathPart
-        //     );
-        //     return this._createEntity(result);
-        // } catch (e) {
-        //     throw e;
-        // }
     }
 
 

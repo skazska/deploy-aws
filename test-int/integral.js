@@ -10,12 +10,13 @@ const AWSGlobal = require('aws-sdk/global');
 const Inform = require('@skazska/inform');
 const RestApi = require('../api-gateway/rest-api');
 const RestApiConnector = require('../api-gateway/connector');
+const {apiGwLambdaIntegrationUri: lambdaUri} = require('../utils');
 
 const LambdaFunction = require('../lambda/function');
 
 
-const API_NAME = 'aws-deploy-test-api';
-const FUNC_NAME = 'aws-deploy-test-api';
+const API_NAME = 'aws-deploy-test-api-integral';
+const FUNC_NAME = 'aws-deploy-test-function-integral';
 
 // const awsResponse = (response) => {
 //     return {
@@ -72,38 +73,44 @@ describe('Integral scenarios', () => {
     it('Create: api->resource->method->integration', async () => {
         try {
             const api = await restApiController.create({name: API_NAME});
-            const resource = api.addResource('test');
-            const resource1 = resource.addResource('res');
-            const meth = resource1.addMethod('ANY');
-
+            const resource = await api.addResource('test');
+            const resource1 = await resource.addResource('res');
+            const meth = await resource1.addMethod('ANY');
+            const integration = await meth.addIntegration({
+                type: 'AWS_PROXY',
+                integrationHttpMethod: 'POST',
+                uri: lambdaUri(funcArn)
+            });
+            expect(integration).not.to.be.empty;
         } catch (e) {
             throw e;
         }
 
 
-        expect(result.properties).to.be.eql({prop: 'response', "id": 'id'});
-
-        expect(apiCall).to.be.calledOnce;
-        expect(apiCall.args[0][0]).to.be.eql({
-            "prop": "val"
-        });
-
-        expect(group.informers.length).to.equal(1);
-        informer = await informer;
-        expect(informer).to.be.called;
+        // expect(result.properties).to.be.eql({prop: 'response', "id": 'id'});
+        //
+        // expect(apiCall).to.be.calledOnce;
+        // expect(apiCall.args[0][0]).to.be.eql({
+        //     "prop": "val"
+        // });
+        //
+        // expect(group.informers.length).to.equal(1);
+        // informer = await informer;
+        // expect(informer).to.be.called;
 
     });
 
     after(async () => {
         await lambdaFunction.delete();
         try {
-            let apis = await RestApiConnector.getRestApis(null, 5);
+            const connector = new RestApiConnector();
+            let apis = await connector.getRestApis(null, 5);
             apis.items.reduce(async (result, item) => {
                 if (item.name !== API_NAME) return result;
                 console.log('there is some apis named ' + API_NAME + ' wait for delete');
-                console.log('result: ', JSON.stringify(result));
+                console.log('waiting 1 minute threshold: ', JSON.stringify(result));
                 await new Promise(resolve => setTimeout(resolve, 60000));
-                result = await RestApiConnector.deleteRestApi(item.id);
+                result = await connector.deleteRestApi(item.id);
                 console.log(item.id, JSON.stringify(result));
                 return result;
             }, true)

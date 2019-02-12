@@ -6,7 +6,7 @@ const ApiGwResource = require('./resource');
 class RestApiEntity extends Entity {
 
     constructor (properties, connector, informer) {
-        super(properties, connector, informer, {idProperty: 'RestApiId'});
+        super(properties, connector, informer, {idProperty: 'id'});
         this.resourceApi = new ApiGwResource({}, connector, informer);
     }
 
