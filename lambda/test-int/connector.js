@@ -9,6 +9,10 @@ const Connector = require('../connector');
 const preparePackage = require('../../utils/fs').preparePackage;
 
 const FUNC_NAME = 'aws-deploy-test-api';
+const RestApi = require('../../api-gateway/rest-api');
+
+const accountId = '266895356213';
+const region = 'eu-west-1';
 
 describe('AWS Lambda Connector ', () => {
     AWSGlobal.config.loadFromPath('./.aws-cfg.json');
@@ -116,6 +120,34 @@ describe('AWS Lambda Connector ', () => {
         expect(result).to.have.property('FunctionName').that.is.equal(FUNC_NAME);
         expect(result).to.have.property('Handler').that.is.equal(funcParams.Handler);
         expect(result).to.have.property('MemorySize').that.is.equal(connector.defaults.MemorySize + 100);
+    });
+
+    it('#addFunctionPermission should should result in some data', async () => {
+        let result = 'initial';
+        try {
+            const restApi = new RestApi({});
+            const rest = await restApi.create({name: 'aws-deploy-test-api'});
+            result = await connector.addFunctionPermission(FUNC_NAME, null, 'test', {
+                SourceArn: 'arn:aws:execute-api:'+region+':'+accountId+':'+rest.id+'/*/*/*'
+            });
+        } catch (e) {
+            result = e;
+        }
+        expect(result).not.to.be.equal('initial');
+        expect(result).not.to.be.instanceof(Error);
+        expect(result).to.have.nested.property('$response.requestId').that.is.a('string');
+    });
+
+    it('#removeFunctionPermission should should result in some data', async () => {
+        let result = 'initial';
+        try {
+            result = await connector.removeFunctionPermission(FUNC_NAME, null, 'test');
+        } catch (e) {
+            result = e;
+        }
+        expect(result).not.to.be.equal('initial');
+        expect(result).not.to.be.instanceof(Error);
+        expect(result).to.have.nested.property('$response.requestId').that.is.a('string');
     });
 
     it('#deleteFunction should should result in some data', async () => {

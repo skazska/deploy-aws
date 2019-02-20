@@ -235,6 +235,40 @@ class ApiGatewayConnector extends CommonAwsConnector {
         return this.api.updateMethod(params).promise();
     }
 
+    testMethod  (restApiId, resourceId, httpMethod, properties) {
+        const defaults = {
+            // httpMethod: 'STRING_VALUE', /* required */
+            // resourceId: 'STRING_VALUE', /* required */
+            // restApiId: 'STRING_VALUE', /* required */
+            // body: 'STRING_VALUE',
+            // clientCertificateId: 'STRING_VALUE',
+            // headers: {
+            //     '<String>': 'STRING_VALUE',
+            //     /* '<String>': ... */
+            // },
+            // multiValueHeaders: {
+            //     '<String>': [
+            //         'STRING_VALUE',
+            //         /* more items */
+            //     ],
+            //     /* '<String>': ... */
+            // },
+            // pathWithQueryString: 'STRING_VALUE',
+            // stageVariables: {
+            //     '<String>': 'STRING_VALUE',
+            //     /* '<String>': ... */
+            // }
+        };
+        return this.api.testInvokeMethod(Object.assign(
+            defaults,
+            properties,
+            {
+                restApiId: restApiId,
+                resourceId: resourceId,
+                httpMethod: httpMethod
+            })
+        ).promise();
+    }
 
     /**************************************************************
      * INTEGRATIONS

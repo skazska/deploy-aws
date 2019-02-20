@@ -96,7 +96,7 @@ class LambdaConnector extends CommonAwsConnector {
      * @return {Promise<PromiseResult<null, AWSError>>}
      */
     deleteFunction (name, qualifier) {
-        var params = {
+        const params = {
             FunctionName: name
         };
         if (qualifier) params.Qualifier = qualifier;
@@ -114,7 +114,7 @@ class LambdaConnector extends CommonAwsConnector {
      * @param qualifier
      */
     getFunction (name, qualifier) {
-        var params = {
+        const params = {
             FunctionName: name
         };
         if (qualifier) params.Qualifier = qualifier;
@@ -133,7 +133,7 @@ class LambdaConnector extends CommonAwsConnector {
      * @return {Promise<PromiseResult<Lambda.FunctionConfiguration, AWSError> | never>}
      */
     getFunctionConfiguration (name, qualifier) {
-        var params = {
+        const params = {
             FunctionName: name
         };
         if (qualifier) params.Qualifier = qualifier;
@@ -244,7 +244,7 @@ class LambdaConnector extends CommonAwsConnector {
      * @return {Promise<PromiseResult<Lambda.FunctionConfiguration, AWSError>>}
      */
     updateFunctionCode (name, code, publish) {
-        var params = Object.assign(
+        const params = Object.assign(
             {
                 // FunctionName: name,
                 // Publish: !!publish,
@@ -280,6 +280,76 @@ class LambdaConnector extends CommonAwsConnector {
         }
         */
     }
+
+    /**
+     * invokes lambda-function setting lambda function access permissions
+     * @param {string} name
+     * @param {string|null} qualifier
+     * @param {string} statementId
+     * @param {object} options
+     * @return {Promise<PromiseResult<Lambda.FunctionConfiguration, AWSError>>}
+     */
+    addFunctionPermission (name, qualifier, statementId, options) {
+        const params = Object.assign(
+            {
+                Action: 'lambda:InvokeFunction', /* https://docs.aws.amazon.com/en_us/lambda/latest/dg/access-control-resource-based.html */
+                // FunctionName: 'STRING_VALUE', /* required */
+                Principal: 'apigateway.amazonaws.com', /* required */
+                // StatementId: 'STRING_VALUE', /* required */
+                // EventSourceToken: 'STRING_VALUE',
+                // Qualifier: 'STRING_VALUE',
+                // RevisionId: 'STRING_VALUE',
+                // SourceAccount: 'STRING_VALUE',
+                // SourceArn: 'STRING_VALUE'  arn:aws:execute-api:eu-west-1:266895356213:9vs7bi7scf/*/*/test-microservice-http-endpoint  - https://docs.aws.amazon.com/en_us/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.html#api-gateway-calling-api-permissions
+                                                //                region     user-id      api-id/stage/method/resourcepath
+            },
+            options,
+            {
+                FunctionName: name,
+                StatementId: statementId
+            }
+        );
+        if (qualifier) params.Qualifier = qualifier;
+
+        return this.api.addPermission(params).promise();
+        /*
+        data = {
+         CodeSha256: "LQT+0DHxxxxcfwLyQjzoEFKZtdqQjHXanlSdfXBlEW0VA=",
+         CodeSize: 123,
+         Description: "",
+         FunctionArn: "arn:aws:lambda:us-west-2:123456789012:function:myFunction",
+         FunctionName: "myFunction",
+         Handler: "index.handler",
+         LastModified: "2016-11-21T19:49:20.006+0000",
+         MemorySize: 128,
+         Role: "arn:aws:iam::123456789012:role/lambda_basic_execution",
+         Runtime: "python2.7",
+         Timeout: 123,
+         Version: "1",
+         VpcConfig: {
+         }
+        }
+        */
+    }
+
+    /**
+     * invokes lambda-function removing lambda function access permissions
+     * @param {string} name
+     * @param {string|null} qualifier
+     * @param {string} statementId
+     * @return {Promise<PromiseResult<{}, AWSError>>}
+     */
+    removeFunctionPermission (name, qualifier, statementId) {
+        const params = {
+            FunctionName: name,
+            StatementId: statementId
+        };
+        if (qualifier) params.Qualifier = qualifier;
+
+        return this.api.removePermission(params).promise();
+
+    }
+
 }
 
 module.exports = LambdaConnector;

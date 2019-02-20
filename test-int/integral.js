@@ -100,6 +100,8 @@ describe('Integral scenarios', () => {
 
     });
 
+    it
+
     after(async () => {
         await lambdaFunction.delete();
         try {

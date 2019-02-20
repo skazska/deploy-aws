@@ -145,12 +145,12 @@ describe('API Resource Controller', () => {
             });
 
             resource = new Resource({id: 'name'}, connector, group);
-            entity = resource._createEntity({name: 'name', prop: 'val', restApiId: '1', resourceId: '2'});
-            apiCall = sinon.fake(() => { return awsResponse('response'); });
+            entity = resource._createEntity({name: 'name', prop: 'val', restApiId: '1', id: '2'});
+            apiCall = sinon.fake(() => { return awsResponse({prop: 'response'}); });
         });
         it('#_createEntity(properties) should return an RestApiEntity instance with properties', () => {
             expect(entity).to.be.instanceof(ApiEntity);
-            expect(entity.id).to.eql({ restApiId: '1', resourceId: '2' });
+            expect(entity.id).to.eql({ restApiId: '1', id: '2' });
             expect(entity.val('prop')).to.eql('val');
             expect(entity.informer).to.be.equal(group);
         });
@@ -161,7 +161,7 @@ describe('API Resource Controller', () => {
 
             //TODO further way to implement update method and correct test
             const result = await entity.update({prop: 'val1'}).promise();
-            expect(result).to.be.equal('response');
+            expect(result).to.be.eql({prop: 'response'});
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
@@ -183,7 +183,7 @@ describe('API Resource Controller', () => {
                 throw e;
             }
 
-            expect(result.properties).to.be.equal('response');
+            expect(result.properties).to.be.eql({prop: 'response', "restApiId": "1"});
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
@@ -206,7 +206,12 @@ describe('API Resource Controller', () => {
                 throw e;
             }
 
-            expect(result.properties).to.be.equal('response');
+            expect(result.properties).to.be.eql({
+                "httpMethod": "ANY",
+                "prop": "response",
+                "id": "2",
+                "restApiId": "1",
+            });
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
@@ -224,7 +229,7 @@ describe('API Resource Controller', () => {
         it('#delete() should return promise invoke rest-api(deleteRestApi), addInformer which fires change and complete', async () => {
             sinon.replace(entity.connector.api, 'deleteResource', apiCall);
             const result = await entity.delete();
-            expect(result).to.be.equal('response');
+            expect(result).to.be.eql({prop: 'response'});
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({

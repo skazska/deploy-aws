@@ -192,6 +192,43 @@ describe('LambdaFunction', () => {
             await lambdaFunction.updateCode({code: 'sas'}, true);
             expect(apiCall.args[1][0]).to.have.property("Publish", true);
         });
+
+        it('#addPermission() should invoke lambdaApi(addFunctionPermission), addInformer which fires change and complete', async () => {
+            sinon.replace(connector.api, 'addPermission', apiCall);
+            const result = await lambdaFunction.addPermission(null, 'test', {SourceArn: 'sourceArn'});
+            expect(result).to.be.eql({FunctionName: 'name', result: 'result'});
+
+            expect(apiCall).to.be.calledOnce;
+            expect(apiCall.args[0][0]).to.be.eql({
+                Action: 'lambda:InvokeFunction',
+                FunctionName: 'name',
+                Principal: 'apigateway.amazonaws.com',
+                StatementId: 'test',
+                SourceArn: 'sourceArn'
+            });
+
+            expect(group.informers.length).to.equal(2);
+            informer = await informer;
+            expect(informer).to.be.called;
+        });
+
+        it('#removePermission() should invoke lambdaApi(addFunctionPermission), addInformer which fires change and complete', async () => {
+            sinon.replace(connector.api, 'removePermission', apiCall);
+            const result = await lambdaFunction.removePermission(null, 'test');
+            expect(result).to.be.eql({FunctionName: 'name', result: 'result'});
+
+            expect(apiCall).to.be.calledOnce;
+            expect(apiCall.args[0][0]).to.be.eql({
+                FunctionName: 'name',
+                StatementId: 'test'
+            });
+
+            expect(group.informers.length).to.equal(2);
+            informer = await informer;
+            expect(informer).to.be.called;
+
+        });
+
         it('#delete(version) should return promise invoke lambdaApi(deleteFunction), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'deleteFunction', apiCall);
             const result = await lambdaFunction.delete();

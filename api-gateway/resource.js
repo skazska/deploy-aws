@@ -50,7 +50,7 @@ class ApiGwResourceEntity extends Entity {
                 this.connector.deleteResource,
                 'Delete rest-api-resource ' + idParam.resourceId,
                 idParam.restApiId,
-                idParam.resourceId
+                idParam.id
             );
             return result;
         } catch (e) {

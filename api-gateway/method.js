@@ -90,7 +90,7 @@ class ApiGwMethodEntity extends Entity {
         //add new
         const result = await this._informCall(
             this.connector.createIntegration,
-            'Set integration: ' + 'type ' + integrationOptions.type + ', uri ' + integrationOptions.uri,
+            'Set integration: type ' + integrationOptions.type + ', uri ' + integrationOptions.uri,
             this.id.restApiId, this.id.resourceId, this.id.httpMethod, integrationOptions
         );
         result.restApiId = this.id.restApiId;
@@ -98,6 +98,21 @@ class ApiGwMethodEntity extends Entity {
         result.httpMethod = this.id.httpMethod;
         return new ApiGwIntegrationEntity(result, this.connector, this.informer);
     }
+
+    /**
+     * tests method invocation
+     * @param params
+     * @return {Promise<*|void>}
+     */
+    async test(params) {
+        //add new
+        return await this._informCall(
+            this.connector.testMethod,
+            'testMethodInvocation',
+            this.id.restApiId, this.id.resourceId, this.id.httpMethod, params
+        );
+    }
+
 
 }
 
@@ -130,7 +145,7 @@ class ApiGwMethod extends Api {
                 properties
             );
             result.restApiId = properties.restApiId;
-            result.resourceId = properties.resourceId;
+            result.id = properties.resourceId;
             result.httpMethod = properties.httpMethod;
 
             return this._createEntity(result);

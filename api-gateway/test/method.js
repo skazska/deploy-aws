@@ -63,13 +63,18 @@ describe('API Method Controller', () => {
             });
 
             method = new Method({id: 'name'}, connector, group);
-            apiCall = sinon.fake(() => { return awsResponse('response'); });
+            apiCall = sinon.fake(() => { return awsResponse({prop: 'response'}); });
         });
         it('#create(properties) should return promise, invoke method(createResource), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'putMethod', apiCall);
 
             const result = await method.create({restApiId: 'restApi', resourceId: 'resourceId', httpMethod: 'httpMethod'});
-            expect(result.properties).to.be.equal('response');
+            expect(result.properties).to.be.eql({
+                "httpMethod": "httpMethod",
+                "prop": "response",
+                "id": "resourceId",
+                "restApiId": "restApi"
+            });
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
@@ -86,7 +91,7 @@ describe('API Method Controller', () => {
         it('#read() should return promise invoke method(getMethod), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'getMethod', apiCall);
             const result = await method.read('restApiId', 'resourceId', 'httpMethod');
-            expect(result.properties).to.be.equal('response');
+            expect(result.properties).to.be.eql({prop: 'response'});
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
@@ -125,7 +130,7 @@ describe('API Method Controller', () => {
 
             method = new Method({id: 'name'}, connector, group);
             entity = method._createEntity({restApiId: '1', resourceId: '2', httpMethod: 'httpMethod', prop: 'val'});
-            apiCall = sinon.fake(() => { return awsResponse('response'); });
+            apiCall = sinon.fake(() => { return awsResponse({prop: 'response'}); });
         });
         it('#_createEntity(properties) should return an MethodEntity instance with properties', () => {
             expect(entity).to.be.instanceof(ApiEntity);
@@ -140,7 +145,7 @@ describe('API Method Controller', () => {
 
             //TODO further way to implement update method and correct test
             const result = await entity.update({prop: 'val1'}).promise();
-            expect(result).to.be.equal('response');
+            expect(result).to.be.eql({prop: 'response'});
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
@@ -162,7 +167,12 @@ describe('API Method Controller', () => {
                 throw e;
             }
 
-            expect(result.properties).to.be.equal('response');
+            expect(result.properties).to.be.eql({
+                "httpMethod": "httpMethod",
+                "prop": "response",
+                "resourceId": "2",
+                "restApiId": "1"
+            });
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
@@ -183,7 +193,7 @@ describe('API Method Controller', () => {
         it('#delete() should return promise invoke rest-api(deleteRestApi), addInformer which fires change and complete', async () => {
             sinon.replace(entity.connector.api, 'deleteMethod', apiCall);
             const result = await entity.delete();
-            expect(result).to.be.equal('response');
+            expect(result).to.be.eql({prop: 'response'});
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({

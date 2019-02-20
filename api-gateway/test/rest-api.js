@@ -140,7 +140,7 @@ describe('API Controller', () => {
             });
 
             restApi = new RestApi({}, connector, group);
-            entity = restApi._createEntity({name: 'name', prop: 'val', RestApiId: '1'});
+            entity = restApi._createEntity({name: 'name', prop: 'val', id: '1'});
             apiCall = sinon.fake(() => { return awsResponse('response'); });
         });
         it('#_createEntity(properties) should return an RestApiEntity instance with properties', () => {

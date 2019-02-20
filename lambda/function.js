@@ -57,6 +57,58 @@ class FunctionEntity extends Entity {
     }
 
     /**
+     * adds permission to function
+     * @param version
+     * @param id
+     * @param options
+     * @return {Promise<null>}
+     */
+    async addPermission(version, id, options) {
+        try {
+            const result = await this._informCall(
+                this.connector.addFunctionPermission,
+                'add permission to function ' + this.id,
+                this.id,
+                version,
+                id,
+                options
+            );
+            return result;
+        } catch (e) {
+            if (e.code === 'ResourceNotFoundException') {
+                return null;
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    /**
+     * removes permission from function
+     * @param version
+     * @param id
+     * @return {Promise<null>}
+     */
+    async removePermission(version, id) {
+        try {
+            const result = await this._informCall(
+                this.connector.removeFunctionPermission,
+                'remove permission from function ' + this.id,
+                this.id,
+                version,
+                id
+            );
+            return result;
+        } catch (e) {
+            if (e.code === 'ResourceNotFoundException') {
+                return null;
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    /**
      * delete entity
      */
     async delete (version) {
