@@ -171,6 +171,22 @@ describe('AWS Lambda Connector ', () => {
                 console.error(e);
             }
         }
+
+        try {
+            let apis = await connector.getRestApis(null, 5);
+            apis.items.reduce(async (result, item) => {
+                if (item.name !== 'aws-deploy-test-api') return result;
+                console.log('there is some apis named ' + 'aws-deploy-test-api' + ' wait for delete');
+                console.log('result: ', JSON.stringify(result));
+                await new Promise(resolve => setTimeout(resolve, 60000));
+                result = await connector.deleteRestApi(item.id);
+                console.log(item.id, JSON.stringify(result));
+                return result;
+            }, true)
+        } catch (e) {
+            console.error(e);
+        }
+
     })
 
 });

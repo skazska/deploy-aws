@@ -29,8 +29,6 @@ describe('AWS Api Gateway Connector - Integration methods', function () {
 
     before(async () => {
         try {
-            user = userApi.get();
-
             let result = await connector.createRestApi({name: 'aws-deploy-test-api'});
             restApiId = result.id;
             result = await connector.getResources(restApiId, null, 1);
@@ -63,6 +61,8 @@ describe('AWS Api Gateway Connector - Integration methods', function () {
         expect(integration).to.have.property('passthroughBehavior').that.is.a('string');
     });
 
+    //TODO PUTINTEGRATIONRESPONSE ! matters!
+
     it('#getIntegration should result in new integration data ', async () => {
         let result = null;
         try {
@@ -93,11 +93,11 @@ describe('AWS Api Gateway Connector - Integration methods', function () {
 
         console.dir(method);
         console.dir(integration);
-        const sourceArn = 'arn:aws:execute-api:'+region+':'+accountId+':'+restApiId+'/*/'+method.id.httpMethod+'/*';
-        // TODO add permission to funcArn
+        const sourceArn = 'arn:aws:execute-api:'+region+':'+accountId+':'+restApiId+'/*/*/';
 
         let result = null;
         try {
+            await lambdaFunction.addPermission(null, 'test', {SourceArn: sourceArn});
             result = await connector.testMethod(restApiId, resourceId, 'GET', {});
         } catch (e) {
             result = e;
@@ -105,7 +105,8 @@ describe('AWS Api Gateway Connector - Integration methods', function () {
 
         expect(result).not.to.be.equal(null);
         expect(result).not.to.be.instanceof(Error);
-        expect(result).to.eql({a: "b"});
+        console.log(result);
+        expect(result).to.have.property('body').eql({a: "b"});
     });
 
 
