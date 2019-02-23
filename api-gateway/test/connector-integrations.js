@@ -69,6 +69,41 @@ describe('AWS Api Gateway Connector - Integrations methods', () => {
         xit('should treat params right', async () => {
         });
     });
+
+
+    describe('#createIntegrationResponse', () => {
+        beforeEach(() => {
+            sinon.replace(connector.api, 'putIntegrationResponse', sinon.fake(() => {
+                return awsResponse('response');
+            }));
+        });
+        afterEach(() => {
+            sinon.restore();
+        });
+        it('#createIntegrationResponse should result in some data', async () => {
+            const result = await connector.createIntegrationResponse('restApi', 123, 'ANY', '200', {});
+            const apiCall = connector.api.putIntegrationResponse;
+            expect(apiCall).to.be.calledOnceWith({restApiId: 'restApi', resourceId: 123, httpMethod: 'ANY',
+                statusCode: '200'});
+            expect(result).to.be.equal('response');
+        });
+    });
+
+    describe('#deleteIntegrationResponse', () => {
+        beforeEach(() => {
+            sinon.replace(connector.api, 'deleteIntegrationResponse', sinon.fake(() => { return awsResponse('response'); }));
+        });
+        afterEach(() => {
+            sinon.restore();
+        });
+        it('#deleteIntegrationResponse should result in some data', async () => {
+            const result  = await connector.deleteIntegrationResponse('restApi', 123, 'ANY', '200');
+            const apiCall = connector.api.deleteIntegrationResponse;
+            expect(apiCall).to.be.calledOnceWith({restApiId: 'restApi', resourceId: 123, httpMethod: 'ANY', statusCode: '200'});
+            expect(result).to.be.equal('response');
+        });
+    });
+
     describe('#deleteIntegration', () => {
         beforeEach(() => {
             sinon.replace(connector.api, 'deleteIntegration', sinon.fake(() => { return awsResponse('response'); }));

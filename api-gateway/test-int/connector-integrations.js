@@ -61,7 +61,6 @@ describe('AWS Api Gateway Connector - Integration methods', function () {
         expect(integration).to.have.property('passthroughBehavior').that.is.a('string');
     });
 
-    //TODO PUTINTEGRATIONRESPONSE ! matters!
 
     it('#getIntegration should result in new integration data ', async () => {
         let result = null;
@@ -86,6 +85,30 @@ describe('AWS Api Gateway Connector - Integration methods', function () {
     //     xit('should treat params right', async () => {
     //     });
     // });
+
+    it('#createIntegrationResponse should result in some data', async () => {
+        let result = 'initial';
+        try {
+            result = await connector.createIntegrationResponse(restApiId, resourceId, 'ANY', '200', {});
+        } catch (e) {
+            result = e;
+        }
+        expect(result).not.to.be.equal('initial');
+        expect(result).not.to.be.instanceof(Error);
+        expect(result).to.have.nested.property('$response.requestId').that.is.a('string');
+    });
+
+    it('#deleteIntegrationResponse should result in some data', async () => {
+        let result = 'initial';
+        try {
+            result = await connector.deleteIntegrationResponse(restApiId, resourceId, 'ANY', '200');
+        } catch (e) {
+            result = e;
+        }
+        expect(result).not.to.be.equal('initial');
+        expect(result).not.to.be.instanceof(Error);
+        expect(result).to.have.nested.property('$response.requestId').that.is.a('string');
+    });
 
     it('#testMethod should call AWS SDK AG method testInvokeMethod', async () => {
         // restApiId = 'mrrjkkmso8';

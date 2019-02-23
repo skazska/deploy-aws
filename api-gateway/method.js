@@ -2,15 +2,14 @@ const Api = require('../common/api');
 const Entity = require('../common/api-entity');
 const Connector = require('./connector');
 
-class ApiGwIntegrationEntity extends Entity {
-
+class ApiGwResponseEntity extends Entity {
     constructor (properties, connector, informer) {
-        super(properties, connector, informer, {idProperty: ['restApiId', 'resourceId', 'httpMethod']});
+        super(properties, connector, informer, {idProperty: ['restApiId', 'resourceId', 'httpMethod', 'statusCode']});
+        this.entityName = 'AbstractResponse'
     }
 
     /**
      * updates entity
-     * @param id
      * @param properties
      */
     update (properties) {
@@ -19,7 +18,80 @@ class ApiGwIntegrationEntity extends Entity {
 
     /**
      * delete entity
-     * @param {string} id
+     */
+    async delete () {
+        const idParam = this.id;
+        try {
+            const result = await this._informCall(
+                this.connector['delete' + this.entityName],
+                'Delete ' + this.entityName + idParam.resourceId + idParam.httpMethod + idParam.statusCode,
+                idParam.restApiId,
+                idParam.resourceId,
+                idParam.httpMethod,
+                idParam.statusCode
+            );
+            return result;
+        } catch (e) {
+            if (e.code === 'ResourceNotFoundException') {
+                return null;
+            } else {
+                throw e;
+            }
+        }
+    }
+}
+
+class ApiGwMethodResponseEntity extends ApiGwResponseEntity {
+    constructor (properties, connector, informer) {
+        super(properties, connector, informer);
+        this.entityName = 'MethodResponse';
+    }
+}
+
+class ApiGwIntegrationResponseEntity extends ApiGwResponseEntity {
+    constructor (properties, connector, informer) {
+        super(properties, connector, informer);
+        this.entityName = 'IntegrationResponse';
+    }
+}
+
+
+class ApiGwIntegrationEntity extends Entity {
+
+    constructor (properties, connector, informer) {
+        super(properties, connector, informer, {idProperty: ['restApiId', 'resourceId', 'httpMethod']});
+    }
+
+    /**
+     * adds Integration's Response config
+     * @param statusCode
+     * @param params
+     * @return {Promise<void>}
+     */
+    async addResponse(statusCode, params) {
+        const result = await this._informCall(
+            this.connector.createIntegrationResponse,
+            'Set response: ' + params.statusCode,
+            this.id.restApiId, this.id.resourceId, this.id.httpMethod, statusCode, params
+        );
+        result.restApiId = this.id.restApiId;
+        result.resourceId = this.id.resourceId;
+        result.httpMethod = this.id.httpMethod;
+        // result.statusCode = statusCode;
+        return new ApiGwIntegrationResponseEntity(result, this.connector, this.informer);
+    }
+
+
+    /**
+     * updates entity
+     * @param properties
+     */
+    update (properties) {
+
+    }
+
+    /**
+     * delete entity
      */
     async delete () {
         const idParam = this.id;
@@ -50,7 +122,6 @@ class ApiGwMethodEntity extends Entity {
 
     /**
      * updates entity
-     * @param id
      * @param properties
      */
     update (properties) {
@@ -59,7 +130,6 @@ class ApiGwMethodEntity extends Entity {
 
     /**
      * delete entity
-     * @param {string} id
      */
     async delete () {
         const idParam = this.id;
@@ -79,6 +149,25 @@ class ApiGwMethodEntity extends Entity {
                 throw e;
             }
         }
+    }
+
+    /**
+     * addsMethod's Response config
+     * @param statusCode
+     * @param params
+     * @return {Promise<void>}
+     */
+    async addResponse(statusCode, params) {
+        const result = await this._informCall(
+            this.connector.createMethodResponse,
+            'Set response: ' + params.statusCode,
+            this.id.restApiId, this.id.resourceId, this.id.httpMethod, statusCode, params
+        );
+        result.restApiId = this.id.restApiId;
+        result.resourceId = this.id.resourceId;
+        result.httpMethod = this.id.httpMethod;
+        // result.statusCode = statusCode;
+        return new ApiGwMethodResponseEntity(result, this.connector, this.informer);
     }
 
     /**

@@ -69,6 +69,40 @@ describe('AWS Api Gateway Connector - Methods methods', () => {
         xit('should treat params right', async () => {
         });
     });
+
+    describe('#createMethodResponse', () => {
+        beforeEach(() => {
+            sinon.replace(connector.api, 'putMethodResponse', sinon.fake(() => {
+                return awsResponse('response');
+            }));
+        });
+        afterEach(() => {
+            sinon.restore();
+        });
+        it('#createMethodResponse should result in some data', async () => {
+            const result = await connector.createMethodResponse('restApi', 123, 'ANY', '200', {});
+            const apiCall = connector.api.putMethodResponse;
+            expect(apiCall).to.be.calledOnceWith({restApiId: 'restApi', resourceId: 123, httpMethod: 'ANY',
+                statusCode: '200'});
+            expect(result).to.be.equal('response');
+        });
+    });
+
+    describe('#deleteMethodResponse', () => {
+        beforeEach(() => {
+            sinon.replace(connector.api, 'deleteMethodResponse', sinon.fake(() => { return awsResponse('response'); }));
+        });
+        afterEach(() => {
+            sinon.restore();
+        });
+        it('#deleteMethodResponse should result in some data', async () => {
+            const result  = await connector.deleteMethodResponse('restApi', 123, 'ANY', '200');
+            const apiCall = connector.api.deleteMethodResponse;
+            expect(apiCall).to.be.calledOnceWith({restApiId: 'restApi', resourceId: 123, httpMethod: 'ANY', statusCode: '200'});
+            expect(result).to.be.equal('response');
+        });
+    });
+
     describe('#deleteMethod', () => {
         beforeEach(() => {
             sinon.replace(connector.api, 'deleteMethod', sinon.fake(() => { return awsResponse('response'); }));

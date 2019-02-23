@@ -235,6 +235,44 @@ class ApiGatewayConnector extends CommonAwsConnector {
         return this.api.updateMethod(params).promise();
     }
 
+    createMethodResponse (restApiId, resourceId, httpMethod, statusCode, properties) {
+        const defaults = {
+            // httpMethod: 'STRING_VALUE', /* required */
+            // resourceId: 'STRING_VALUE', /* required */
+            // restApiId: 'STRING_VALUE', /* required */
+            // statusCode: 'STRING_VALUE', /* required */
+            // responseModels: {
+            //     '<String>': 'STRING_VALUE',
+            //     /* '<String>': ... */
+            // },
+            // responseParameters: {
+            //     '<String>': true || false,
+            //     /* '<String>': ... */
+            // }
+        };
+        return this.api.putMethodResponse(Object.assign(
+            defaults,
+            properties,
+            {
+                restApiId: restApiId,
+                resourceId: resourceId,
+                httpMethod: httpMethod,
+                statusCode: statusCode
+            })
+        ).promise();
+    }
+
+    deleteMethodResponse (restApiId, resourceId, httpMethod, statusCode) {
+        const params = {
+            resourceId: resourceId, /* required */
+            restApiId: restApiId, /* required */
+            httpMethod: httpMethod,  /* required */
+            statusCode: statusCode  /* required */
+        };
+        return this.api.deleteMethodResponse(params).promise();
+    }
+
+
     testMethod  (restApiId, resourceId, httpMethod, properties) {
         const defaults = {
             // httpMethod: 'STRING_VALUE', /* required */
@@ -348,6 +386,46 @@ class ApiGatewayConnector extends CommonAwsConnector {
         }
         return this.api.updateIntegration(params).promise();
     }
+
+    createIntegrationResponse (restApiId, resourceId, httpMethod, statusCode, properties) {
+        const defaults = {
+            // httpMethod: 'STRING_VALUE', /* required */
+            // resourceId: 'STRING_VALUE', /* required */
+            // restApiId: 'STRING_VALUE', /* required */
+            // statusCode: 'STRING_VALUE', /* required */
+            // contentHandling: CONVERT_TO_BINARY | CONVERT_TO_TEXT,
+            // responseParameters: {
+            //     '<String>': 'STRING_VALUE',
+            //     /* '<String>': ... */
+            // },
+            // responseTemplates: {
+            //     '<String>': 'STRING_VALUE',
+            //     /* '<String>': ... */
+            // },
+            // selectionPattern: 'STRING_VALUE'
+        };
+        return this.api.putIntegrationResponse(Object.assign(
+            defaults,
+            properties,
+            {
+                restApiId: restApiId,
+                resourceId: resourceId,
+                httpMethod: httpMethod,
+                statusCode: statusCode
+            })
+        ).promise();
+    }
+
+    deleteIntegrationResponse (restApiId, resourceId, httpMethod, statusCode) {
+        const params = {
+            resourceId: resourceId, /* required */
+            restApiId: restApiId, /* required */
+            httpMethod: httpMethod,  /* required */
+            statusCode: statusCode  /* required */
+        };
+        return this.api.deleteIntegrationResponse(params).promise();
+    }
+
 
 }
 

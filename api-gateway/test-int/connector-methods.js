@@ -58,7 +58,31 @@ describe('AWS Api Gateway Connector - Method methods', function() {
         });
     });
 
-    it('#deleteMethod should should result in some data', async () => {
+    it('#createMethodResponse should result in some data', async () => {
+        let result = 'initial';
+        try {
+            result = await connector.createMethodResponse(restApiId, resourceId, 'ANY', '200', {});
+        } catch (e) {
+            result = e;
+        }
+        expect(result).not.to.be.equal('initial');
+        expect(result).not.to.be.instanceof(Error);
+        expect(result).to.have.nested.property('$response.requestId').that.is.a('string');
+    });
+
+    it('#deleteMethodResponse should result in some data', async () => {
+        let result = 'initial';
+        try {
+            result = await connector.deleteMethodResponse(restApiId, resourceId, 'ANY', '200');
+        } catch (e) {
+            result = e;
+        }
+        expect(result).not.to.be.equal('initial');
+        expect(result).not.to.be.instanceof(Error);
+        expect(result).to.have.nested.property('$response.requestId').that.is.a('string');
+    });
+
+    it('#deleteMethod should result in some data', async () => {
         let result = 'initial';
         try {
             result = await connector.deleteMethod(restApiId, resourceId, 'ANY');
