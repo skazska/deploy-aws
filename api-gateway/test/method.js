@@ -37,7 +37,7 @@ describe('API Method Controller', () => {
         let method;
         it('should have properties connector, informer, id, properties', () => {
             method = new Method({id: 'name'}, connector, informer);
-            expect(method).to.eql({
+            expect(method).to.deep.include({
                 connector: connector,
                 properties: {id: 'name'},
                 informer: informer

@@ -1,8 +1,8 @@
 const ApiGwMethodAbstract = require('./method-base');
-const ApiGwMethodEntity = require('./method-entity');
+const ApiGwIntegrationEntity = require('./integration-entity');
 const Connector = require('./connector');
 
-class ApiGwMethod extends ApiGwMethodAbstract {
+class ApiGwIntegration extends ApiGwMethodAbstract {
     /**
      * @param {string} id
      * @param {*} properties
@@ -11,9 +11,9 @@ class ApiGwMethod extends ApiGwMethodAbstract {
      */
     constructor (properties, connector, informer) {
         super(properties, connector || new Connector({}), informer || null);
-        this.entityConstructor = ApiGwMethodEntity;
-        this.entityName = 'Method';
+        this.entityConstructor = ApiGwIntegrationEntity;
+        this.entityName = 'Integration';
     }
 }
 
-module.exports = ApiGwMethod;
+module.exports = ApiGwIntegration;

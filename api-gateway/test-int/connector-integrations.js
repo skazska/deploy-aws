@@ -98,10 +98,10 @@ describe('AWS Api Gateway Connector - Integration methods', function () {
         expect(result).to.have.nested.property('$response.requestId').that.is.a('string');
     });
 
-    it('#deleteIntegrationResponse should result in some data', async () => {
+    it('#createIntegrationResponse should result in some data', async () => {
         let result = 'initial';
         try {
-            result = await connector.deleteIntegrationResponse(restApiId, resourceId, 'ANY', '200');
+            result = await connector.createIntegrationResponse(restApiId, resourceId, 'ANY', '200', {});
         } catch (e) {
             result = e;
         }
@@ -120,6 +120,7 @@ describe('AWS Api Gateway Connector - Integration methods', function () {
 
         let result = null;
         try {
+            // await connector.createMethodResponse(restApiId, resourceId, 'ANY', '200', {});
             await lambdaFunction.addPermission(null, 'test', {SourceArn: sourceArn});
             result = await connector.testMethod(restApiId, resourceId, 'GET', {});
         } catch (e) {
@@ -129,9 +130,20 @@ describe('AWS Api Gateway Connector - Integration methods', function () {
         expect(result).not.to.be.equal(null);
         expect(result).not.to.be.instanceof(Error);
         console.log(result);
-        expect(result).to.have.property('body').eql({a: "b"});
+        expect(result).to.have.property('body').equal('{"a":"b"}');
     });
 
+    it('#deleteIntegrationResponse should result in some data', async () => {
+        let result = 'initial';
+        try {
+            result = await connector.deleteIntegrationResponse(restApiId, resourceId, 'ANY', '200');
+        } catch (e) {
+            result = e;
+        }
+        expect(result).not.to.be.equal('initial');
+        expect(result).not.to.be.instanceof(Error);
+        expect(result).to.have.nested.property('$response.requestId').that.is.a('string');
+    });
 
     it('#deleteIntegration should should result in some data', async () => {
         let result = 'initial';
