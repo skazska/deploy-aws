@@ -47,8 +47,7 @@ describe('AWS Api Gateway Connector - Integrations methods', () => {
         it('should call AWS SDK AG method putIntegration transforming input params to properties', async () => {
             const result = await connector.createIntegration('restApi', 123, 'ANY');
             const apiCall = connector.api.putIntegration;
-            expect(apiCall).to.be.calledOnceWith({restApiId: 'restApi', resourceId: 123, httpMethod: 'ANY',
-                type: 'AWS_PROXY'});
+            expect(apiCall).to.be.calledOnceWith({restApiId: 'restApi', resourceId: 123, httpMethod: 'ANY'});
             expect(result).to.be.equal('response');
         });
     });
