@@ -14,7 +14,7 @@ class ApiGatewayConnector extends CommonAwsConnector {
      * REST API
      **************************************************************/
 
-    getRestApis (position, limit) {
+    listRestApis (position, limit) {
         const params = {
             limit: limit || 25
         };
@@ -93,7 +93,7 @@ class ApiGatewayConnector extends CommonAwsConnector {
      * RESOURCES
      **************************************************************/
 
-    getResources (restApiId, position, limit) {
+    listResources (restApiId, position, limit) {
         var params = {
             restApiId: restApiId, /* required */
             limit: limit || 25

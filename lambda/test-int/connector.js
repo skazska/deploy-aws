@@ -52,7 +52,7 @@ describe('AWS Lambda Connector ', () => {
         expect(result).to.have.property('MemorySize').that.is.equal(connector.defaults.MemorySize);
     });
 
-    xit('#getRestApis should result in position and list', async () => {
+    xit('#listRestApis should result in position and list', async () => {
         let result = null;
         try {
             result = await connector.getRestApis(null, 1);

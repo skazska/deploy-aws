@@ -50,6 +50,10 @@ class RestApiEntity extends Entity {
         );
         return result;
     }
+
+    async readResources() {
+
+    }
 }
 
 class RestApi extends Api {
@@ -109,7 +113,7 @@ class RestApi extends Api {
      */
     list (options) {
         if (!options) options = {position: 0, limit: 25};
-        return this._informCall(this.connector.getRestApis, 'Get rest-apis (' + options.position + ', ' + options.limit + ')',
+        return this._informCall(this.connector.listRestApis, 'Get rest-apis (' + options.position + ', ' + options.limit + ')',
             options.position, options.limit);
     }
 

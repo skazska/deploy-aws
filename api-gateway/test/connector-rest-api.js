@@ -22,42 +22,42 @@ describe('AWS Api Gateway Connector - RestApi methods', () => {
             expect(connector.api).to.be.instanceof(AG);
         });
     });
-    describe('#getRestApis', () => {
+    describe('#listRestApis', () => {
         beforeEach(() => {
             sinon.replace(connector.api, 'getRestApis', sinon.fake(() => { return awsResponse('response'); }));
         });
         afterEach(() => {
             sinon.restore();
         });
-        it('should call AWS SDK AG method getRestApis transforming input params to properties', async () => {
-            const result = await connector.getRestApis();
+        it('should call AWS SDK AG method listRestApis transforming input params to properties', async () => {
+            const result = await connector.listRestApis();
             const apiCall = connector.api.getRestApis;
             expect(apiCall).to.be.calledOnce;
             expect(result).to.be.equal('response');
         });
-        it('should compose position and limit params into options for AWS SDK AG mathod getRestApis', async () => {
-            const result = await connector.getRestApis('a', 25);
+        it('should compose position and limit params into options for AWS SDK AG mathod listRestApis', async () => {
+            const result = await connector.listRestApis('a', 25);
             const apiCall = connector.api.getRestApis;
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({position: 'a', limit: 25});
             expect(result).to.be.equal('response');
         });
         it('should set limit option to 25 if limit param is not provided', async () => {
-            const result = await connector.getRestApis('a');
+            const result = await connector.listRestApis('a');
             const apiCall = connector.api.getRestApis;
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({position: 'a', limit: 25});
             expect(result).to.be.equal('response');
         });
         it('should not add position option if position param is not provided', async () => {
-            const result = await connector.getRestApis();
+            const result = await connector.listRestApis();
             const apiCall = connector.api.getRestApis;
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({limit: 25});
             expect(result).to.be.equal('response');
         });
         it('should not add position option if position param is null', async () => {
-            const result = await connector.getRestApis(null);
+            const result = await connector.listRestApis(null);
             const apiCall = connector.api.getRestApis;
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({limit: 25});

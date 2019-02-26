@@ -93,7 +93,7 @@ describe('API Controller', () => {
             informer = await informer;
             expect(informer).to.be.called;
         });
-        it('#list() should return promise invoke rest-api(getRestApis), addInformer which fires change and complete', async () => {
+        it('#list() should return promise invoke rest-api(listRestApis), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'getRestApis', apiCall);
             const result = await restApi.list({position: 1, limit: 2});
             expect(result).to.be.eql({prop: 'response', "id": 'id'});

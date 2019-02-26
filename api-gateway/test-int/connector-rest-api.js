@@ -31,10 +31,10 @@ describe('AWS Api Gateway Connector - RestApi methods', () => {
         expect(result.endpointConfiguration).to.have.property('types').that.is.an('array');
     });
 
-    it('#getRestApis should result in position and list', async () => {
+    it('#listRestApis should result in position and list', async () => {
         let result = null;
         try {
-            result = await connector.getRestApis(null, 1);
+            result = await connector.listRestApis(null, 1);
         } catch (e) {
             result = e;
         }
@@ -46,10 +46,10 @@ describe('AWS Api Gateway Connector - RestApi methods', () => {
         expect(result).to.have.property('items').that.is.an('array').that.have.lengthOf(1);
     });
 
-    xit('#getRestApis should result in position and list', async () => {
+    xit('#listRestApis should result in position and list', async () => {
         let result = null;
         try {
-            result = await connector.getRestApis(position, 20);
+            result = await connector.listRestApis(position, 20);
         } catch (e) {
             result = e;
         }
@@ -102,7 +102,7 @@ describe('AWS Api Gateway Connector - RestApi methods', () => {
 
     after(async () => {
         try {
-            let apis = await connector.getRestApis(null, 5);
+            let apis = await connector.listRestApis(null, 5);
             apis.items.reduce(async (result, item) => {
                 if (item.name !== API_NAME) return result;
                 console.log('there is some apis named ' + API_NAME + ' wait for delete');

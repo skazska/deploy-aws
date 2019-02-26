@@ -55,16 +55,20 @@
   "restApi": {
     "timetables-api-clients": {
       "awsProperties": {
-        "restApiId": "vp2mwxx5c2"
+        "description": "STRING_VALUE"
       },
       "resources": {
         "clients": {
-          "pathPart": "clients",
-          "integrations": {
-            "ANY": {
-              "type": "AWS_PROXY",
-              "integrationMethod": "POST",
-              "lambda": { "aws-deploy": "lambda.aws-deploy-test", "aws-deploy-prop": "FunctionArn" }
+          "ANY": {
+            "type": "AWS_PROXY",
+            "awsProperties": {
+              "description": "STRING_VALUE"
+            },
+            "integration": {
+              "lambda": { "aws-deploy": "lambda.aws-deploy-test", "aws-deploy-prop": "FunctionArn" },
+              "awsProperties": {
+                "description": "STRING_VALUE"
+              }
             }
           }
         }

@@ -149,7 +149,7 @@ class ApiGwResource extends Api {
     list (options) {
         if (!options) throw new Error('missing required arguments');
         return this._informCall(
-            this.connector.getResources,
+            this.connector.listResources,
             'Get resources for ' + options.restApiId + ' (' + options.position + ', ' + options.limit + ')',
             options.restApiId, options.position, options.limit
         );

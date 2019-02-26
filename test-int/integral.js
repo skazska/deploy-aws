@@ -106,7 +106,7 @@ describe('Integral scenarios', () => {
         await lambdaFunction.delete();
         try {
             const connector = new RestApiConnector();
-            let apis = await connector.getRestApis(null, 5);
+            let apis = await connector.listRestApis(null, 5);
             apis.items.reduce(async (result, item) => {
                 if (item.name !== API_NAME) return result;
                 console.log('there is some apis named ' + API_NAME + ' wait for delete');

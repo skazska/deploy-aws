@@ -31,7 +31,7 @@ describe('AWS Api Gateway Connector - Integration methods', function () {
         try {
             let result = await connector.createRestApi({name: 'aws-deploy-test-api'});
             restApiId = result.id;
-            result = await connector.getResources(restApiId, null, 1);
+            result = await connector.listResources(restApiId, null, 1);
             resourceId = result.items[0].id;
             lambdaFunction = await lambdaApi.create('aws-deploy-test-api',
                 {MemorySize: 128, Runtime: "nodejs8.10", Handler: "index.handler", Role: invokeRole},
@@ -98,10 +98,10 @@ describe('AWS Api Gateway Connector - Integration methods', function () {
         expect(result).to.have.nested.property('$response.requestId').that.is.a('string');
     });
 
-    it('#createIntegrationResponse should result in some data', async () => {
+    it('#getIntegrationResponse should result in some data', async () => {
         let result = 'initial';
         try {
-            result = await connector.createIntegrationResponse(restApiId, resourceId, 'ANY', '200', {});
+            result = await connector.getIntegrationResponse(restApiId, resourceId, 'ANY', '200', {});
         } catch (e) {
             result = e;
         }

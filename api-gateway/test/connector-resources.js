@@ -22,7 +22,7 @@ describe('AWS Api Gateway Connector - Resource methods', () => {
             expect(connector.api).to.be.instanceof(AG);
         });
     });
-    describe('#getResources', () => {
+    describe('#listResources', () => {
         beforeEach(() => {
             sinon.replace(connector.api, 'getResources', sinon.fake(() => { return awsResponse('response'); }));
         });
@@ -30,34 +30,34 @@ describe('AWS Api Gateway Connector - Resource methods', () => {
             sinon.restore();
         });
         it('should call AWS SDK AG method getResources transforming input params to properties', async () => {
-            const result = await connector.getResources('restApi');
+            const result = await connector.listResources('restApi');
             const apiCall = connector.api.getResources;
             expect(apiCall).to.be.calledOnce;
             expect(result).to.be.equal('response');
         });
         it('should compose position and limit params into options for AWS SDK AG mathod getResources', async () => {
-            const result = await connector.getResources('restApi', 'a', 25);
+            const result = await connector.listResources('restApi', 'a', 25);
             const apiCall = connector.api.getResources;
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({restApiId: 'restApi', position: 'a', limit: 25});
             expect(result).to.be.equal('response');
         });
         it('should set limit option to 25 if limit param is not provided', async () => {
-            const result = await connector.getResources('restApi', 'a');
+            const result = await connector.listResources('restApi', 'a');
             const apiCall = connector.api.getResources;
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({restApiId: 'restApi', position: 'a', limit: 25});
             expect(result).to.be.equal('response');
         });
         it('should not add position option if position param is not provided', async () => {
-            const result = await connector.getResources('restApi');
+            const result = await connector.listResources('restApi');
             const apiCall = connector.api.getResources;
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({restApiId: 'restApi', limit: 25});
             expect(result).to.be.equal('response');
         });
         it('should not add position option if position param is null', async () => {
-            const result = await connector.getResources('restApi', null, 15);
+            const result = await connector.listResources('restApi', null, 15);
             const apiCall = connector.api.getResources;
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({restApiId: 'restApi', limit: 15});

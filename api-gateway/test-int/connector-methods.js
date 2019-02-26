@@ -14,7 +14,7 @@ describe('AWS Api Gateway Connector - Method methods', function() {
         try {
             let result = await connector.createRestApi({name: 'aws-deploy-test-api'});
             restApiId = result.id;
-            result = await connector.getResources(restApiId, null, 1);
+            result = await connector.listResources(restApiId, null, 1);
             resourceId = result.items[0].id;
         } catch (e) {
             throw e;

@@ -20,10 +20,10 @@ describe('AWS Api Gateway Connector - Resource methods', function() {
         }
     });
 
-    it('#getResources should result in position and list', async () => {
+    it('#listResources should result in position and list', async () => {
         let result = null;
         try {
-            result = await connector.getResources(restApiId, null, 2);
+            result = await connector.listResources(restApiId, null, 2);
         } catch (e) {
             result = e;
         }
@@ -78,10 +78,10 @@ describe('AWS Api Gateway Connector - Resource methods', function() {
     });
 
 
-    it('#getResources should result in position and list 2', async () => {
+    it('#listResources should result in position and list 2', async () => {
         let result = null;
         try {
-            result = await connector.getResources(restApiId, null, 1);
+            result = await connector.listResources(restApiId, null, 1);
         } catch (e) {
             result = e;
         }
