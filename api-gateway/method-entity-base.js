@@ -49,8 +49,21 @@ class ApiGwMethodEntityAbstract extends Entity {
     async addResponse(statusCode, params) {
         const result = await this._informCall(
             this.connector['create' + this.entityName + 'Response'],
-            'Set response: ' + params.statusCode,
+            'Set response: ' + statusCode,
             this.id.restApiId, this.id.resourceId, this.id.httpMethod, statusCode, params
+        );
+        result.restApiId = this.id.restApiId;
+        result.resourceId = this.id.resourceId;
+        result.httpMethod = this.id.httpMethod;
+        // result.statusCode = statusCode;
+        return new this.responseEntityConstructor(result, this.connector, this.informer);
+    }
+
+    async getResponse(statusCode) {
+        const result = await this._informCall(
+            this.connector['get' + this.entityName + 'Response'],
+            'Get response: ' + statusCode,
+            this.id.restApiId, this.id.resourceId, this.id.httpMethod, statusCode
         );
         result.restApiId = this.id.restApiId;
         result.resourceId = this.id.resourceId;

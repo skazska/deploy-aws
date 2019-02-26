@@ -5,7 +5,7 @@ const AWSGlobal = require('aws-sdk/global');
 const ConnectorRestApi = require('../connector');
 
 describe('AWS Api Gateway Connector - Resource methods', function() {
-    this.timeout(6000);
+    this.timeout(12000);
     AWSGlobal.config.loadFromPath('./.aws-cfg.json');
     const connector = new ConnectorRestApi();
     let restApiId = null;

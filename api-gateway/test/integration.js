@@ -78,7 +78,6 @@ describe('API Integration Controller', () => {
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
-                "authorizationType": "NONE",
                 "restApiId": "restApi",
                 "resourceId": "resourceId",
                 "httpMethod": "httpMethod"
@@ -167,7 +166,7 @@ describe('API Integration Controller', () => {
                 throw e;
             }
 
-            expect(result.properties).to.be.eql({
+            expect(responseEntity.properties).to.be.eql({
                 "httpMethod": "httpMethod",
                 "prop": "response",
                 "resourceId": "2",
@@ -187,6 +186,33 @@ describe('API Integration Controller', () => {
             expect(informer).to.be.called;
         });
 
+        it('#getResponse() should return promise, invoke getIntegrationResponse, addInformer which fires change and complete', async () => {
+            sinon.replace(entity.connector.api, 'getIntegrationResponse', apiCall);
+            try {
+                responseEntity = await entity.getResponse('200');
+            } catch (e) {
+                throw e;
+            }
+
+            expect(responseEntity.properties).to.be.eql({
+                "httpMethod": "httpMethod",
+                "prop": "response",
+                "resourceId": "2",
+                "restApiId": "1"
+            });
+
+            expect(apiCall).to.be.calledOnce;
+            expect(apiCall.args[0][0]).to.be.eql({
+                "restApiId": "1",
+                "resourceId": "2",
+                "httpMethod": "httpMethod",
+                "statusCode": "200"
+            });
+
+            expect(group.informers.length).to.equal(1);
+            informer = await informer;
+            expect(informer).to.be.called;
+        });
 
         it('#delete() should return promise invoke rest-api(deleteRestApi), addInformer which fires change and complete', async () => {
             sinon.replace(entity.connector.api, 'deleteIntegration', apiCall);

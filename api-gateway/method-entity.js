@@ -36,6 +36,24 @@ class ApiGwMethodEntity extends ApiGwMethodEntityAbstract {
     }
 
     /**
+     * gets integration
+     * @param integrationOptions
+     * @return {Promise<*|void>}
+     */
+    async getIntegration() {
+        //add new
+        const result = await this._informCall(
+            this.connector.getIntegration,
+            'Set integration',
+            this.id.restApiId, this.id.resourceId, this.id.httpMethod
+        );
+        result.restApiId = this.id.restApiId;
+        result.resourceId = this.id.resourceId;
+        result.httpMethod = this.id.httpMethod;
+        return new ApiGwIntegrationEntity(result, this.connector, this.informer);
+    }
+
+    /**
      * tests method invocation
      * @param params
      * @return {Promise<*|void>}

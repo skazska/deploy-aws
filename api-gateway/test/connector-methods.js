@@ -88,6 +88,21 @@ describe('AWS Api Gateway Connector - Methods methods', () => {
         });
     });
 
+    describe('#getMethodResponse', () => {
+        beforeEach(() => {
+            sinon.replace(connector.api, 'getMethodResponse', sinon.fake(() => { return awsResponse('response'); }));
+        });
+        afterEach(() => {
+            sinon.restore();
+        });
+        it('#getMethodResponse should result in some data', async () => {
+            const result  = await connector.getMethodResponse('restApi', 123, 'ANY', '200');
+            const apiCall = connector.api.getMethodResponse;
+            expect(apiCall).to.be.calledOnceWith({restApiId: 'restApi', resourceId: 123, httpMethod: 'ANY', statusCode: '200'});
+            expect(result).to.be.equal('response');
+        });
+    });
+
     describe('#deleteMethodResponse', () => {
         beforeEach(() => {
             sinon.replace(connector.api, 'deleteMethodResponse', sinon.fake(() => { return awsResponse('response'); }));

@@ -116,6 +116,7 @@ describe('API Method Controller', () => {
         let group;
         let informer;
         let entity;
+        let responseEntity;
 
         beforeEach(() => {
             infoCall = sinon.fake();
@@ -189,6 +190,90 @@ describe('API Method Controller', () => {
             expect(informer).to.be.called;
         });
 
+        it('#getIntegration() should return promise, invoke getintegration, addInformer which fires change and complete', async () => {
+            sinon.replace(entity.connector.api, 'getIntegration', apiCall);
+            let result;
+            try {
+                result = await entity.getIntegration();
+            } catch (e) {
+                throw e;
+            }
+
+            expect(result.properties).to.be.eql({
+                "httpMethod": "httpMethod",
+                "prop": "response",
+                "resourceId": "2",
+                "restApiId": "1"
+            });
+
+            expect(apiCall).to.be.calledOnce;
+            expect(apiCall.args[0][0]).to.be.eql({
+                "restApiId": "1",
+                "resourceId": "2",
+                "httpMethod": "httpMethod",
+            });
+
+            expect(group.informers.length).to.equal(1);
+            informer = await informer;
+            expect(informer).to.be.called;
+
+        });
+
+        it('#addResponse(options) should return promise, invoke putMethodResponse, addInformer which fires change and complete', async () => {
+            sinon.replace(entity.connector.api, 'putMethodResponse', apiCall);
+            try {
+                responseEntity = await entity.addResponse('200', {});
+            } catch (e) {
+                throw e;
+            }
+
+            expect(responseEntity.properties).to.be.eql({
+                "httpMethod": "httpMethod",
+                "prop": "response",
+                "resourceId": "2",
+                "restApiId": "1"
+            });
+
+            expect(apiCall).to.be.calledOnce;
+            expect(apiCall.args[0][0]).to.be.eql({
+                "restApiId": "1",
+                "resourceId": "2",
+                "httpMethod": "httpMethod",
+                "statusCode": "200"
+            });
+
+            expect(group.informers.length).to.equal(1);
+            informer = await informer;
+            expect(informer).to.be.called;
+        });
+
+        it('#getResponse() should return promise, invoke getMethodResponse, addInformer which fires change and complete', async () => {
+            sinon.replace(entity.connector.api, 'getMethodResponse', apiCall);
+            try {
+                responseEntity = await entity.getResponse('200');
+            } catch (e) {
+                throw e;
+            }
+
+            expect(responseEntity.properties).to.be.eql({
+                "httpMethod": "httpMethod",
+                "prop": "response",
+                "resourceId": "2",
+                "restApiId": "1"
+            });
+
+            expect(apiCall).to.be.calledOnce;
+            expect(apiCall.args[0][0]).to.be.eql({
+                "restApiId": "1",
+                "resourceId": "2",
+                "httpMethod": "httpMethod",
+                "statusCode": "200"
+            });
+
+            expect(group.informers.length).to.equal(1);
+            informer = await informer;
+            expect(informer).to.be.called;
+        });
 
         it('#delete() should return promise invoke rest-api(deleteRestApi), addInformer which fires change and complete', async () => {
             sinon.replace(entity.connector.api, 'deleteMethod', apiCall);

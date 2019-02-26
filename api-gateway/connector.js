@@ -272,6 +272,15 @@ class ApiGatewayConnector extends CommonAwsConnector {
         return this.api.deleteMethodResponse(params).promise();
     }
 
+    getMethodResponse (restApiId, resourceId, httpMethod, statusCode) {
+        const params = {
+            resourceId: resourceId, /* required */
+            restApiId: restApiId, /* required */
+            httpMethod: httpMethod,  /* required */
+            statusCode: statusCode  /* required */
+        };
+        return this.api.getMethodResponse(params).promise();
+    }
 
     testMethod  (restApiId, resourceId, httpMethod, properties) {
         const defaults = {
@@ -323,7 +332,6 @@ class ApiGatewayConnector extends CommonAwsConnector {
 
     createIntegration (restApiId, resourceId, httpMethod, properties) {
         const defaults = {
-            type: 'AWS_PROXY', //HTTP | AWS | MOCK | HTTP_PROXY | AWS_PROXY, /* required */
             // cacheKeyParameters: [
             //     'STRING_VALUE',
             //     /* more items */
@@ -355,6 +363,16 @@ class ApiGatewayConnector extends CommonAwsConnector {
                 httpMethod: httpMethod
             })
         ).promise();
+    }
+
+    getIntegrationResponse (restApiId, resourceId, httpMethod, statusCode) {
+        const params = {
+            resourceId: resourceId, /* required */
+            restApiId: restApiId, /* required */
+            httpMethod: httpMethod,  /* required */
+            statusCode: statusCode  /* required */
+        };
+        return this.api.getIntegrationResponse(params).promise();
     }
 
     deleteIntegration (restApiId, resourceId, httpMethod) {
