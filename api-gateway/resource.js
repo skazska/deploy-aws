@@ -78,6 +78,23 @@ class ApiGwResourceEntity extends Entity {
     }
 
     /**
+     * TODO add tests
+     * @param pathPart
+     * @return {Promise<void>}
+     */
+    async readResource(pathPart) {
+        //get root resource id
+        const root = await this.resourceApi.find(this.id, '/', null, 5);
+        //add new
+        const result = await this._informCall(
+            this.resourceApi.create.bind(this.resourceApi),
+            'add resource ' + pathPart,
+            {restApiId: this.id, parentId: root.id, pathPart: pathPart}
+        );
+        return result;
+    }
+
+    /**
      * adds method to resource
      * @param {string} httpMethod
      * @param {Object} [properties]
@@ -151,7 +168,7 @@ class ApiGwResource extends Api {
         return this._informCall(
             this.connector.listResources,
             'Get resources for ' + options.restApiId + ' (' + options.position + ', ' + options.limit + ')',
-            options.restApiId, options.position, options.limit
+            options.restApiId, options.position, options.limit, options
         );
     }
 

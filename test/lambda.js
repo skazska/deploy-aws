@@ -7,7 +7,6 @@ const expect = chai.expect;
 
 const Inform = require('@skazska/inform');
 const Lambda = require('../lambda');
-const LambdaFunction = Lambda.Controller;
 const Connector = require('../lambda/connector');
 
 const groupOptions = {

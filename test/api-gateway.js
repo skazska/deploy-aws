@@ -9,6 +9,26 @@ const ApiGw = require('../api-gateway');
 const RestApi = require('../api-gateway/rest-api');
 const Connector = require('../api-gateway/connector');
 
+const Inform = require('@skazska/inform');
+const groupOptions = {
+    failText: 'damn',
+    pendingText: 'waiting',
+    inProcessText: 'doing',
+    doneText: 'did',
+    text: 'it'
+};
+function createInformer(renderer) {
+    return new Inform(renderer, 'Deploy service').addGroup(null, groupOptions);
+}
+const awsResponse = (response) => {
+    return {
+        promise: () => {
+            return new Promise(resolve => setImmediate(resolve, response))
+        }
+    };
+};
+
+
 describe('ApiGatewayController', () => {
     describe('#create', () => {
         it('should instantiate Connector ', () => {
@@ -23,10 +43,9 @@ describe('ApiGatewayController', () => {
     });
     describe('#deploy', () => {
         const preparePackageStub = sinon.stub();
-        const opts = {wd: 'wd', codeEntries: ['1'], packager: preparePackageStub};
-
+        
         let infoCall;
-        let restApi;
+        let apiGw;
 
 
         let listStub;
@@ -41,13 +60,19 @@ describe('ApiGatewayController', () => {
         let updateResourceStub;
         let deleteResourceStub;
 
-        let listIntegrationsStub;
+        let createMethodStub;
+        let readMethodStub;
+        let updateMethodStub;
+        let deleteMethodStub;
+
         let createIntegrationStub;
         let readIntegrationStub;
         let updateIntegrationStub;
         let deleteIntegrationStub;
 
         let props;
+        let opts;
+
         let group;
         let informer;
         before(() => {
@@ -60,34 +85,75 @@ describe('ApiGatewayController', () => {
                     resolve(handler);
                 });
             });
-            restApi = new RestApi();
+            apiGw = new ApiGw();
 
-            listStub = sinon.stub(restApi.connector.api, 'getRestApis');
-            createStub = sinon.stub(restApi.connector.api, 'createRestApi');
-            readStub = sinon.stub(restApi.connector.api, 'getRestApi');
-            updateStub = sinon.stub(restApi.connector.api, 'updateRestApi');
-            deleteStub = sinon.stub(restApi.connector.api, 'deleteRestApi');
+            listStub = sinon.stub(apiGw.connector.api, 'getRestApis');
+            createStub = sinon.stub(apiGw.connector.api, 'createRestApi');
+            readStub = sinon.stub(apiGw.connector.api, 'getRestApi');
+            updateStub = sinon.stub(apiGw.connector.api, 'updateRestApi');
+            deleteStub = sinon.stub(apiGw.connector.api, 'deleteRestApi');
 
-            listResourcesStub = sinon.stub(restApi.connector.api, 'getResources');
-            readResourceStub = sinon.stub(restApi.connector.api, 'getResource');
-            createResourceStub = sinon.stub(restApi.connector.api, 'createResource');
-            deleteResourceStub = sinon.stub(restApi.connector.api, 'deleteResource');
+            listResourcesStub = sinon.stub(apiGw.connector.api, 'getResources');
+            readResourceStub = sinon.stub(apiGw.connector.api, 'getResource');
+            createResourceStub = sinon.stub(apiGw.connector.api, 'createResource');
+            deleteResourceStub = sinon.stub(apiGw.connector.api, 'deleteResource');
 
-            listIntegrationsStub = sinon.stub(restApi.connector.api, 'getIntegrations');
-            readIntegrationStub = sinon.stub(restApi.connector.api, 'getIntegration');
-            createIntegrationStub = sinon.stub(restApi.connector.api, 'createIntegration');
-            deleteIntegrationStub = sinon.stub(restApi.connector.api, 'deleteIntegration');
+            readMethodStub = sinon.stub(apiGw.connector.api, 'getMethod');
+            createMethodStub = sinon.stub(apiGw.connector.api, 'putMethod');
+            deleteMethodStub = sinon.stub(apiGw.connector.api, 'deleteMethod');
+
+            readIntegrationStub = sinon.stub(apiGw.connector.api, 'getIntegration');
+            createIntegrationStub = sinon.stub(apiGw.connector.api, 'putIntegration');
+            deleteIntegrationStub = sinon.stub(apiGw.connector.api, 'deleteIntegration');
 
             props = new Promise(resolve => {
                 setImmediate(
                     resolve,
-                    {Role: 'role', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcCs='}
+                    {description: 'STRING_VALUE'}
                 )
             });
+            opts = {
+                resources: new Promise(resolve => {
+                    setImmediate(
+                        resolve,
+                        {
+                            "clients": {
+                                "ANY": {
+                                    "type": "AWS_PROXY",
+                                    "awsProperties": {
+                                        "description": "STRING_VALUE"
+                                    },
+                                    "integration": {
+                                        "lambda": "FunctionArn",
+                                        "awsProperties": {
+                                            "description": "STRING_VALUE"
+                                        }
+                                    }
+                                },
+                                "resources" : {
+                                    ":id": {
+
+                                    }
+                                }
+                            }
+                        }
+                    )
+                })
+            };
 
         });
-        it('should', () => {
+        it('should call RestApi method create if list result did not contain item with restApi name', async () => {
+            listStub.returns(awsResponse({items: [
+                {id: 'id', name: 'name1'},
+                {id: 'id', name: 'name1'}
+            ]}));
+            createStub.returns(awsResponse({id: 'id', name: 'name', description: 'STRING_VALUE'}));
 
-        })
+            const entity = await apiGw.deploy('name', props, opts, group);
+            expect(entity.properties).to.eql({id: 'id', name: 'name', description: 'STRING_VALUE'});
+            expect(createStub.args[0][0]).to.deep.include({
+                id: 'id', name: 'name', description: 'STRING_VALUE'
+            });
+        });
     });
 });

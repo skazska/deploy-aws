@@ -93,19 +93,20 @@ class ApiGatewayConnector extends CommonAwsConnector {
      * RESOURCES
      **************************************************************/
 
-    listResources (restApiId, position, limit) {
-        var params = {
-            restApiId: restApiId, /* required */
+    listResources (restApiId, position, limit, params) {
+        var params = Object.assign({
+            //restApiId: restApiId, /* required */
             limit: limit || 25
             // position: position
             // embed: [
             //     'STRING_VALUE',
             //     /* more items */
             // ]
-        };
+        }, params || {});
         if (typeof position !== 'undefined' && position !== null) {
             params.position = position;
         }
+        params.restApiId = restApiId;
         return this.api.getResources(params).promise();
     }
 

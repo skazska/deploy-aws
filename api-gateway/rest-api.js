@@ -51,8 +51,36 @@ class RestApiEntity extends Entity {
         return result;
     }
 
-    async readResources() {
+    /**
+     * TODO add tests
+     * @param pathPart
+     * @return {Promise<void>}
+     */
+    async readResource(pathPart) {
+        //get root resource id
+        const root = await this.resourceApi.find(this.id, '/', null, 5);
+        //add new
+        const result = await this._informCall(
+            this.resourceApi.create.bind(this.resourceApi),
+            'add resource ' + pathPart,
+            {restApiId: this.id, parentId: root.id, pathPart: pathPart}
+        );
+        return result;
+    }
 
+    /**
+     * TODO add tests
+     * @param params
+     * @return {Promise<void>}
+     */
+    async listResources(params) {
+        //add new
+        const result = await this._informCall(
+            this.resourceApi.list.bind(this.resourceApi),
+            'list resources',
+            Object.assign({restApiId: this.id}, params || {})
+        );
+        return result;
     }
 }
 

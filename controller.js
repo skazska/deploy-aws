@@ -47,7 +47,6 @@ class Controller {
 
         return this.roleController.deploy(
             params.key,
-            // params.awsProperties.RoleName,
             params.awsProperties,
             {inlinePolicy: params.inlinePolicy, policies: policies},
             informGroup
@@ -58,7 +57,6 @@ class Controller {
         const properties = resolvePropertiesPromise(params.awsProperties, deployment);
         return this.lambdaController.deploy(
             params.key,
-            // params.awsProperties.FunctionName,
             properties,
             {wd: options.wd, codeEntries: params.codeEntries},
             informGroup
@@ -66,12 +64,12 @@ class Controller {
     }
 
     deployRestApi (params, options, deployment, informGroup) {
-        // const properties = resolvePropertiesPromise(params.awsProperties, deployment);
+        const properties = resolvePropertiesPromise(params.awsProperties, deployment);
+        const resources = resolvePropertiesPromise(params.resources, deployment);
         return this.restApiController.deploy(
             params.key,
-            // params.awsProperties.FunctionName,
-            params.awsProperties,//properties
-            {resources: params.resources},
+            properties,
+            {resources: resources},
             informGroup
         );
     }

@@ -23,9 +23,9 @@ class LambdaController {
         // this.function = new Function(this.connector, informer);
     }
 
-    static get Controller() {
-        return LambdaFunction;
-    }
+    // static get Controller() {
+    //     return LambdaFunction;
+    // }
 
     /**
      * @typedef {Object} LambdaFunction~DeployOptions
@@ -40,7 +40,7 @@ class LambdaController {
      * @param {string} name function name
      * @param {Promise<Lambda.Types.CreateFunctionRequest>} properties of lambda function
      * @param {LambdaFunction~DeployOptions} options,
-     * @param {InformGroup} [informGroup]
+     * @param {Group} [informGroup]
      * @return {Promise<PromiseResult<Lambda.FunctionConfiguration, AWSError>|*>}
      */
     async deploy (name, properties, options, informGroup) {
