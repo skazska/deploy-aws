@@ -29,7 +29,7 @@ function createInformer(renderer) {
     return new Inform(renderer, 'Deploy service').addGroup(null, groupOptions);
 }
 
-describe('API Controller', () => {
+describe('REST API Controller', () => {
     const connector = new RestApiConnector({default: 'value'});
 
     describe('instance#constructor', () => {
@@ -169,27 +169,29 @@ describe('API Controller', () => {
             // expect(informer).to.be.called;
         });
 
-        it('#addResource(pathPart) should return promise, invoke resource(updateRestApi), addInformer which fires change and complete', async () => {
-            sinon.replace(entity.resourceApi.connector.api, 'createResource', apiCall);
+        it('#readRoot() should return promise, invoke resource(getResource), addInformer which fires change and complete', async () => {
+            // sinon.replace(entity.resourceApi.connector.api, 'getResource', apiCall);
             const listApiCall = sinon.fake(() => { return awsResponse({items: [{path: 'first'}, {path: 'second'}, {path: '/', id: 'parentId'}]}); });
             sinon.replace(entity.resourceApi.connector.api, 'getResources', listApiCall);
             let result;
             try {
-                result = await entity.addResource('res');
+                result = await entity.readRoot();
             } catch (e) {
                 throw e;
             }
 
-            expect(result.properties).to.be.equal('response');
+            expect(result.properties).to.eql({path: '/', id: 'parentId'});
 
-            expect(apiCall).to.be.calledOnce;
-            expect(apiCall.args[0][0]).to.be.eql({
-                "restApiId": "1",
-                "parentId": "parentId",
-                "pathPart": "res"
-            });
+            // FIXME ResourceApi find does not log
+            // expect(apiCall).to.be.calledOnce;
+            // expect(apiCall.args[0][0]).to.be.eql({
+            //     "restApiId": "1",
+            //     "parentId": "parentId",
+            //     "pathPart": "res"
+            // });
+            // expect(group.informers.length).to.equal(3); ?2
 
-            expect(group.informers.length).to.equal(3);
+            expect(group.informers.length).to.equal(1);
             informer = await informer;
             expect(informer).to.be.called;
         });

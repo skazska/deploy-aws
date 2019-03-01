@@ -273,7 +273,7 @@ describe('API Resource Controller', () => {
             // sinon.replace(resource, 'list', apiCall);
 
             const result = await resource.find('restApiId', 'second');
-            expect(result).to.be.eql({path: 'second'});
+            expect(result.properties).to.be.eql({path: 'second'});
         });
         it('should call list with next position until path found', async () => {
             apiCall = sinon.stub();
@@ -282,7 +282,7 @@ describe('API Resource Controller', () => {
             sinon.replace(connector.api, 'getResources', apiCall);
 
             const result = await resource.find('restApiId', 'third', 0, 2);
-            expect(result).to.be.eql({path: 'third'});
+            expect(result.properties).to.be.eql({path: 'third'});
             expect(apiCall.args[0][0]).to.eql({restApiId: 'restApiId', limit: 2});
             expect(apiCall.args[1][0]).to.eql({restApiId: 'restApiId', limit: 2, position: '1'});
         });

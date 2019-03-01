@@ -132,7 +132,7 @@ describe('deploy-aws Controller', () => {
         it('should invoke deploy method of "api-gateway/controller" instance (restApiController property)', async () => {
             sinon.replace(controller.restApiController, 'deploy', sinon.fake());
             await controller.deployRestApi(
-                {key: 'key', resources: {}, awsProperties: {prop: 'awsProps'}},
+                {key: 'key', resources: {res: {}}, awsProperties: {prop: 'awsProps'}},
                 null,
                 null,
                 'informGroup'
@@ -141,8 +141,10 @@ describe('deploy-aws Controller', () => {
             expect(deploy).to.be.calledOnce;
             expect(deploy).to.be.calledOn(controller.restApiController);
             expect(deploy.args[0][0]).to.be.equal('key');
-            expect(deploy.args[0][1]).to.be.eql({prop: 'awsProps'});
-            expect(deploy.args[0][2]).to.be.eql({resources: {}});
+            const props = await deploy.args[0][1];
+            expect(props).to.eql({prop: 'awsProps'});
+            const res = await deploy.args[0][2]['resources'];
+            expect(res).to.eql({res: {}});
             expect(deploy.args[0][3]).to.be.equal('informGroup');
         });
     });

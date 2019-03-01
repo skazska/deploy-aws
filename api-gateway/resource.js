@@ -83,13 +83,11 @@ class ApiGwResourceEntity extends Entity {
      * @return {Promise<void>}
      */
     async readResource(pathPart) {
-        //get root resource id
-        const root = await this.resourceApi.find(this.id, '/', null, 5);
         //add new
         const result = await this._informCall(
-            this.resourceApi.create.bind(this.resourceApi),
-            'add resource ' + pathPart,
-            {restApiId: this.id, parentId: root.id, pathPart: pathPart}
+            this.resourceApi.read.bind(this.resourceApi),
+            'read resource ' + pathPart,
+            {restApiId: this.id.restApiId, parentId: this.id.id, pathPart: pathPart}
         );
         return result;
     }
@@ -187,8 +185,8 @@ class ApiGwResource extends Api {
         if (position) options.position = position;
         let result = await this.list(options);
         let resource = result.items.find(resource => resource.path === path ? resource : undefined);
-        if (!result.position) return resource;
-        return resource || this.find(restApiId, path, result.position, options.limit);
+        if (!result.position) return this._createEntity(resource);
+        return this._createEntity(resource) || this.find(restApiId, path, result.position, options.limit);
     }
 
 }

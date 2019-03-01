@@ -18,7 +18,7 @@ class ApiBase {
      * @param {Function} fn
      * @param {String} text
      * @param {*} args
-     * @return {Promise}
+     * @return {Promise<*>}
      * @private
      */
     _informCall (fn, text, ...args) {

@@ -27,7 +27,7 @@ class CommonApi extends ApiBase {
      * @private
      */
     _createEntity (EntityClass, properties, options) {
-        return new EntityClass(properties, this.connector, this.informer, options);
+        return properties ? new EntityClass(properties, this.connector, this.informer, options) : properties;
     }
 
     /**

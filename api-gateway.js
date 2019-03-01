@@ -37,8 +37,8 @@ class ApiGateway {
             const rest = await restApi.findOrCreate(name, params);
 
             const currentResources = rest.listResources({limit: options.resourceListLimit || RESOURCE_LIST_LIMIT});
-
-            await this.deployResources(rest, resources[resouceName], currentResources);
+            const root = await rest.readRoot();
+            await this.deployResources(root, resources, currentResources.items);
 
             return rest;
         } catch (e) {
@@ -46,36 +46,41 @@ class ApiGateway {
         }
     }
 
-    async deployResource(entity, name, properties) {
+    async deployResource(entity, resource, currentResources) {
         let res = null;
 
         try {
-            res = await entity.addResource(name);
+            res = await entity.addResource(resource.pathPart);
 
+            if (resource.resources) {
+                await this.deployResources(entity, resource.resources, currentResources);
+            }
+
+            return res;
         } catch (e) {
             throw e;
         }
-
-        // Promise.all(Object.keys(options.resources).map(resouceName => {
-        //
-        // }));
-
-        return res;
     }
-    async deployResources(rest, resources, currentResources) {
 
-        let transition = new Transition((left, right) => left === right.PolicyName)
-            .setRemover(name => this.deletePolicy({RoleName: roleName, PolicyName: name}))
-            .setAdjustor((name, policy) => this.putPolicy(Object.assign({RoleName: roleName}, policy)))
-            .setCreator(policy => this.putPolicy(Object.assign({RoleName: roleName}, policy)))
-            .perform(policies.PolicyNames, inlines);
+    /**
+     *
+     * @param {ApiGwResourceEntity} root
+     * @param {[]} resources
+     * @param currentResources
+     * @return {Promise<[*]>}
+     */
+    deployResources(root, resources, currentResources) {
+        const newRes = Object.keys(resources).map(key => {
+            resources[key].pathPart = key; return resources[key];
+        });
+        const oldRes = currentResources.filter(res => res.parentId === root.id.id);
 
+        const transition = new Transition((oldItem, newItem) => oldItem.pathPart === newItem.pathPart)
+            .setRemover(oldItem => root.removeResource(oldItem.pathPart))
+            .setCreator(newItem => this.deployResource(root, newItem, currentResources))
+            .perform(oldRes, newRes);
 
-
-        await Promise.all(Object.keys(resources).map(resouceName => {
-            return this.deployResource(rest, resouceName, resources[resouceName], currentResources);
-        }));
-
+        return Promise.all(Object.values(transition).map(set => Promise.all(set)));
     }
 }
 
