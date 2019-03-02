@@ -42,7 +42,7 @@ describe('AWS Lambda Connector', () => {
             expect(result).to.be.equal('response');
         });
     });
-    describe('#getFunctionConfiguration', () => {
+    describe('#readFunctionConfiguration', () => {
         beforeEach(() => {
             sinon.replace(connector.api, 'getFunctionConfiguration', sinon.fake(() => { return awsResponse('response'); }));
         });
@@ -50,13 +50,13 @@ describe('AWS Lambda Connector', () => {
             sinon.restore();
         });
         it('should call AWS SDK method getFunctionConfiguration with name input params packed to properties', async () => {
-            const result = await connector.getFunctionConfiguration('myFunc');
+            const result = await connector.readFunctionConfiguration('myFunc');
             const apiCall = connector.api.getFunctionConfiguration;
             expect(apiCall).to.be.calledOnceWith({FunctionName: 'myFunc'});
             expect(result).to.be.equal('response');
         });
         it('should call AWS SDK method getFunctionConfiguration with name, qualifier input params packed to properties', async () => {
-            const result = await connector.getFunctionConfiguration('myFunc', 'v1');
+            const result = await connector.readFunctionConfiguration('myFunc', 'v1');
             const apiCall = connector.api.getFunctionConfiguration;
             expect(apiCall).to.be.calledOnceWith({FunctionName: 'myFunc', Qualifier: 'v1'});
             expect(result).to.be.equal('response');

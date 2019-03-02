@@ -113,7 +113,7 @@ class LambdaConnector extends CommonAwsConnector {
      * @param name
      * @param qualifier
      */
-    getFunction (name, qualifier) {
+    readFunction (name, qualifier) {
         const params = {
             FunctionName: name
         };
@@ -132,7 +132,7 @@ class LambdaConnector extends CommonAwsConnector {
      * @param {string} [qualifier]
      * @return {Promise<PromiseResult<Lambda.FunctionConfiguration, AWSError> | never>}
      */
-    getFunctionConfiguration (name, qualifier) {
+    readFunctionConfiguration (name, qualifier) {
         const params = {
             FunctionName: name
         };

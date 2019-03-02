@@ -69,10 +69,10 @@ describe('AWS Lambda Connector ', () => {
         expect(result).to.have.property('MemorySize').that.is.equal(connector.defaults.MemorySize);
     });
 
-    it('#getFunctionConfiguration should result in function aws-deploy-test-api config data', async () => {
+    it('#readFunctionConfiguration should result in function aws-deploy-test-api config data', async () => {
         let result = null;
         try {
-            result = await connector.getFunctionConfiguration(FUNC_NAME);
+            result = await connector.readFunctionConfiguration(FUNC_NAME);
         } catch (e) {
             result = e;
         }

@@ -180,7 +180,7 @@ class LambdaFunction extends Api {
      */
     async read (name, version) {
         try {
-            const result = await this._informCall(this.connector.getFunctionConfiguration, 'Get config for function ' + name,
+            const result = await this._informCall(this.connector.readFunctionConfiguration, 'Get config for function ' + name,
                 name, version);
             return result ? this._createEntity(result) : null;
         } catch (e) {
