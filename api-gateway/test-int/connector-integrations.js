@@ -98,10 +98,10 @@ describe('AWS Api Gateway Connector - Integration methods', function () {
         expect(result).to.have.nested.property('$response.requestId').that.is.a('string');
     });
 
-    it('#getIntegrationResponse should result in some data', async () => {
+    it('#readIntegrationResponse should result in some data', async () => {
         let result = 'initial';
         try {
-            result = await connector.getIntegrationResponse(restApiId, resourceId, 'ANY', '200', {});
+            result = await connector.readIntegrationResponse(restApiId, resourceId, 'ANY', '200', {});
         } catch (e) {
             result = e;
         }

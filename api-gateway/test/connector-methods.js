@@ -88,15 +88,15 @@ describe('AWS Api Gateway Connector - Methods methods', () => {
         });
     });
 
-    describe('#getMethodResponse', () => {
+    describe('#readMethodResponse', () => {
         beforeEach(() => {
             sinon.replace(connector.api, 'getMethodResponse', sinon.fake(() => { return awsResponse('response'); }));
         });
         afterEach(() => {
             sinon.restore();
         });
-        it('#getMethodResponse should result in some data', async () => {
-            const result  = await connector.getMethodResponse('restApi', 123, 'ANY', '200');
+        it('#readMethodResponse should result in some data', async () => {
+            const result  = await connector.readMethodResponse('restApi', 123, 'ANY', '200');
             const apiCall = connector.api.getMethodResponse;
             expect(apiCall).to.be.calledOnceWith({restApiId: 'restApi', resourceId: 123, httpMethod: 'ANY', statusCode: '200'});
             expect(result).to.be.equal('response');

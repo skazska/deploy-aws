@@ -70,10 +70,10 @@ describe('AWS Api Gateway Connector - Method methods', function() {
         expect(result).to.have.nested.property('$response.requestId').that.is.a('string');
     });
 
-    it('#getMethodResponse should result in some data', async () => {
+    it('#readMethodResponse should result in some data', async () => {
         let result = 'initial';
         try {
-            result = await connector.getMethodResponse(restApiId, resourceId, 'ANY', '200');
+            result = await connector.readMethodResponse(restApiId, resourceId, 'ANY', '200');
         } catch (e) {
             result = e;
         }

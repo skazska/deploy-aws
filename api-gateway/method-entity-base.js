@@ -61,7 +61,7 @@ class ApiGwMethodEntityAbstract extends Entity {
 
     async getResponse(statusCode) {
         const result = await this._informCall(
-            this.connector['get' + this.entityName + 'Response'],
+            this.connector['read' + this.entityName + 'Response'],
             'Get response: ' + statusCode,
             this.id.restApiId, this.id.resourceId, this.id.httpMethod, statusCode
         );

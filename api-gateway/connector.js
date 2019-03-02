@@ -273,7 +273,7 @@ class ApiGatewayConnector extends CommonAwsConnector {
         return this.api.deleteMethodResponse(params).promise();
     }
 
-    getMethodResponse (restApiId, resourceId, httpMethod, statusCode) {
+    readMethodResponse (restApiId, resourceId, httpMethod, statusCode) {
         const params = {
             resourceId: resourceId, /* required */
             restApiId: restApiId, /* required */
@@ -366,7 +366,7 @@ class ApiGatewayConnector extends CommonAwsConnector {
         ).promise();
     }
 
-    getIntegrationResponse (restApiId, resourceId, httpMethod, statusCode) {
+    readIntegrationResponse (restApiId, resourceId, httpMethod, statusCode) {
         const params = {
             resourceId: resourceId, /* required */
             restApiId: restApiId, /* required */
