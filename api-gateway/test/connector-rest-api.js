@@ -64,7 +64,7 @@ describe('AWS Api Gateway Connector - RestApi methods', () => {
             expect(result).to.be.equal('response');
         });
     });
-    describe('#getRestApi', () => {
+    describe('#readRestApi', () => {
         beforeEach(() => {
             sinon.replace(connector.api, 'getRestApi', sinon.fake(() => { return awsResponse('response'); }));
         });
@@ -72,7 +72,7 @@ describe('AWS Api Gateway Connector - RestApi methods', () => {
             sinon.restore();
         });
         it('should call AWS SDK AG method getRestApi transforming input params to properties', async () => {
-            const result = await connector.getRestApi(123);
+            const result = await connector.readRestApi(123);
             const apiCall = connector.api.getRestApi;
             expect(apiCall).to.be.calledOnceWith({restApiId: 123});
             expect(result).to.be.equal('response');

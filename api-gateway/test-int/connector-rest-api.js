@@ -59,10 +59,10 @@ describe('AWS Api Gateway Connector - RestApi methods', () => {
         expect(result).to.have.property('items').that.is.an('array').that.have.lengthOf(1);
     });
 
-    it('#getRestApi should should result in rest-api data with name aws-deploy-test-api', async () => {
+    it('#readRestApi should should result in rest-api data with name aws-deploy-test-api', async () => {
         let result = null;
         try {
-            result = await connector.getRestApi(restApiId);
+            result = await connector.readRestApi(restApiId);
         } catch (e) {
             result = e;
         }

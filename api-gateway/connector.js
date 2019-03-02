@@ -24,7 +24,7 @@ class ApiGatewayConnector extends CommonAwsConnector {
         return this.api.getRestApis(params).promise();
     }
 
-    getRestApi (id) {
+    readRestApi (id) {
         const params = {
             restApiId: id
         };

@@ -113,7 +113,7 @@ class RestApi extends Api {
      */
     async read (id) {
         try {
-            const resp = await this._informCall(this.connector.getRestApi, 'Get rest-api ' + id, id);
+            const resp = await this._informCall(this.connector.readRestApi, 'Get rest-api ' + id, id);
             return this._createEntity(resp);
         } catch (e) {
             if (e.code === 'ResourceNotFoundException') {

@@ -20,12 +20,8 @@ const groupOptions = {
 function createInformer(renderer) {
     return new Inform(renderer, 'Deploy service').addGroup(null, groupOptions);
 }
-const awsResponse = (response) => {
-    return {
-        promise: () => {
-            return new Promise(resolve => setImmediate(resolve, response))
-        }
-    };
+const connectorResponse = (response) => {
+    return new Promise(resolve => setImmediate(resolve, response));
 };
 
 
@@ -88,25 +84,25 @@ describe('ApiGatewayController', () => {
             });
             apiGw = new ApiGw();
 
-            listStub = sinon.stub(apiGw.connector.api, 'getRestApis');
-            createStub = sinon.stub(apiGw.connector.api, 'createRestApi');
-            readStub = sinon.stub(apiGw.connector.api, 'getRestApi');
-            updateStub = sinon.stub(apiGw.connector.api, 'updateRestApi');
-            deleteStub = sinon.stub(apiGw.connector.api, 'deleteRestApi');
+            listStub = sinon.stub(apiGw.connector, 'listRestApis');
+            createStub = sinon.stub(apiGw.connector, 'createRestApi');
+            readStub = sinon.stub(apiGw.connector, 'readRestApi');
+            updateStub = sinon.stub(apiGw.connector, 'updateRestApi');
+            deleteStub = sinon.stub(apiGw.connector, 'deleteRestApi');
 
             //FIXME опять не катит, надо у ResourceEntity перехватывать create и прописывать туда коннектор с фейками...
-            listResourcesStub = sinon.stub(apiGw.connector.api, 'getResources');
-            readResourceStub = sinon.stub(apiGw.connector.api, 'getResource');
-            createResourceStub = sinon.stub(apiGw.connector.api, 'createResource');
+            listResourcesStub = sinon.stub(apiGw.connector, 'listResources');
+            readResourceStub = sinon.stub(apiGw.connector, 'readResource');
+            createResourceStub = sinon.stub(apiGw.connector, 'createResource');
             deleteResourceStub = sinon.stub(apiGw.connector.api, 'deleteResource');
 
-            readMethodStub = sinon.stub(apiGw.connector.api, 'getMethod');
-            createMethodStub = sinon.stub(apiGw.connector.api, 'putMethod');
-            deleteMethodStub = sinon.stub(apiGw.connector.api, 'deleteMethod');
+            readMethodStub = sinon.stub(apiGw.connector, 'readMethod');
+            createMethodStub = sinon.stub(apiGw.connector, 'createMethod');
+            deleteMethodStub = sinon.stub(apiGw.connector, 'deleteMethod');
 
-            readIntegrationStub = sinon.stub(apiGw.connector.api, 'getIntegration');
-            createIntegrationStub = sinon.stub(apiGw.connector.api, 'putIntegration');
-            deleteIntegrationStub = sinon.stub(apiGw.connector.api, 'deleteIntegration');
+            readIntegrationStub = sinon.stub(apiGw.connector, 'readIntegration');
+            createIntegrationStub = sinon.stub(apiGw.connector, 'createIntegration');
+            deleteIntegrationStub = sinon.stub(apiGw.connector, 'deleteIntegration');
 
             props = new Promise(resolve => {
                 setImmediate(
