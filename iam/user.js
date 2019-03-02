@@ -72,7 +72,7 @@ class User extends Api {
      */
     async read (id) {
         try {
-            const resp = await this._informCall(this.connector.getUser, 'Get user ' + id, id);
+            const resp = await this._informCall(this.connector.readUser, 'Get user ' + id, id);
             return this._createEntity(resp);
         } catch (e) {
             if (e.code === 'ResourceNotFoundException') {

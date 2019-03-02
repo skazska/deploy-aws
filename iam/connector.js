@@ -14,7 +14,7 @@ class IAMConnector extends CommonAwsConnector {
      * User API
      **************************************************************/
 
-    getUser (name) {
+    readUser (name) {
         const params = {};
         if (name) {
             params.UserName = name

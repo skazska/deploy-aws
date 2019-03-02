@@ -8,10 +8,10 @@ describe('AWS IAM Connector ', () => {
     AWSGlobal.config.loadFromPath('./.aws-cfg.json');
     const connector = new Connector({});
 
-    it('#getUser should result in current user data', async () => {
+    it('#readUser should result in current user data', async () => {
         let result = null;
         try {
-            result = await connector.getUser();
+            result = await connector.readUser();
         } catch (e) {
             result = e;
         }
