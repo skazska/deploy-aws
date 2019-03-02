@@ -190,11 +190,11 @@ describe('API Method Controller', () => {
             expect(informer).to.be.called;
         });
 
-        it('#getIntegration() should return promise, invoke getintegration, addInformer which fires change and complete', async () => {
+        it('#readIntegration() should return promise, invoke getintegration, addInformer which fires change and complete', async () => {
             sinon.replace(entity.connector.api, 'getIntegration', apiCall);
             let result;
             try {
-                result = await entity.getIntegration();
+                result = await entity.readIntegration();
             } catch (e) {
                 throw e;
             }

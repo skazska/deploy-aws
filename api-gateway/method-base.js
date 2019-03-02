@@ -51,7 +51,7 @@ class ApiGwMethodAbstract extends Api {
      */
     async read (restApiId, resourceId, httpMethod) {
         try {
-            const result = await this._informCall(this.connector['get' + this.entityName],
+            const result = await this._informCall(this.connector['read' + this.entityName],
                 'Get ' + this.entityName + ' ' + httpMethod, restApiId, resourceId, httpMethod);
             return result ? this._createEntity(result) : null;
         } catch (e) {

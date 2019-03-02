@@ -40,10 +40,10 @@ class ApiGwMethodEntity extends ApiGwMethodEntityAbstract {
      * @param integrationOptions
      * @return {Promise<*|void>}
      */
-    async getIntegration() {
+    async readIntegration() {
         //add new
         const result = await this._informCall(
-            this.connector.getIntegration,
+            this.connector.readIntegration,
             'Set integration',
             this.id.restApiId, this.id.resourceId, this.id.httpMethod
         );

@@ -35,10 +35,10 @@ describe('AWS Api Gateway Connector - Method methods', function() {
         expect(result).to.have.property('httpMethod').that.is.a('string');
     });
 
-    it('#getMethod should result in new method data ', async () => {
+    it('#readMethod should result in new method data ', async () => {
         let result = null;
         try {
-            result = await connector.getMethod(restApiId, resourceId, 'ANY');
+            result = await connector.readMethod(restApiId, resourceId, 'ANY');
         } catch (e) {
             result = e;
         }

@@ -163,7 +163,7 @@ class ApiGatewayConnector extends CommonAwsConnector {
      * METHODS
      **************************************************************/
 
-    getMethod (restApiId, resourceId, httpMethod) {
+    readMethod (restApiId, resourceId, httpMethod) {
         const params = {
             resourceId: resourceId, /* required */
             restApiId: restApiId, /* required */
@@ -322,7 +322,7 @@ class ApiGatewayConnector extends CommonAwsConnector {
      * INTEGRATIONS
      **************************************************************/
 
-    getIntegration (restApiId, resourceId, httpMethod) {
+    readIntegration (restApiId, resourceId, httpMethod) {
         const params = {
             resourceId: resourceId, /* required */
             restApiId: restApiId, /* required */

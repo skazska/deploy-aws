@@ -62,10 +62,10 @@ describe('AWS Api Gateway Connector - Integration methods', function () {
     });
 
 
-    it('#getIntegration should result in new integration data ', async () => {
+    it('#readIntegration should result in new integration data ', async () => {
         let result = null;
         try {
-            result = await connector.getIntegration(restApiId, resourceId, 'ANY');
+            result = await connector.readIntegration(restApiId, resourceId, 'ANY');
         } catch (e) {
             result = e;
         }

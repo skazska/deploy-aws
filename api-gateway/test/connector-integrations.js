@@ -22,7 +22,7 @@ describe('AWS Api Gateway Connector - Integrations methods', () => {
             expect(connector.api).to.be.instanceof(AG);
         });
     });
-    describe('#getIntegration', () => {
+    describe('#readIntegration', () => {
         beforeEach(() => {
             sinon.replace(connector.api, 'getIntegration', sinon.fake(() => { return awsResponse('response'); }));
         });
@@ -30,7 +30,7 @@ describe('AWS Api Gateway Connector - Integrations methods', () => {
             sinon.restore();
         });
         it('should call AWS SDK AG method getIntegration transforming input params to properties', async () => {
-            const result = await connector.getIntegration('restApi', 123, 'ANY');
+            const result = await connector.readIntegration('restApi', 123, 'ANY');
             const apiCall = connector.api.getIntegration;
             expect(apiCall).to.be.calledOnceWith({restApiId: 'restApi', resourceId: 123, httpMethod: 'ANY'});
             expect(result).to.be.equal('response');
