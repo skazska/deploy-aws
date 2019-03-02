@@ -51,10 +51,10 @@ describe('AWS Api Gateway Connector - Resource methods', function() {
         expect(result).to.have.property('pathPart').that.is.equal('test');
     });
 
-    it('#getResource should result in new resource data ', async () => {
+    it('#readResource should result in new resource data ', async () => {
         let result = null;
         try {
-            result = await connector.getResource(restApiId, resourceId);
+            result = await connector.readResource(restApiId, resourceId);
         } catch (e) {
             result = e;
         }

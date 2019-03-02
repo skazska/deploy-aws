@@ -110,7 +110,7 @@ class ApiGatewayConnector extends CommonAwsConnector {
         return this.api.getResources(params).promise();
     }
 
-    getResource (restApiId, id) {
+    readResource (restApiId, id) {
         const params = {
             resourceId: id, /* required */
             restApiId: restApiId /* required */

@@ -143,7 +143,7 @@ class ApiGwResource extends Api {
      */
     async read (restApiId, id) {
         try {
-            const result = await this._informCall(this.connector.getResource, 'Get resource ' + id, restApiId, id);
+            const result = await this._informCall(this.connector.readResource, 'Get resource ' + id, restApiId, id);
             return result ? this._createEntity(result) : null;
         } catch (e) {
             if (e.code === 'ResourceNotFoundException') {
