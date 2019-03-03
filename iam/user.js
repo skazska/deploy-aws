@@ -41,11 +41,7 @@ class User extends Api {
      * @param {informGroup} [informer]
      */
     constructor (properties, connector, informer) {
-        super(properties, connector || new Connector({}), informer || null);
-    }
-
-    _createEntity (response) {
-        return super._createEntity(UserEntity, response.User);
+        super(properties, connector || new Connector({}), informer || null, UserEntity);
     }
 
     /**
@@ -73,7 +69,7 @@ class User extends Api {
     async read (id) {
         try {
             const resp = await this._informCall(this.connector.readUser, 'Get user ' + id, id);
-            return this._createEntity(resp);
+            return this._createEntity(resp.User);
         } catch (e) {
             if (e.code === 'ResourceNotFoundException') {
                 return null;

@@ -10,8 +10,8 @@ class ApiGwMethod extends ApiGwMethodAbstract {
      * @param {informGroup} [informer]
      */
     constructor (properties, connector, informer) {
-        super(properties, connector || new Connector({}), informer || null);
-        this.entityConstructor = ApiGwMethodEntity;
+        super(properties, connector || new Connector({}), informer || null, ApiGwMethodEntity);
+        // this.entityConstructor = ApiGwMethodEntity;
         this.entityName = 'Method';
     }
 }

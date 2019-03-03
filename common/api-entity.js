@@ -17,7 +17,7 @@ class ApiEntity extends ApiBase {
      *
      * @param {Object} properties
      * @return {*}
-     * @private
+     * @protected
      */
     _updateEntity (properties) {
         Object.assign(this.properties, properties); //TODO possibly need check for property removal
@@ -62,6 +62,22 @@ class ApiEntity extends ApiBase {
     delete () {
 
     }
+
+    /**
+     *
+     * @param {Object} properties
+     * @param {CommonApi} instance - creator instance
+     * @param {ApiEntity} constructor - Entity class constructor
+     * @param {Object} [addProps] - additional properties to set to new entity's properties
+     * @return {*}
+     */
+    static createEntity (properties, instance, constructor, addProps) {
+        if (!(properties && typeof properties === 'object')) return properties;
+        const entity = new constructor(properties, instance.connector, instance.informer);
+        if (addProps) Object.assign(entity.properties, addProps);
+        return entity;
+    }
+
 }
 
 module.exports = ApiEntity;

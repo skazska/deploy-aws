@@ -141,11 +141,15 @@ describe('ApiGatewayController', () => {
 
         });
         it('should call RestApi method create if list result did not contain item with restApi name', async () => {
-            listStub.returns(awsResponse({items: [
+            listStub.returns(connectorResponse({items: [
                 {id: 'id', name: 'name1'},
                 {id: 'id', name: 'name1'}
             ]}));
-            createStub.returns(awsResponse({id: 'id', name: 'name', description: 'STRING_VALUE'}));
+            createStub.returns(connectorResponse({id: 'id', name: 'name', description: 'STRING_VALUE'}));
+            listResourcesStub.returns(connectorResponse({items: [
+                    {id: 'resId', pathPart: '/', path: '/'}
+                ]}));
+            createResourceStub.returns(connectorResponse({id: 'resId1', pathPart: 'clients', path: '/clients'}));
 
             const entity = await apiGw.deploy('name', props, opts, group);
             expect(entity.properties).to.eql({id: 'id', name: 'name', description: 'STRING_VALUE'});

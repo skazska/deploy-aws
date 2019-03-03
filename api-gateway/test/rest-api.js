@@ -35,12 +35,12 @@ describe('REST API Controller', () => {
     describe('instance#constructor', () => {
         const informer = createInformer(sinon.fake());
         it('should have properties connector, informer, id, properties', () => {
-            restApi = new RestApi({}, connector, informer);
-            expect(restApi).to.eql({
-                connector: connector,
-                properties: {},
-                informer: informer
-            });
+            const restApi = new RestApi({}, connector, informer);
+            expect(restApi).to.have.property('connector').eql(connector);
+            expect(restApi).to.have.property('properties').eql({});
+            expect(restApi).to.have.property('informer').eql(informer);
+            expect(restApi).to.have.property('entityConstructor');
+
         })
     });
 
@@ -180,7 +180,7 @@ describe('REST API Controller', () => {
                 throw e;
             }
 
-            expect(result.properties).to.eql({path: '/', id: 'parentId'});
+            expect(result.properties).to.eql({path: '/', id: 'parentId', restApiId: "1"});
 
             // FIXME ResourceApi find does not log
             // expect(apiCall).to.be.calledOnce;

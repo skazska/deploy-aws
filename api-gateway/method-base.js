@@ -4,19 +4,14 @@ const Connector = require('./connector');
 
 class ApiGwMethodAbstract extends Api {
     /**
-     * @param {string} id
      * @param {*} properties
      * @param {ApiGatewayConnector} [connector]
      * @param {informGroup} [informer]
+     * @param entityConstructor
      */
-    constructor (properties, connector, informer) {
-        super(properties, connector || new Connector({}), informer || null);
-        this.entityConstructor = ApiGwMethodEntityAbstract;
+    constructor (properties, connector, informer, entityConstructor) {
+        super(properties, connector || new Connector({}), informer || null, entityConstructor);
         this.entityName = 'MethodAbstract';
-    }
-
-    _createEntity (properties) {
-        return super._createEntity(this.entityConstructor, properties);
     }
 
     /**
@@ -32,11 +27,8 @@ class ApiGwMethodAbstract extends Api {
                 properties.httpMethod,
                 properties
             );
-            result.restApiId = properties.restApiId;
-            result.id = properties.resourceId;
-            result.httpMethod = properties.httpMethod;
 
-            return this._createEntity(result);
+            return this._createEntity(result, {restApiId: properties.restApiId, resourceId: properties.resourceId});
         } catch (e) {
             throw e;
         }
@@ -53,7 +45,7 @@ class ApiGwMethodAbstract extends Api {
         try {
             const result = await this._informCall(this.connector['read' + this.entityName],
                 'Get ' + this.entityName + ' ' + httpMethod, restApiId, resourceId, httpMethod);
-            return result ? this._createEntity(result) : null;
+            return result ? this._createEntity(result, {restApiId: restApiId, resourceId: resourceId}) : null;
         } catch (e) {
             if (e.code === 'ResourceNotFoundException') {
                 return null;

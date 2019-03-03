@@ -73,7 +73,8 @@ describe('Integral scenarios', () => {
     it('Create: api->resource->method->integration', async () => {
         try {
             const api = await restApiController.create({name: API_NAME});
-            const resource = await api.addResource('test');
+            const root = await api.readRoot();
+            const resource = await root.addResource('test');
             const resource1 = await resource.addResource('res');
             const meth = await resource1.addMethod('ANY');
             const integration = await meth.addIntegration({

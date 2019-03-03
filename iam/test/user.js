@@ -36,11 +36,10 @@ describe('IAM User API Controller', () => {
         const informer = createInformer(sinon.fake());
         it('should have properties connector, informer, id, properties', () => {
             const iamApi = new UserApi({}, connector, informer);
-            expect(iamApi).to.eql({
-                connector: connector,
-                properties: {},
-                informer: informer
-            });
+            expect(iamApi).to.have.property('connector').eql(connector);
+            expect(iamApi).to.have.property('properties').eql({});
+            expect(iamApi).to.have.property('informer').eql(informer);
+            expect(iamApi).to.have.property('entityConstructor');
         })
     });
 

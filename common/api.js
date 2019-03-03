@@ -1,4 +1,5 @@
 const ApiBase = require('./api-base');
+const Entity = require('./api-entity');
 
 /**
  * @property {LambdaConnector} connector
@@ -10,24 +11,25 @@ const ApiBase = require('./api-base');
 class CommonApi extends ApiBase {
     /**
      * constructor
-     * @param {*} properties
+     * @param {Object} properties
      * @param {CommonAwsConnector} connector
      * @param {Inform} informer
+     * @param {ApiEntity} entityConstructor
      */
-    constructor (properties, connector, informer) {
+    constructor (properties, connector, informer, entityConstructor) {
         super(properties, connector, informer);
+        this.entityConstructor = entityConstructor;
     }
 
     /**
      *
-     * @param {Class} EntityClass
      * @param {Object} properties
-     * @param {Object} options
-     * @return {*}
-     * @private
+     * @param {Object} [addProps]
+     * @return {ApiEntity}
+     * @protected
      */
-    _createEntity (EntityClass, properties, options) {
-        return properties ? new EntityClass(properties, this.connector, this.informer, options) : properties;
+    _createEntity (properties, addProps) {
+        return Entity.createEntity(properties, this, this.entityConstructor, addProps);
     }
 
     /**

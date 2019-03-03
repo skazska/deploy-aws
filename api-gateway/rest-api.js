@@ -35,23 +35,6 @@ class RestApiEntity extends Entity {
     }
 
     /**
-     * adds resource to rest-api
-     * @param pathPart
-     * @return {Promise<*|void>}
-     */
-    // async addResource(pathPart) {
-    //     //get root resource id
-    //     const root = await this.resourceApi.find(this.id, '/', null, 5);
-    //     //add new
-    //     const result = await this._informCall(
-    //         this.resourceApi.create.bind(this.resourceApi),
-    //         'add resource ' + pathPart,
-    //         {restApiId: this.id, parentId: root.id, pathPart: pathPart}
-    //     );
-    //     return result;
-    // }
-
-    /**
      * @return {Promise<ApiGwResourceEntity>}
      */
     async readRoot() {
@@ -73,6 +56,17 @@ class RestApiEntity extends Entity {
         );
         return result;
     }
+
+    /**
+     *
+     * @param {Object} properties
+     * @param instance
+     * @param restApiId
+     * @return {*}
+     */
+    static createEntity (properties, instance) {
+        return super.createEntity(properties, instance, this);
+    }
 }
 
 class RestApi extends Api {
@@ -82,11 +76,7 @@ class RestApi extends Api {
      * @param {informGroup} [informer]
      */
     constructor (properties, connector, informer) {
-        super(properties, connector || new Connector({}), informer || null);
-    }
-
-    _createEntity (properties) {
-        return super._createEntity(RestApiEntity, properties);
+        super(properties, connector || new Connector({}), informer || null, RestApiEntity);
     }
 
     /**
@@ -174,9 +164,9 @@ class RestApi extends Api {
         }
 
         if (!api) {
-            return this.create(params);
+            return await this.create(params);
         } else {
-            return this._createEntity(api);
+            return await this._createEntity(api);
         }
     }
 }

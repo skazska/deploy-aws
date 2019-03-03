@@ -34,10 +34,14 @@ class ApiGateway {
                 properties,
                 options.resources
             ]);
+
             const rest = await restApi.findOrCreate(name, params);
 
-            const currentResources = rest.listResources({limit: options.resourceListLimit || RESOURCE_LIST_LIMIT});
-            const root = await rest.readRoot();
+            const [currentResources, root] = await Promise.all([
+                rest.listResources({limit: options.resourceListLimit || RESOURCE_LIST_LIMIT}),
+                rest.readRoot()
+            ]);
+
             await this.deployResources(root, resources, currentResources.items);
 
             return rest;

@@ -41,11 +41,10 @@ describe('LambdaFunction', () => {
         const informer = createInformer(sinon.fake());
         it('should have properties connector, informer, id, properties', () => {
             lambda = new LambdaFunction({some: 'prop'}, connector, informer);
-            expect(lambda).to.eql({
-                connector: connector,
-                properties: {some: 'prop'},
-                informer: informer
-            });
+            expect(lambda).to.have.property('connector').eql(connector);
+            expect(lambda).to.have.property('properties').eql({"some": "prop"});
+            expect(lambda).to.have.property('informer').eql(informer);
+            expect(lambda).to.have.property('entityConstructor');
         })
     });
     describe('methods', () => {

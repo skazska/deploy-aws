@@ -63,7 +63,7 @@ describe('API Integration Controller', () => {
             });
 
             integration = new Integration({id: 'name'}, connector, group);
-            apiCall = sinon.fake(() => { return awsResponse({prop: 'response'}); });
+            apiCall = sinon.fake(() => { return awsResponse({prop: 'response', httpMethod: 'httpMethod'}); });
         });
         it('#create(properties) should return promise, invoke integration(createResource), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'putIntegration', apiCall);
@@ -72,7 +72,7 @@ describe('API Integration Controller', () => {
             expect(result.properties).to.be.eql({
                 "httpMethod": "httpMethod",
                 "prop": "response",
-                "id": "resourceId",
+                "resourceId": "resourceId",
                 "restApiId": "restApi"
             });
 
@@ -89,12 +89,17 @@ describe('API Integration Controller', () => {
         });
         it('#read() should return promise invoke integration(getMethod), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'getIntegration', apiCall);
-            const result = await integration.read('restApiId', 'resourceId', 'httpMethod');
-            expect(result.properties).to.be.eql({prop: 'response'});
+            const result = await integration.read('restApi', 'resourceId', 'httpMethod');
+            expect(result.properties).to.be.eql({
+                "httpMethod": "httpMethod",
+                "prop": "response",
+                "resourceId": "resourceId",
+                "restApiId": "restApi"
+            });
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
-                "restApiId": "restApiId",
+                "restApiId": "restApi",
                 "resourceId": "resourceId",
                 "httpMethod": "httpMethod",
             });

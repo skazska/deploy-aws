@@ -19,7 +19,7 @@ class ApiBase {
      * @param {String} text
      * @param {*} args
      * @return {Promise<*>}
-     * @private
+     * @protected
      */
     _informCall (fn, text, ...args) {
         return this.informer

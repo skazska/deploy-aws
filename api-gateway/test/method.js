@@ -63,7 +63,7 @@ describe('API Method Controller', () => {
             });
 
             method = new Method({id: 'name'}, connector, group);
-            apiCall = sinon.fake(() => { return awsResponse({prop: 'response'}); });
+            apiCall = sinon.fake(() => { return awsResponse({prop: 'response', httpMethod: "httpMethod"}); });
         });
         it('#create(properties) should return promise, invoke method(createResource), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'putMethod', apiCall);
@@ -72,7 +72,7 @@ describe('API Method Controller', () => {
             expect(result.properties).to.be.eql({
                 "httpMethod": "httpMethod",
                 "prop": "response",
-                "id": "resourceId",
+                "resourceId": "resourceId",
                 "restApiId": "restApi"
             });
 
@@ -91,7 +91,12 @@ describe('API Method Controller', () => {
         it('#read() should return promise invoke method(getMethod), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'getMethod', apiCall);
             const result = await method.read('restApiId', 'resourceId', 'httpMethod');
-            expect(result.properties).to.be.eql({prop: 'response'});
+            expect(result.properties).to.be.eql({
+                "httpMethod": "httpMethod",
+                "prop": "response",
+                "resourceId": "resourceId",
+                "restApiId": "restApiId"
+            });
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({

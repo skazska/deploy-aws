@@ -1,116 +1,6 @@
 const Api = require('../common/api');
-const Entity = require('../common/api-entity');
+const ApiGwResourceEntity = require('./resource-entity');
 const Connector = require('./connector');
-const ApiGwMethod = require('./method');
-
-/**
- * creates resource (should be bound)
- * @param {Object} properties
- */
-async function createResource (properties) {
-    try {
-        const result = await this._informCall(
-            this.connector.createResource, 'Create resource ' + properties.pathPart,
-            properties.restApiId,
-            properties.parentId,
-            properties.pathPart
-        );
-        result.restApiId = properties.restApiId;
-        return result; //this._createEntity(result);
-    } catch (e) {
-        throw e;
-    }
-}
-
-
-class ApiGwResourceEntity extends Entity {
-
-    constructor (properties, connector, informer) {
-        super(properties, connector, informer, {idProperty: ['restApiId', 'id']});
-        this.methodApi = new ApiGwMethod({}, connector, informer);
-    }
-
-    /**
-     * updates entity
-     * @param id
-     * @param properties
-     */
-    update (properties) {
-
-    }
-
-    /**
-     * delete entity
-     * @param {string} id
-     */
-    async delete () {
-        const idParam = this.id;
-        try {
-            const result = await this._informCall(
-                this.connector.deleteResource,
-                'Delete rest-api-resource ' + idParam.resourceId,
-                idParam.restApiId,
-                idParam.id
-            );
-            return result;
-        } catch (e) {
-            if (e.code === 'ResourceNotFoundException') {
-                return null;
-            } else {
-                throw e;
-            }
-        }
-    }
-
-    /**
-     * adds resource to rest-api
-     * @param pathPart
-     * @return {Promise<*|void>}
-     */
-    async addResource(pathPart) {
-        //add new
-        const result = await this._informCall(
-            createResource.bind(this),
-            'Add resource ' + pathPart,
-            {restApiId: this.id.restApiId, parentId: this.id.id, pathPart: pathPart}
-        );
-        return new ApiGwResourceEntity(result, this.connector, this.informer);
-    }
-
-    /**
-     * TODO add tests
-     * @param pathPart
-     * @return {Promise<void>}
-     */
-    async readResource(pathPart) {
-        //add new
-        const result = await this._informCall(
-            this.resourceApi.read.bind(this.resourceApi),
-            'read resource ' + pathPart,
-            {restApiId: this.id.restApiId, parentId: this.id.id, pathPart: pathPart}
-        );
-        return result;
-    }
-
-    /**
-     * adds method to resource
-     * @param {string} httpMethod
-     * @param {Object} [properties]
-     * @return {Promise<*|void>}
-     */
-    async addMethod(httpMethod, properties) {
-        //add new
-        const result = await this._informCall(
-            this.methodApi.create.bind(this.methodApi),
-            'add method ' + httpMethod,
-            Object.assign(
-                {restApiId: this.id.restApiId, resourceId: this.id.id, httpMethod: httpMethod}
-                , properties || {}
-            )
-        );
-        return result;
-    }
-}
 
 class ApiGwResource extends Api {
     /**
@@ -120,11 +10,7 @@ class ApiGwResource extends Api {
      * @param {informGroup} [informer]
      */
     constructor (properties, connector, informer) {
-        super(properties, connector || new Connector({}), informer || null);
-    }
-
-    _createEntity (properties) {
-        return super._createEntity(ApiGwResourceEntity, properties);
+        super(properties, connector || new Connector({}), informer || null, ApiGwResourceEntity);
     }
 
     /**
@@ -132,7 +18,7 @@ class ApiGwResource extends Api {
      * @param {Object} properties
      */
     async create (properties) {
-        return this._createEntity(await createResource.call(this, properties));
+        return ApiGwResourceEntity.createResource(properties, this);
     }
 
 
@@ -144,7 +30,7 @@ class ApiGwResource extends Api {
     async read (restApiId, id) {
         try {
             const result = await this._informCall(this.connector.readResource, 'Get resource ' + id, restApiId, id);
-            return result ? this._createEntity(result) : null;
+            return result ? this._createEntity(result, {restApiId: restApiId}) : null;
         } catch (e) {
             if (e.code === 'ResourceNotFoundException') {
                 return null;
@@ -176,7 +62,7 @@ class ApiGwResource extends Api {
      * @param path
      * @param {String} [position]
      * @param {Number} [limit]
-     * @return {Promise<Promise<*>|*|number|BigInt|T>}
+     * @return {Promise<*>}
      */
     async find(restApiId, path, position, limit) {
         const options = {restApiId: restApiId, limit: limit || 25};
@@ -185,8 +71,8 @@ class ApiGwResource extends Api {
         if (position) options.position = position;
         let result = await this.list(options);
         let resource = result.items.find(resource => resource.path === path ? resource : undefined);
-        if (!result.position) return this._createEntity(resource);
-        return this._createEntity(resource) || this.find(restApiId, path, result.position, options.limit);
+        if (!result.position) return this._createEntity(resource, {restApiId: restApiId});
+        return this._createEntity(resource, {restApiId: restApiId}) || this.find(restApiId, path, result.position, options.limit);
     }
 
 }

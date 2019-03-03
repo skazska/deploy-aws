@@ -141,11 +141,7 @@ class LambdaFunction extends Api {
      * @param {informGroup} [informer]
      */
     constructor (properties, connector, informer) {
-        super(properties, connector || new Connector({}), informer || null);
-    }
-
-    _createEntity (properties) {
-        return super._createEntity(FunctionEntity, properties);
+        super(properties, connector || new Connector({}), informer || null, FunctionEntity);
     }
 
     /**
