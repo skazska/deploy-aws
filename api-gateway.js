@@ -1,5 +1,7 @@
 const Connector = require('./api-gateway/connector');
 const RestApi = require('./api-gateway/rest-api');
+const { Transition } = require('./utils/arraysProcessor');
+
 
 const RESOURCE_LIST_LIMIT = 200;
 
@@ -57,7 +59,7 @@ class ApiGateway {
             res = await entity.addResource(resource.pathPart);
 
             if (resource.resources) {
-                await this.deployResources(entity, resource.resources, currentResources);
+                await this.deployResources(res, resource.resources, currentResources);
             }
 
             return res;
@@ -68,20 +70,20 @@ class ApiGateway {
 
     /**
      *
-     * @param {ApiGwResourceEntity} root
+     * @param {ApiGwResourceEntity} parent
      * @param {[]} resources
      * @param currentResources
      * @return {Promise<[*]>}
      */
-    deployResources(root, resources, currentResources) {
+    deployResources(parent, resources, currentResources) {
         const newRes = Object.keys(resources).map(key => {
             resources[key].pathPart = key; return resources[key];
         });
-        const oldRes = currentResources.filter(res => res.parentId === root.id.id);
+        const oldRes = currentResources.filter(res => res.parentId === parent.id.id);
 
         const transition = new Transition((oldItem, newItem) => oldItem.pathPart === newItem.pathPart)
-            .setRemover(oldItem => root.removeResource(oldItem.pathPart))
-            .setCreator(newItem => this.deployResource(root, newItem, currentResources))
+            .setRemover(oldItem => parent.removeResource(oldItem.pathPart))
+            .setCreator(newItem => this.deployResource(parent, newItem, currentResources))
             .perform(oldRes, newRes);
 
         return Promise.all(Object.values(transition).map(set => Promise.all(set)));

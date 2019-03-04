@@ -22,22 +22,7 @@ class ApiGwResourceEntity extends Entity {
      * @param {string} id
      */
     async delete () {
-        const idParam = this.id;
-        try {
-            const result = await this._informCall(
-                this.connector.deleteResource,
-                'Delete rest-api-resource ' + idParam.resourceId,
-                idParam.restApiId,
-                idParam.id
-            );
-            return result;
-        } catch (e) {
-            if (e.code === 'ResourceNotFoundException') {
-                return null;
-            } else {
-                throw e;
-            }
-        }
+        return await ApiGwResourceEntity.removeResource(this.id, this);
     }
 
     /**
@@ -59,15 +44,15 @@ class ApiGwResourceEntity extends Entity {
      * @param pathPart
      * @return {Promise<void>}
      */
-    async readResource(pathPart) {
-        //add new
-        const result = await this._informCall(
-            this.resourceApi.read.bind(this.resourceApi),
-            'read resource ' + pathPart,
-            {restApiId: this.id.restApiId, parentId: this.id.id, pathPart: pathPart}
-        );
-        return result;
-    }
+    // async readResource(pathPart) {
+    //     //add new
+    //     const result = await this._informCall(
+    //         this.resourceApi.read.bind(this.resourceApi),
+    //         'read resource ' + pathPart,
+    //         {restApiId: this.id.restApiId, parentId: this.id.id, pathPart: pathPart}
+    //     );
+    //     return result;
+    // }
 
     /**
      * adds method to resource
@@ -105,6 +90,31 @@ class ApiGwResourceEntity extends Entity {
         } catch (e) {
             throw e;
         }
+    }
+
+    /**
+     * TODO add tests
+     * @param {} id
+     * @param instance
+     * @return {Promise<*>}
+     */
+    static async removeResource (id, instance) {
+        try {
+            const result = await instance._informCall(
+                instance.connector.deleteResource,
+                'Delete rest-api-resource ' + id.id,
+                id.restApiId,
+                id.id
+            );
+            return result;
+        } catch (e) {
+            if (e.code === 'ResourceNotFoundException') {
+                return null;
+            } else {
+                throw e;
+            }
+        }
+
     }
 }
 

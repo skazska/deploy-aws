@@ -129,7 +129,7 @@ describe('ApiGatewayController', () => {
                                     }
                                 },
                                 "resources" : {
-                                    ":id": {
+                                    "test": {
 
                                     }
                                 }
@@ -147,15 +147,24 @@ describe('ApiGatewayController', () => {
             ]}));
             createStub.returns(connectorResponse({id: 'id', name: 'name', description: 'STRING_VALUE'}));
             listResourcesStub.returns(connectorResponse({items: [
-                    {id: 'resId', pathPart: '/', path: '/'}
-                ]}));
-            createResourceStub.returns(connectorResponse({id: 'resId1', pathPart: 'clients', path: '/clients'}));
+                {id: 'resId', pathPart: '/', path: '/'},
+                {id: 'testResId', pathPart: 'orphan', path: '/orphan'}
+            ]}));
+            createResourceStub
+                .onFirstCall().returns(connectorResponse({id: 'resId1', pathPart: 'clients', path: '/clients'}))
+                .onSecondCall().returns(connectorResponse({id: 'resId2', pathPart: 'test', path: '/clients/test'}));
+
+            deleteResourceStub.returns(connectorResponse({request: 'done'}));
+
 
             const entity = await apiGw.deploy('name', props, opts, group);
             expect(entity.properties).to.eql({id: 'id', name: 'name', description: 'STRING_VALUE'});
             expect(createStub.args[0][0]).to.deep.include({
-                id: 'id', name: 'name', description: 'STRING_VALUE'
+                name: 'name', description: 'STRING_VALUE'
             });
+            expect(createResourceStub.args[0]).eql(['id', 'resId', 'clients']);
+            expect(createResourceStub.args[1]).eql(['id', 'resId1', 'test']);
+            expect(deleteResourceStub.args[0]).eql(['id', 'testResId']);
         });
     });
 });

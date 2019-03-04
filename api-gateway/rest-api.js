@@ -57,6 +57,15 @@ class RestApiEntity extends Entity {
         return result;
     }
 
+    async removeResource(id) {
+        const result = await this._informCall(
+            this.resourceApi.list.bind(this.resourceApi),
+            'list resources',
+            Object.assign({restApiId: this.id}, params || {})
+        );
+        return result;
+    }
+
     /**
      *
      * @param {Object} properties
@@ -164,7 +173,7 @@ class RestApi extends Api {
         }
 
         if (!api) {
-            return await this.create(params);
+            return await this.create(Object.assign({name: name}, params));
         } else {
             return await this._createEntity(api);
         }
