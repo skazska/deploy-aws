@@ -3,9 +3,9 @@ const ApiGwMethod = require('./method');
 
 class ApiGwResourceEntity extends Entity {
 
-    constructor (properties, connector, informer) {
-        super(properties, connector, informer, {idProperty: ['restApiId', 'id']});
-        this.methodApi = new ApiGwMethod({}, connector, informer);
+    constructor (properties, connector, informer, options) {
+        super(properties, connector, informer, {idProperty: ['restApiId', 'id'], defaults: options.defaults});
+        this.methodApi = new ApiGwMethod({restApiId: this.id.restApiId, resourceId: this.id.id}, connector, informer);
     }
 
     /**
@@ -62,14 +62,7 @@ class ApiGwResourceEntity extends Entity {
      */
     async addMethod(httpMethod, properties) {
         //add new
-        const result = await this._informCall(
-            this.methodApi.create.bind(this.methodApi),
-            'add method ' + httpMethod,
-            Object.assign(
-                {restApiId: this.id.restApiId, resourceId: this.id.id, httpMethod: httpMethod}
-                , properties || {}
-            )
-        );
+        const result = await this.methodApi.create(httpMethod,properties || {});
         return result;
     }
 
@@ -82,11 +75,12 @@ class ApiGwResourceEntity extends Entity {
         try {
             const result = await instance._informCall(
                 instance.connector.createResource, 'Create resource ' + properties.pathPart,
-                properties.restApiId,
+                instance.defaults.restApiId,
                 properties.parentId,
                 properties.pathPart
             );
-            return this.createEntity(result, instance, ApiGwResourceEntity, {restApiId: properties.restApiId});
+            // return this.createEntity(result, instance, ApiGwResourceEntity, {restApiId: properties.restApiId});
+            return this.createEntity(result, instance, ApiGwResourceEntity);
         } catch (e) {
             throw e;
         }

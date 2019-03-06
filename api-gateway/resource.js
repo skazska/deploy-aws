@@ -11,6 +11,7 @@ class ApiGwResource extends Api {
      */
     constructor (properties, connector, informer) {
         super(properties, connector || new Connector({}), informer || null, ApiGwResourceEntity);
+        if (!(properties && properties.restApiId)) throw new Error('restApiId is not provided for resource api')
     }
 
     /**
@@ -18,6 +19,7 @@ class ApiGwResource extends Api {
      * @param {Object} properties
      */
     async create (properties) {
+        // return ApiGwResourceEntity.createResource(Object.assign({}, this.defaults, properties), this);
         return ApiGwResourceEntity.createResource(properties, this);
     }
 
@@ -27,10 +29,14 @@ class ApiGwResource extends Api {
      * @param {string} restApiId
      * @param {string} id
      */
-    async read (restApiId, id) {
+    async read (id) {
         try {
-            const result = await this._informCall(this.connector.readResource, 'Get resource ' + id, restApiId, id);
-            return result ? this._createEntity(result, {restApiId: restApiId}) : null;
+            const result = await this._informCall(
+                this.connector.readResource,
+                'Get resource ' + id,
+                this.defaults.restApiId,
+                id);
+            return result ? this._createEntity(result) : null;
         } catch (e) {
             if (e.code === 'ResourceNotFoundException') {
                 return null;
@@ -48,11 +54,11 @@ class ApiGwResource extends Api {
      * @param {Number} [options.limit]
      */
     list (options) {
-        if (!options) throw new Error('missing required arguments');
+        if (!options) throw options={};
         return this._informCall(
             this.connector.listResources,
-            'Get resources for ' + options.restApiId + ' (' + options.position + ', ' + options.limit + ')',
-            options.restApiId, options.position, options.limit, options
+            'Get resources for ' + this.defaults.restApiId + ' (' + options.position + ', ' + options.limit + ')',
+            this.defaults.restApiId, options.position, options.limit, options
         );
     }
 
@@ -64,15 +70,16 @@ class ApiGwResource extends Api {
      * @param {Number} [limit]
      * @return {Promise<*>}
      */
-    async find(restApiId, path, position, limit) {
+    async find(path, position, limit) {
+        const restApiId = this.defaults.restApiId;
         const options = {restApiId: restApiId, limit: limit || 25};
         let undefined;
 
         if (position) options.position = position;
         let result = await this.list(options);
         let resource = result.items.find(resource => resource.path === path ? resource : undefined);
-        if (!result.position) return this._createEntity(resource, {restApiId: restApiId});
-        return this._createEntity(resource, {restApiId: restApiId}) || this.find(restApiId, path, result.position, options.limit);
+        if (!result.position) return this._createEntity(resource);
+        return this._createEntity(resource) || this.find(path, result.position, options.limit);
     }
 
 }

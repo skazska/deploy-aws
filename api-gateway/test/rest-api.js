@@ -69,6 +69,7 @@ describe('REST API Controller', () => {
 
             const result = await restApi.create({prop: 'val'});
             expect(result.properties).to.be.eql({prop: 'response', "id": 'id'});
+            expect(result.resourceApi).to.have.property('defaults').eql({restApiId: 'id'});
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
@@ -83,6 +84,8 @@ describe('REST API Controller', () => {
             sinon.replace(connector.api, 'getRestApi', apiCall);
             const result = await restApi.read('id');
             expect(result.properties).to.be.eql({prop: 'response', "id": 'id'});
+
+            expect(result.resourceApi).to.have.property('defaults').eql({restApiId: 'id'});
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
@@ -146,6 +149,7 @@ describe('REST API Controller', () => {
         it('#_createEntity(properties) should return an RestApiEntity instance with properties', () => {
             expect(entity).to.be.instanceof(ApiEntity);
             expect(entity.id).to.eql('1');
+            expect(entity.resourceApi).to.have.property('defaults').eql({restApiId: '1'});
             expect(entity.val('prop')).to.eql('val');
             expect(entity.informer).to.be.equal(group);
         });
@@ -180,7 +184,9 @@ describe('REST API Controller', () => {
                 throw e;
             }
 
-            expect(result.properties).to.eql({path: '/', id: 'parentId', restApiId: "1"});
+            expect(result.properties).to.eql({path: '/', id: 'parentId'});
+            expect(result.defaults).to.eql({restApiId: "1"});
+            expect(result.id).to.eql({restApiId: "1", id: 'parentId'});
 
             // FIXME ResourceApi find does not log
             // expect(apiCall).to.be.calledOnce;
@@ -280,12 +286,12 @@ describe('REST API Controller', () => {
             restApi = new RestApi({}, connector, group);
         });
         it('should resolve record with given name from list', async () => {
-            apiCall = sinon.fake(() => { return awsResponse({items: [{name: 'first'}, {name: 'second'}]}); });
+            apiCall = sinon.fake(() => { return awsResponse({items: [{name: 'first', id: '1'}, {name: 'second', id: '2'}]}); });
             sinon.replace(connector.api, 'getRestApis', apiCall);
             // sinon.replace(restApi, 'list', apiCall);
 
-            const result = await restApi.findOrCreate('second', {});
-            expect(result.properties).to.be.eql({name: 'second'});
+            const result = await restApi.findOrCreate('second', {name: 'new'});
+            expect(result.properties).to.be.eql({name: 'second', id: '2'});
         });
         it('should call list with next position until name found', async () => {
             apiCall = sinon.fake(() => { return awsResponse({items: [{name: 'first'}, {name: 'second'}]}); });

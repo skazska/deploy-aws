@@ -1,7 +1,15 @@
+/**
+ * @module ApiEntity
+ */
+
 const ApiBase = require('./api-base');
 
+/**
+ * Represents entity API
+ */
 class ApiEntity extends ApiBase {
     /**
+     * @constructor
      * @param {Object} properties
      * @param {CommonAwsConnector} connector
      * @param {Inform} [informer]
@@ -9,7 +17,7 @@ class ApiEntity extends ApiBase {
      * @param {String|String[]} options.idProperty
      */
     constructor (properties, connector, informer, options) {
-        super(properties, connector, informer);
+        super(properties, connector, informer, (options || {})['defaults']);
         this.idProperty = (options || {})['idProperty'] || 'id';
     }
 
@@ -30,10 +38,10 @@ class ApiEntity extends ApiBase {
      */
     get id () {
         if (typeof this.idProperty === 'string') {
-            return this.properties[this.idProperty];
+            return this.properties[this.idProperty] || this.defaults[this.idProperty];
         } else if (Array.isArray(this.idProperty)) {
             return this.idProperty.reduce((result, propName) => {
-                result[propName] = this.properties[propName];
+                result[propName] = this.properties[propName] || this.defaults[propName];
                 return result;
             }, {});
         }
@@ -67,14 +75,16 @@ class ApiEntity extends ApiBase {
      *
      * @param {Object} properties
      * @param {CommonApi} instance - creator instance
-     * @param {ApiEntity} constructor - Entity class constructor
-     * @param {Object} [addProps] - additional properties to set to new entity's properties
+     * @param {typeof ApiEntity} constructor - Entity class constructor
+     * @param {Object} [defaults] - additional properties to set to new entity's properties
      * @return {*}
      */
-    static createEntity (properties, instance, constructor, addProps) {
+    static createEntity (properties, instance, constructor, defaults) {
         if (!(properties && typeof properties === 'object')) return properties;
-        const entity = new constructor(properties, instance.connector, instance.informer);
-        if (addProps) Object.assign(entity.properties, addProps);
+        const addProperties = Object.assign({}, instance.defaults, defaults || {});
+        const entity = new constructor(properties, instance.connector, instance.informer, {defaults: addProperties});
+        // entity.defaults = instance.defaults;
+        //if (addProps) Object.assign(entity.properties, addProps);
         return entity;
     }
 

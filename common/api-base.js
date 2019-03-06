@@ -1,16 +1,21 @@
+/**
+ * @module ApiBase
+ */
+
 class ApiBase {
     /**
-     * constructor
+     * @constructor
      * @param {*} properties
      * @param {CommonAwsConnector} connector
      * @param {Inform} informer
      */
-    constructor (properties, connector, informer) {
+    constructor (properties, connector, informer, defaults) {
         this.connector = connector;
         this.properties = properties || null;
         if (informer) {
             this.informer = informer;
         }
+        this.defaults = defaults || {};
     }
 
     /**

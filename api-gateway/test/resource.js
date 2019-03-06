@@ -37,10 +37,11 @@ describe('API Resource Controller', () => {
         const informer = createInformer(sinon.fake());
         let resource;
         it('should have properties connector, informer, id, properties', () => {
-            resource = new Resource({id: 'name'}, connector, informer);
+            resource = new Resource({restApiId: 'name'}, connector, informer);
             expect(resource).to.eql({
                 connector: connector,
-                properties: {id: 'name'},
+                properties: {},
+                defaults: {restApiId: 'name'},
                 informer: informer,
                 entityConstructor: ResourceEntity
             });
@@ -64,15 +65,18 @@ describe('API Resource Controller', () => {
                 });
             });
 
-            resource = new Resource({id: 'name'}, connector, group);
+            resource = new Resource({restApiId: 'restApi'}, connector, group);
             apiCall = sinon.fake(() => { return awsResponse({id: 'resourceId', pathPart: 'pathPart', parentId: 'parentId'}); });
         });
         it('#create(properties) should return promise, invoke resource(createResource), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'createResource', apiCall);
 
-            const result = await resource.create({restApiId: 'restApi', parentId: 'parentId', pathPart: 'pathPart'});
+            const result = await resource.create({parentId: 'parentId', pathPart: 'pathPart'});
             expect(result.properties).to.be.eql({
-                restApiId: 'restApi', parentId: 'parentId', pathPart: 'pathPart', id: 'resourceId'
+                parentId: 'parentId', pathPart: 'pathPart', id: 'resourceId'
+            });
+            expect(result.defaults).to.be.eql({
+                restApiId: 'restApi'
             });
 
             expect(apiCall).to.be.calledOnce;
@@ -88,15 +92,18 @@ describe('API Resource Controller', () => {
         });
         it('#read() should return promise invoke resource(getResource), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'getResource', apiCall);
-            const result = await resource.read('restApiId', 'id');
+            const result = await resource.read('id');
             expect(result.properties).to.be.eql({
-                restApiId: 'restApiId', parentId: 'parentId', pathPart: 'pathPart', id: 'resourceId'
+                parentId: 'parentId', pathPart: 'pathPart', id: 'resourceId'
+            });
+            expect(result.defaults).to.be.eql({
+                restApiId: 'restApi'
             });
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
                 "resourceId": "id",
-                "restApiId": "restApiId",
+                "restApiId": "restApi",
             });
 
             expect(group.informers.length).to.equal(1);
@@ -112,7 +119,7 @@ describe('API Resource Controller', () => {
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
-                "restApiId": 'id',
+                "restApiId": 'restApi',
                 "position": 1,
                 "limit": 2
             });
@@ -121,9 +128,9 @@ describe('API Resource Controller', () => {
             informer = await informer;
             expect(informer).to.be.called;
 
-            await resource.list({restApiId: 'id'});
+            await resource.list({});
             expect(apiCall.args[1][0]).to.be.eql({
-                "restApiId": 'id',
+                "restApiId": 'restApi',
                 "limit": 25
             });
 
@@ -152,8 +159,8 @@ describe('API Resource Controller', () => {
                 });
             });
 
-            resource = new Resource({id: 'name'}, connector, group);
-            entity = resource._createEntity({name: 'name', prop: 'val', restApiId: '1', id: '2'});
+            resource = new Resource({restApiId: '1'}, connector, group);
+            entity = resource._createEntity({name: 'name', prop: 'val', id: '2'}, {restApiId: '1'});
             apiCall = sinon.fake(() => { return awsResponse({id: 'resourceId', pathPart: 'pathPart', parentId: 'parentId'}); });
         });
         it('#_createEntity(properties) should return an RestApiEntity instance with properties', () => {
@@ -161,6 +168,7 @@ describe('API Resource Controller', () => {
             expect(entity.id).to.eql({ restApiId: '1', id: '2' });
             expect(entity.val('prop')).to.eql('val');
             expect(entity.informer).to.be.equal(group);
+            expect(entity).to.have.property('methodApi').to.have.property('defaults').eql({restApiId: '1', resourceId: '2'});
         });
         it('#update(properties) should return promise, invoke rest-api(updateRestApi), addInformer which fires change and complete', async () => {
             //TODO further way to implement update method and correct test
@@ -191,7 +199,9 @@ describe('API Resource Controller', () => {
                 throw e;
             }
 
-            expect(result.properties).to.be.eql({restApiId: '1', parentId: 'parentId', pathPart: 'pathPart', id: 'resourceId'});
+            expect(result.id).to.be.eql({restApiId: '1', id: 'resourceId'});
+            expect(result.properties).to.be.eql({parentId: 'parentId', pathPart: 'pathPart', id: 'resourceId'});
+            expect(result.defaults).to.be.eql({restApiId: '1'});
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
@@ -217,10 +227,18 @@ describe('API Resource Controller', () => {
                 throw e;
             }
 
-            expect(result.properties).to.be.eql({
+            expect(result.id).to.be.eql({
                 "resourceId": "2",
                 "restApiId": "1",
-                "httpMethod": "ANY",
+                "httpMethod": "ANY"
+            });
+
+            expect(result.properties).to.be.eql({
+                "httpMethod": "ANY"
+            });
+            expect(result.defaults).to.be.eql({
+                "resourceId": "2",
+                "restApiId": "1"
             });
 
             expect(call).to.be.calledOnce;
@@ -231,7 +249,7 @@ describe('API Resource Controller', () => {
                 "httpMethod": "ANY"
             });
 
-            expect(group.informers.length).to.equal(2);
+            expect(group.informers.length).to.equal(1);
             informer = await informer;
             expect(informer).to.be.called;
         });
@@ -277,15 +295,16 @@ describe('API Resource Controller', () => {
                 });
             });
 
-            resource = new Resource({id: 'name'}, connector, group);
+            resource = new Resource({restApiId: 'restApiId'}, connector, group);
         });
         it('should resolve record with given path', async () => {
             apiCall = sinon.fake(() => { return awsResponse({items: [{path: 'first'}, {path: 'second'}]}); });
             sinon.replace(connector.api, 'getResources', apiCall);
             // sinon.replace(resource, 'list', apiCall);
 
-            const result = await resource.find('restApiId', 'second');
-            expect(result.properties).to.be.eql({path: 'second', restApiId: "restApiId"});
+            const result = await resource.find('second');
+            expect(result.properties).to.be.eql({path: 'second'});
+            expect(result.defaults).to.be.eql({restApiId: 'restApiId'});
         });
         it('should call list with next position until path found', async () => {
             apiCall = sinon.stub();
@@ -293,8 +312,9 @@ describe('API Resource Controller', () => {
             apiCall.onSecondCall().returns(awsResponse({items: [{path: 'third'}, {path: 'forth'}]}));
             sinon.replace(connector.api, 'getResources', apiCall);
 
-            const result = await resource.find('restApiId', 'third', 0, 2);
-            expect(result.properties).to.be.eql({path: 'third', restApiId: "restApiId"});
+            const result = await resource.find('third', 0, 2);
+            expect(result.properties).to.be.eql({path: 'third'});
+            expect(result.defaults).to.be.eql({restApiId: 'restApiId'});
             expect(apiCall.args[0][0]).to.eql({restApiId: 'restApiId', limit: 2});
             expect(apiCall.args[1][0]).to.eql({restApiId: 'restApiId', limit: 2, position: '1'});
         });

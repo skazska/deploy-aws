@@ -1,8 +1,8 @@
 const Entity = require('../common/api-entity');
 
 class ApiGwResponseEntity extends Entity {
-    constructor (properties, connector, informer) {
-        super(properties, connector, informer, {idProperty: ['restApiId', 'resourceId', 'httpMethod', 'statusCode']});
+    constructor (properties, connector, informer, options) {
+        super(properties, connector, informer, {idProperty: ['restApiId', 'resourceId', 'httpMethod', 'statusCode'], defaults: options.defaults});
         this.entityName = 'AbstractEntity'
     }
 

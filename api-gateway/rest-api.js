@@ -7,7 +7,7 @@ class RestApiEntity extends Entity {
 
     constructor (properties, connector, informer) {
         super(properties, connector, informer, {idProperty: 'id'});
-        this.resourceApi = new ApiGwResource({}, connector, informer);
+        this.resourceApi = new ApiGwResource({restApiId: this.id}, connector, informer);
     }
 
     /**
@@ -39,7 +39,7 @@ class RestApiEntity extends Entity {
      */
     async readRoot() {
         //get root resource id
-        return await this.resourceApi.find(this.id, '/', null, 5);
+        return await this.resourceApi.find('/', null, 5);
     }
 
     /**
@@ -73,9 +73,9 @@ class RestApiEntity extends Entity {
      * @param restApiId
      * @return {*}
      */
-    static createEntity (properties, instance) {
-        return super.createEntity(properties, instance, this);
-    }
+    // static createEntity (properties, instance) {
+    //     return super.createEntity(properties, instance, this);
+    // }
 }
 
 class RestApi extends Api {

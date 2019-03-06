@@ -42,7 +42,8 @@ describe('LambdaFunction', () => {
         it('should have properties connector, informer, id, properties', () => {
             lambda = new LambdaFunction({some: 'prop'}, connector, informer);
             expect(lambda).to.have.property('connector').eql(connector);
-            expect(lambda).to.have.property('properties').eql({"some": "prop"});
+            expect(lambda).to.have.property('properties').eql({});
+            expect(lambda).to.have.property('defaults').eql({"some": "prop"});
             expect(lambda).to.have.property('informer').eql(informer);
             expect(lambda).to.have.property('entityConstructor');
         })
@@ -60,7 +61,7 @@ describe('LambdaFunction', () => {
                 });
             });
 
-            lambda = new LambdaFunction({some: 'prop'}, connector, group);
+            lambda = new LambdaFunction({}, connector, group);
             apiCall = sinon.fake(() => {
                 return awsResponse({FunctionName: 'name', result: 'result'});
             });
@@ -75,7 +76,6 @@ describe('LambdaFunction', () => {
             expect(apiCall.args[0][0]).to.be.eql({
                 "default": "value",
                 "prop": "val",
-                "some": "prop",
                 "FunctionName": "name",
                 "Publish": false
             });

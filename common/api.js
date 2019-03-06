@@ -1,3 +1,7 @@
+/**
+ * @module CommonApi
+ */
+
 const ApiBase = require('./api-base');
 const Entity = require('./api-entity');
 
@@ -10,14 +14,14 @@ const Entity = require('./api-entity');
 
 class CommonApi extends ApiBase {
     /**
-     * constructor
+     * @constructor
      * @param {Object} properties
      * @param {CommonAwsConnector} connector
      * @param {Inform} informer
      * @param {ApiEntity} entityConstructor
      */
     constructor (properties, connector, informer, entityConstructor) {
-        super(properties, connector, informer);
+        super({}, connector, informer, properties || {});
         this.entityConstructor = entityConstructor;
     }
 

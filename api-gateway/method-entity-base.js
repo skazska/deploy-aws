@@ -3,8 +3,8 @@ const AbstractResponse = require('./response-base');
 
 class ApiGwMethodEntityAbstract extends Entity {
 
-    constructor (properties, connector, informer) {
-        super(properties, connector, informer, {idProperty: ['restApiId', 'resourceId', 'httpMethod']});
+    constructor (properties, connector, informer, options) {
+        super(properties, connector, informer, {idProperty: ['restApiId', 'resourceId', 'httpMethod'], defaults: options.defaults});
         this.responseEntityConstructor = AbstractResponse;
         this.entityName = 'Abstract';
     }
@@ -52,11 +52,7 @@ class ApiGwMethodEntityAbstract extends Entity {
             'Set response: ' + statusCode,
             this.id.restApiId, this.id.resourceId, this.id.httpMethod, statusCode, params
         );
-        result.restApiId = this.id.restApiId;
-        result.resourceId = this.id.resourceId;
-        result.httpMethod = this.id.httpMethod;
-        // result.statusCode = statusCode;
-        return new this.responseEntityConstructor(result, this.connector, this.informer);
+        return this.constructor.createEntity(result, this, this.responseEntityConstructor, {httpMethod: this.id.httpMethod});
     }
 
     async getResponse(statusCode) {
@@ -65,11 +61,7 @@ class ApiGwMethodEntityAbstract extends Entity {
             'Get response: ' + statusCode,
             this.id.restApiId, this.id.resourceId, this.id.httpMethod, statusCode
         );
-        result.restApiId = this.id.restApiId;
-        result.resourceId = this.id.resourceId;
-        result.httpMethod = this.id.httpMethod;
-        // result.statusCode = statusCode;
-        return new this.responseEntityConstructor(result, this.connector, this.informer);
+        return this.constructor.createEntity(result, this, this.responseEntityConstructor, {httpMethod: this.id.httpMethod});
     }
 }
 

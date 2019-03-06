@@ -1,18 +1,20 @@
 const ApiGwResponseEntity = require('./response-base');
 const ApiGwMethodEntityAbstract = require('./method-entity-base');
+const ApiGwIntegration = require('./integration');
 const ApiGwIntegrationEntity = require('./integration-entity');
 
 class ApiGwMethodResponseEntity extends ApiGwResponseEntity {
-    constructor (properties, connector, informer) {
-        super(properties, connector, informer);
+    constructor (properties, connector, informer, options) {
+        super(properties, connector, informer, options);
         this.entityName = 'MethodResponse';
     }
 }
 
 class ApiGwMethodEntity extends ApiGwMethodEntityAbstract {
 
-    constructor (properties, connector, informer) {
-        super(properties, connector, informer, {idProperty: ['restApiId', 'resourceId', 'httpMethod']});
+    constructor (properties, connector, informer, options) {
+        super(properties, connector, informer, options);
+        this.integrationApi = new ApiGwIntegration({restApiId: this.id.restApiId, resourceId: this.id.resourceId, httpMethod: this.id.httpMethod}, connector, informer);
         this.responseEntityConstructor = ApiGwMethodResponseEntity;
         this.entityName = 'Method';
     }
@@ -24,15 +26,8 @@ class ApiGwMethodEntity extends ApiGwMethodEntityAbstract {
      */
     async addIntegration(integrationOptions) {
         //add new
-        const result = await this._informCall(
-            this.connector.createIntegration,
-            'Set integration: type ' + integrationOptions.type + ', uri ' + integrationOptions.uri,
-            this.id.restApiId, this.id.resourceId, this.id.httpMethod, integrationOptions
-        );
-        result.restApiId = this.id.restApiId;
-        result.resourceId = this.id.resourceId;
-        result.httpMethod = this.id.httpMethod;
-        return new ApiGwIntegrationEntity(result, this.connector, this.informer);
+        const result = await this.integrationApi.create(this.id.httpMethod, integrationOptions);
+        return result;
     }
 
     /**
@@ -42,15 +37,8 @@ class ApiGwMethodEntity extends ApiGwMethodEntityAbstract {
      */
     async readIntegration() {
         //add new
-        const result = await this._informCall(
-            this.connector.readIntegration,
-            'Set integration',
-            this.id.restApiId, this.id.resourceId, this.id.httpMethod
-        );
-        result.restApiId = this.id.restApiId;
-        result.resourceId = this.id.resourceId;
-        result.httpMethod = this.id.httpMethod;
-        return new ApiGwIntegrationEntity(result, this.connector, this.informer);
+        const result = await this.integrationApi.read(this.id.httpMethod);
+        return result;
     }
 
     /**

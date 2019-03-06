@@ -16,19 +16,21 @@ class ApiGwMethodAbstract extends Api {
 
     /**
      * creates resource
+     *
+     * @param name
      * @param {Object} properties
      */
-    async create (properties) {
+    async create (name, properties) {
         try {
             const result = await this._informCall(
-                this.connector['create' + this.entityName], 'Create ' + this.entityName + ' ' + properties.httpMethod,
-                properties.restApiId,
-                properties.resourceId,
-                properties.httpMethod,
+                this.connector['create' + this.entityName], 'Create ' + this.entityName + ' ' + name,
+                this.defaults.restApiId,
+                this.defaults.resourceId,
+                name,
                 properties
             );
 
-            return this._createEntity(result, {restApiId: properties.restApiId, resourceId: properties.resourceId});
+            return this._createEntity(result);
         } catch (e) {
             throw e;
         }
@@ -41,11 +43,16 @@ class ApiGwMethodAbstract extends Api {
      * @param resourceId
      * @param httpMethod
      */
-    async read (restApiId, resourceId, httpMethod) {
+    async read (httpMethod) {
         try {
-            const result = await this._informCall(this.connector['read' + this.entityName],
-                'Get ' + this.entityName + ' ' + httpMethod, restApiId, resourceId, httpMethod);
-            return result ? this._createEntity(result, {restApiId: restApiId, resourceId: resourceId}) : null;
+            const result = await this._informCall(
+                this.connector['read' + this.entityName],
+                'Get ' + this.entityName + ' ' + httpMethod,
+                this.defaults.restApiId,
+                this.defaults.resourceId,
+                httpMethod
+            );
+            return result ? this._createEntity(result) : null;
         } catch (e) {
             if (e.code === 'ResourceNotFoundException') {
                 return null;
