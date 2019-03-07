@@ -67,12 +67,13 @@ describe('REST API Controller', () => {
         it('#create(properties) should return promise, invoke rest-api(createRestApi), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'createRestApi', apiCall);
 
-            const result = await restApi.create({prop: 'val'});
+            const result = await restApi.create('name', {prop: 'val'});
             expect(result.properties).to.be.eql({prop: 'response', "id": 'id'});
             expect(result.resourceApi).to.have.property('defaults').eql({restApiId: 'id'});
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
+                "name": "name",
                 "prop": "val"
             });
 

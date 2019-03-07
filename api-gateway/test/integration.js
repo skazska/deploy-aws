@@ -63,8 +63,9 @@ describe('API Integration Controller', () => {
                 });
             });
 
+            // integration = new Integration({restApiId: 'restApi', resourceId: 'resourceId', httpMethod: 'httpMethod'}, connector, group);
             integration = new Integration({restApiId: 'restApi', resourceId: 'resourceId'}, connector, group);
-            apiCall = sinon.fake(() => { return awsResponse({prop: 'response', httpMethod: 'httpMethod'}); });
+            apiCall = sinon.fake(() => { return awsResponse({"httpMethod": "httpMethod", "prop": "response"}); });
         });
         it('#create(properties) should return promise, invoke integration(createResource), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'putIntegration', apiCall);
@@ -75,6 +76,12 @@ describe('API Integration Controller', () => {
                 "prop": "response"
             });
             expect(result.defaults).to.be.eql({
+                // "httpMethod": "httpMethod",
+                "resourceId": "resourceId",
+                "restApiId": "restApi"
+            });
+            expect(result.id).to.be.eql({
+                "httpMethod": "httpMethod",
                 "resourceId": "resourceId",
                 "restApiId": "restApi"
             });
@@ -98,6 +105,11 @@ describe('API Integration Controller', () => {
                 "prop": "response"
             });
             expect(result.defaults).to.be.eql({
+                "resourceId": "resourceId",
+                "restApiId": "restApi"
+            });
+            expect(result.id).to.be.eql({
+                "httpMethod": "httpMethod",
                 "resourceId": "resourceId",
                 "restApiId": "restApi"
             });

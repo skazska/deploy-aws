@@ -126,7 +126,7 @@ describe('AWS Lambda Connector ', () => {
         let result = 'initial';
         try {
             const restApi = new RestApi({});
-            const rest = await restApi.create({name: 'aws-deploy-test-api'});
+            const rest = await restApi.create('aws-deploy-test-api', {});
             result = await connector.addFunctionPermission(FUNC_NAME, null, 'test', {
                 SourceArn: 'arn:aws:execute-api:'+region+':'+accountId+':'+rest.id+'/*/*/*'
             });

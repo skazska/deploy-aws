@@ -92,12 +92,12 @@ class RestApi extends Api {
      * creates rest-api
      * @param {Object} properties
      */
-    async create (properties) {
+    async create (name, properties) {
         try {
             const resp = await this._informCall(
                 this.connector.createRestApi,
-                'Create rest-api ' + properties.name,
-                properties);
+                'Create rest-api ' + name,
+                Object.assign({name: name}, properties));
 
             return this._createEntity(resp);
         } catch (e) {
@@ -173,7 +173,7 @@ class RestApi extends Api {
         }
 
         if (!api) {
-            return await this.create(Object.assign({name: name}, params));
+            return await this.create(name, params);
         } else {
             return await this._createEntity(api);
         }

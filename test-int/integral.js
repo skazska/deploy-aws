@@ -36,7 +36,8 @@ function createInformer(renderer) {
 }
 
 
-describe('Integral scenarios', () => {
+describe('Integral scenarios', function() {
+    this.timeout(12000);
     AWSGlobal.config.loadFromPath('./.aws-cfg.json');
 
     const infoCall = sinon.fake();
@@ -101,7 +102,7 @@ describe('Integral scenarios', () => {
 
     });
 
-    it
+    //it
 
     after(async () => {
         await lambdaFunction.delete();

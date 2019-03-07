@@ -38,9 +38,10 @@ class CommonApi extends ApiBase {
 
     /**
      * creates entity through api
+     * @param {string} name
      * @param {Object} properties
      */
-    create (properties) {
+    create (name, properties) {
         this.properties = properties;
     }
 
