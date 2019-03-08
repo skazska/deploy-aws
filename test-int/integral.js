@@ -60,6 +60,20 @@ describe('Integral scenarios', function() {
     let funcName = null;
     let funcArn = null;
 
+    let api = null;
+    let root = null;
+
+    let resource = null;
+    let resource1 = null;
+
+    let meth = null;
+    let methResponse = null;
+
+    let integration = null;
+    let intResponse = null;
+
+    let resources = null;
+
     it('Create: function', async () => {
         lambdaFunction = await lambdaApiController.create(FUNC_NAME,
             {MemorySize: 128, Runtime: "nodejs8.10", Handler: "index.handler",
@@ -71,38 +85,92 @@ describe('Integral scenarios', function() {
 
     });
 
-    it('Create: api->resource->method->integration', async () => {
+    it('Create: api and read root resource', async () => {
         try {
-            const api = await restApiController.create({name: API_NAME});
-            const root = await api.readRoot();
-            const resource = await root.addResource('test');
-            const resource1 = await resource.addResource('res');
-            const meth = await resource1.addMethod('ANY');
-            const integration = await meth.addIntegration({
+            api = await restApiController.create(API_NAME, {});
+            root = await api.readRoot();
+            expect(root).not.to.be.empty;
+        } catch (e) {
+            throw e;
+        }
+    });
+
+
+    it('Create: resources', async () => {
+        try {
+            resource = await root.addResource('test');
+            expect(resource).not.to.be.empty;
+            resource1 = await resource.addResource('res');
+            expect(resource1).not.to.be.empty;
+        } catch (e) {
+            throw e;
+        }
+    });
+
+    it('Create: method and response', async () => {
+        try {
+            meth = await resource1.addMethod('ANY');
+            expect(meth).not.to.be.empty;
+            methResponse = await meth.addResponse('200', {});
+            expect(methResponse).not.to.be.empty;
+
+        } catch (e) {
+            throw e;
+        }
+    });
+
+    it('Create: integration and response', async () => {
+        try {
+            integration = await meth.addIntegration({
                 type: 'AWS_PROXY',
                 integrationHttpMethod: 'POST',
                 uri: lambdaUri(funcArn)
             });
             expect(integration).not.to.be.empty;
+            intResponse = await integration.addResponse('200', {});
+            expect(intResponse).not.to.be.empty;
         } catch (e) {
             throw e;
         }
-
-
-        // expect(result.properties).to.be.eql({prop: 'response', "id": 'id'});
-        //
-        // expect(apiCall).to.be.calledOnce;
-        // expect(apiCall.args[0][0]).to.be.eql({
-        //     "prop": "val"
-        // });
-        //
-        // expect(group.informers.length).to.equal(1);
-        // informer = await informer;
-        // expect(informer).to.be.called;
-
     });
 
-    //it
+    it('List resources', async () => {
+        try {
+            const resources = await api.listResources({embed: ['methods']});
+            expect(resources).not.to.be.empty;
+
+            // {
+            //     "ANY": {
+            //         "httpMethod": "ANY",
+            //         "authorizationType": "NONE",
+            //         "apiKeyRequired": false,
+            //         "methodResponses": {
+            //             "200": {
+            //                 "statusCode": "200"
+            //             }
+            //         },
+            //         "methodIntegration": {
+            //             "type": "AWS_PROXY",
+            //             "httpMethod": "POST",
+            //             "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:266895356213:function:aws-deploy-test-function-integral/invocations",
+            //             "passthroughBehavior": "WHEN_NO_MATCH",
+            //             "timeoutInMillis": 29000,
+            //             "cacheNamespace": "ak8465",
+            //             "cacheKeyParameters": [],
+            //             "integrationResponses": {
+            //                 "200": {
+            //                     "statusCode": "200"
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
+
+        } catch (e) {
+            throw e;
+        }
+    });
+
 
     after(async () => {
         await lambdaFunction.delete();

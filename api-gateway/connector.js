@@ -94,7 +94,7 @@ class ApiGatewayConnector extends CommonAwsConnector {
      **************************************************************/
 
     listResources (restApiId, position, limit, params) {
-        var params = Object.assign({
+        const props = Object.assign({
             //restApiId: restApiId, /* required */
             limit: limit || 25
             // position: position
@@ -104,22 +104,22 @@ class ApiGatewayConnector extends CommonAwsConnector {
             // ]
         }, params || {});
         if (typeof position !== 'undefined' && position !== null) {
-            params.position = position;
+            props.position = position;
         }
-        params.restApiId = restApiId;
-        return this.api.getResources(params).promise();
+        props.restApiId = restApiId;
+        return this.api.getResources(props).promise();
     }
 
-    readResource (restApiId, id) {
-        const params = {
+    readResource (restApiId, id, params) {
+        const props = Object.assign({
             resourceId: id, /* required */
             restApiId: restApiId /* required */
             // embed: [
             //     'STRING_VALUE',
             //     /* more items */
             // ]
-        };
-        return this.api.getResource(params).promise();
+        }, params || {});
+        return this.api.getResource(props).promise();
     }
 
     createResource (restApiId, parentId, pathPart) {

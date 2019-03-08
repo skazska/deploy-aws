@@ -22,7 +22,7 @@ class ApiGwResourceEntity extends Entity {
      * @param {string} id
      */
     async delete () {
-        return await ApiGwResourceEntity.removeResource(this.id, this);
+        return await ApiGwResourceEntity.deleteResource(this.id, this);
     }
 
     /**
@@ -38,21 +38,6 @@ class ApiGwResourceEntity extends Entity {
             {restApiId: this.id.restApiId, parentId: this.id.id, pathPart: pathPart}
         );
     }
-
-    /**
-     * TODO add tests
-     * @param pathPart
-     * @return {Promise<void>}
-     */
-    // async readResource(pathPart) {
-    //     //add new
-    //     const result = await this._informCall(
-    //         this.resourceApi.read.bind(this.resourceApi),
-    //         'read resource ' + pathPart,
-    //         {restApiId: this.id.restApiId, parentId: this.id.id, pathPart: pathPart}
-    //     );
-    //     return result;
-    // }
 
     /**
      * adds method to resource
@@ -92,7 +77,7 @@ class ApiGwResourceEntity extends Entity {
      * @param instance
      * @return {Promise<*>}
      */
-    static async removeResource (id, instance) {
+    static async deleteResource (id, instance) {
         try {
             const result = await instance._informCall(
                 instance.connector.deleteResource,

@@ -142,17 +142,30 @@ describe('ApiGatewayController', () => {
         });
         it('should call RestApi method create if list result did not contain item with restApi name', async () => {
             listStub.returns(connectorResponse({items: [
-                {id: 'id', name: 'name1'},
-                {id: 'id', name: 'name1'}
+                {id: 'id1', name: 'name1'},
+                {id: 'id2', name: 'name2'}
             ]}));
             createStub.returns(connectorResponse({id: 'id', name: 'name', description: 'STRING_VALUE'}));
             listResourcesStub.returns(connectorResponse({items: [
                 {id: 'resId', pathPart: '/', path: '/'},
-                {id: 'testResId', pathPart: 'orphan', path: '/orphan'}
+                {id: 'clientsId', pathPart: 'clients', path: '/clients', parentId: 'resId', resourceMethods: {"ANY": {
+                    "httpMethod": "ANY", "authorizationType": "NONE", "apiKeyRequired": false,
+                    methodResponses: { "200": { "statusCode": "200" }},
+                    methodIntegration: {
+                        "type": "AWS_PROXY", "httpMethod": "POST",
+                        "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:266895356213:function:aws-deploy-test-function-integral/invocations",
+                        "passthroughBehavior": "WHEN_NO_MATCH",  "timeoutInMillis": 29000,
+                        "cacheNamespace": "ak8465",
+                        "cacheKeyParameters": [],
+                        integrationResponses: { "200": { "statusCode": "200" } }
+                    }
+                }}},
+                {id: 'testResId', pathPart: 'orphan', path: '/orphan', parentId: 'resId'}
             ]}));
             createResourceStub
-                .onFirstCall().returns(connectorResponse({id: 'resId1', pathPart: 'clients', path: '/clients'}))
-                .onSecondCall().returns(connectorResponse({id: 'resId2', pathPart: 'test', path: '/clients/test'}));
+                // .onFirstCall().returns(connectorResponse({id: 'resId1', pathPart: 'clients', path: '/clients'}))
+                // .onSecondCall()
+                .returns(connectorResponse({id: 'resId2', pathPart: 'test', path: '/clients/test'}));
 
             deleteResourceStub.returns(connectorResponse({request: 'done'}));
 
