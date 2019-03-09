@@ -94,7 +94,7 @@ describe('ApiGatewayController', () => {
             listResourcesStub = sinon.stub(apiGw.connector, 'listResources');
             readResourceStub = sinon.stub(apiGw.connector, 'readResource');
             createResourceStub = sinon.stub(apiGw.connector, 'createResource');
-            deleteResourceStub = sinon.stub(apiGw.connector.api, 'deleteResource');
+            deleteResourceStub = sinon.stub(apiGw.connector, 'deleteResource');
 
             readMethodStub = sinon.stub(apiGw.connector, 'readMethod');
             createMethodStub = sinon.stub(apiGw.connector, 'createMethod');
@@ -130,7 +130,18 @@ describe('ApiGatewayController', () => {
                                 },
                                 "resources" : {
                                     "test": {
-
+                                        "ANY": {
+                                            "type": "AWS_PROXY",
+                                            "awsProperties": {
+                                                "description": "STRING_VALUE"
+                                            },
+                                            "integration": {
+                                                "lambda": "FunctionArn",
+                                                "awsProperties": {
+                                                    "description": "STRING_VALUE"
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -168,6 +179,7 @@ describe('ApiGatewayController', () => {
                 .returns(connectorResponse({id: 'resId2', pathPart: 'test', path: '/clients/test'}));
 
             deleteResourceStub.returns(connectorResponse({request: 'done'}));
+            deleteMethodStub.returns(connectorResponse({request: 'done'}));
 
 
             const entity = await apiGw.deploy('name', props, opts, group);

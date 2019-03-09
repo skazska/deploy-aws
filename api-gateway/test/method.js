@@ -49,6 +49,7 @@ describe('API Method Controller', () => {
     describe('methods', () => {
         let infoCall;
         let apiCall;
+        let apiCallResp;
         let method;
         let group;
         let informer;
@@ -64,7 +65,8 @@ describe('API Method Controller', () => {
             });
 
             method = new Method({restApiId: 'restApi', resourceId: 'resourceId'}, connector, group);
-            apiCall = sinon.fake(() => { return awsResponse({prop: 'response', httpMethod: "httpMethod"}); });
+            apiCallResp = {prop: 'response', httpMethod: "httpMethod"};
+            apiCall = sinon.fake(() => { return awsResponse(apiCallResp); });
         });
         it('#create(properties) should return promise, invoke method(createResource), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'putMethod', apiCall);
@@ -124,6 +126,27 @@ describe('API Method Controller', () => {
             informer = await informer;
             expect(informer).to.be.called;
         });
+
+        it('#delete() should return promise invoke rest-api(deleteRestApi), addInformer which fires change and complete', async () => {
+            sinon.replace(connector.api, 'deleteMethod', apiCall);
+            const result = await method.delete('httpMethod');
+            expect(result).to.be.eql(apiCallResp);
+
+            expect(apiCall).to.be.calledOnce;
+            expect(apiCall.args[0][0]).to.be.eql({
+                "restApiId": "restApi",
+                "resourceId": "resourceId",
+                "httpMethod": "httpMethod",
+            });
+
+            expect(method.informer).to.be.equal(group);
+
+            expect(group.informers.length).to.equal(1);
+            informer = await informer;
+            expect(informer).to.be.called;
+        });
+
+
         afterEach(() => {
             sinon.restore();
         });
@@ -330,24 +353,24 @@ describe('API Method Controller', () => {
             expect(informer).to.be.called;
         });
 
-        it('#delete() should return promise invoke rest-api(deleteRestApi), addInformer which fires change and complete', async () => {
-            sinon.replace(entity.connector.api, 'deleteMethod', apiCall);
-            const result = await entity.delete();
-            expect(result).to.be.eql({statusCode: '200', prop: 'response'});
-
-            expect(apiCall).to.be.calledOnce;
-            expect(apiCall.args[0][0]).to.be.eql({
-                "resourceId": "2",
-                "restApiId": "1",
-                "httpMethod": "httpMethod"
-            });
-
-            expect(entity.informer).to.be.equal(group);
-
-            expect(group.informers.length).to.equal(1);
-            informer = await informer;
-            expect(informer).to.be.called;
-        });
+        // it('#delete() should return promise invoke rest-api(deleteRestApi), addInformer which fires change and complete', async () => {
+        //     sinon.replace(entity.connector.api, 'deleteMethod', apiCall);
+        //     const result = await entity.delete();
+        //     expect(result).to.be.eql({statusCode: '200', prop: 'response'});
+        //
+        //     expect(apiCall).to.be.calledOnce;
+        //     expect(apiCall.args[0][0]).to.be.eql({
+        //         "resourceId": "2",
+        //         "restApiId": "1",
+        //         "httpMethod": "httpMethod"
+        //     });
+        //
+        //     expect(entity.informer).to.be.equal(group);
+        //
+        //     expect(group.informers.length).to.equal(1);
+        //     informer = await informer;
+        //     expect(informer).to.be.called;
+        // });
         afterEach(() => {
             sinon.restore();
         });

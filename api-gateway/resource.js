@@ -46,6 +46,10 @@ class ApiGwResource extends Api {
         }
     }
 
+    async delete (id) {
+        return await ApiGwResourceEntity.deleteResource(id, this);
+    }
+
     /**
      * gets list of entities
      * @param {Object} [options]

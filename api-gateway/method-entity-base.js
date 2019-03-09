@@ -20,25 +20,25 @@ class ApiGwMethodEntityAbstract extends Entity {
     /**
      * delete entity
      */
-    async delete () {
-        const idParam = this.id;
-        try {
-            const result = await this._informCall(
-                this.connector['delete' + this.entityName],
-                'Delete rest-api-method ' + idParam.resourceId + idParam.httpMethod,
-                idParam.restApiId,
-                idParam.resourceId,
-                idParam.httpMethod
-            );
-            return result;
-        } catch (e) {
-            if (e.code === 'ResourceNotFoundException') {
-                return null;
-            } else {
-                throw e;
-            }
-        }
-    }
+    // async delete () {
+    //     const idParam = this.id;
+    //     try {
+    //         const result = await this._informCall(
+    //             this.connector['delete' + this.entityName],
+    //             'Delete rest-api-method ' + idParam.resourceId + idParam.httpMethod,
+    //             idParam.restApiId,
+    //             idParam.resourceId,
+    //             idParam.httpMethod
+    //         );
+    //         return result;
+    //     } catch (e) {
+    //         if (e.code === 'ResourceNotFoundException') {
+    //             return null;
+    //         } else {
+    //             throw e;
+    //         }
+    //     }
+    // }
 
     /**
      * addsMethod's Response config

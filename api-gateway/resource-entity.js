@@ -26,6 +26,15 @@ class ApiGwResourceEntity extends Entity {
     }
 
     /**
+     * delete subresource
+     * @param {string} id
+     */
+    async deleteResource (id) {
+        return await ApiGwResourceEntity.deleteResource(id, this);
+    }
+
+
+    /**
      * adds resource to rest-api
      * @param pathPart
      * @return {Promise<*|void>}
@@ -46,9 +55,17 @@ class ApiGwResourceEntity extends Entity {
      * @return {Promise<*|void>}
      */
     async addMethod(httpMethod, properties) {
-        //add new
-        const result = await this.methodApi.create(httpMethod,properties || {});
-        return result;
+        return await this.methodApi.create(httpMethod,properties || {});
+    }
+
+    /**
+     * adds method to resource
+     * @param {string} httpMethod
+     * @param {Object} [properties]
+     * @return {Promise<*|void>}
+     */
+    async deleteMethod(httpMethod) {
+        return await this.methodApi.delete(httpMethod);
     }
 
     /**

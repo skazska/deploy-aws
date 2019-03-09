@@ -49,21 +49,16 @@ class RestApiEntity extends Entity {
      */
     async listResources(params) {
         //add new
-        const result = await this._informCall(
-            this.resourceApi.list.bind(this.resourceApi),
-            'list resources',
-            Object.assign({restApiId: this.id}, params || {})
-        );
-        return result;
+        return await this.resourceApi.list(params || {});
     }
 
-    async removeResource(id) {
-        const result = await this._informCall(
-            this.resourceApi.list.bind(this.resourceApi),
-            'list resources',
-            Object.assign({restApiId: this.id}, params || {})
-        );
-        return result;
+    /**
+     * TODO add tests
+     * @param id
+     * @return {Promise<*>}
+     */
+    async deleteResource(id) {
+        return await this.resourceApi.delete(id);
     }
 
     /**

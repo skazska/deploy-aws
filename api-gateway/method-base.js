@@ -62,16 +62,16 @@ class ApiGwMethodAbstract extends Api {
         }
     }
 
-    // /**
-    //  * gets list of methods of resource
-    //  */
-    // list (options) {
-    //     return this._informCall(
-    //         this.connector['list' + this.entityName + 's'],
-    //         'Get '+ this.entityName +' for ' + this.defaults.restApiId + ', ' + this.defaults.resourceId,
-    //         this.defaults.restApiId, this.defaults.resourceId
-    //     );
-    // }
+    /**
+     * gets list of methods of resource
+     */
+    delete (name) {
+        return this._informCall(
+            this.connector['delete' + this.entityName],
+            'Delete '+ this.entityName +' for ' + this.defaults.restApiId + ', ' + this.defaults.resourceId,
+            this.defaults.restApiId, this.defaults.resourceId, name
+        );
+    }
 
 }
 

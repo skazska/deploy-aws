@@ -3,8 +3,8 @@ const RestApi = require('./api-gateway/rest-api');
 const { Transition } = require('./utils/arraysProcessor');
 const ApiGwResourceEntity = require('./api-gateway/resource-entity');
 
-
 const RESOURCE_LIST_LIMIT = 200;
+const HTTP_METHODS = ['ANY', 'GET', 'POST', 'PUT', 'HEAD', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE', 'CONNECT'];
 
 class ApiGateway {
 
@@ -53,26 +53,45 @@ class ApiGateway {
         }
     }
 
+    async deployMethod(res, method, current, methods) {
+        return await 1;
+    }
+
     async deployResource(entity, resource, currentResource, allResources) {
         let res = null;
-        let methods = [];
 
         try {
             if (currentResource) {
                 res = ApiGwResourceEntity.createEntity(currentResource, entity, ApiGwResourceEntity);
             } else {
                 //add resource
-                res = await entity.addResource(resource.pathPart);
+                res = await entity.addResource(resource.pathPart, resource.awsProperties);
             }
 
             //deploy methods
+
+            let curMethods = res.val('resourceMethods') || {};
+            curMethods = Object.keys(curMethods).map(name => {
+                return Object.assign({httpMethod: name}, curMethods[name]);
+            });
+            let methods = Object.keys(resource).filter(name => HTTP_METHODS.some(m => m === name))
+                .map(name => { return Object.assign({httpMethod: name}, resource[name]); });
+
+            const transition = new Transition((oldItem, newItem) => oldItem.pathPart === newItem.pathPart)
+                .setRemover(oldItem => res.deleteMethod(oldItem.httpMethod))
+                .setAdjustor((oldItem, newItem) => {
+                    return this.deployMethod(res, newItem, oldItem, curMethods)
+                })
+                .setCreator(newItem => this.deployMethod(res, newItem, null, curMethods))
+                .perform(curMethods, methods);
 
             //deploy subresources
             if (resource.resources) {
                 await this.deployResources(res, resource.resources, allResources);
             }
 
-            return res;
+            //thin: transition is a set of callbacks and we wait for it here even after had waited for deployResources
+            return await Promise.all(Object.values(transition).map(set => Promise.all(set)));
         } catch (e) {
             throw e;
         }
@@ -92,8 +111,10 @@ class ApiGateway {
         const oldRes = currentResources.filter(res => res.parentId === parent.id.id);
 
         const transition = new Transition((oldItem, newItem) => oldItem.pathPart === newItem.pathPart)
-            .setRemover(oldItem => parent.removeResource(oldItem.pathPart))
-            .setAdjustor((oldItem, newItem) => this.deployResource(parent, newItem, oldItem, currentResources))
+            .setRemover(oldItem => {return parent.deleteResource(oldItem.id);})
+            .setAdjustor((oldItem, newItem) => {
+                return this.deployResource(parent, newItem, oldItem, currentResources)
+            })
             .setCreator(newItem => this.deployResource(parent, newItem, null, currentResources))
             .perform(oldRes, newRes);
 
