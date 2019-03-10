@@ -37,7 +37,7 @@ describe('ApiGatewayController', () => {
             // expect(apiGw.restApi.connector).to.be.instanceof(Connector);
         });
     });
-    xdescribe('#deploy', () => {
+    describe('#deploy', () => {
         const preparePackageStub = sinon.stub();
         
         let infoCall;
@@ -62,10 +62,20 @@ describe('ApiGatewayController', () => {
         let updateMethodStub;
         let deleteMethodStub;
 
+        let createMethodResponseStub;
+        let readMethodResponseStub;
+        let updateMethodResponseStub;
+        let deleteMethodResponseStub;
+
         let createIntegrationStub;
         let readIntegrationStub;
         let updateIntegrationStub;
         let deleteIntegrationStub;
+
+        let createIntegrationResponseStub;
+        let readIntegrationResponseStub;
+        let updateIntegrationResponseStub;
+        let deleteIntegrationResponseStub;
 
         let props;
         let opts;
@@ -100,9 +110,17 @@ describe('ApiGatewayController', () => {
             createMethodStub = sinon.stub(apiGw.connector, 'createMethod');
             deleteMethodStub = sinon.stub(apiGw.connector, 'deleteMethod');
 
+            readMethodResponseStub = sinon.stub(apiGw.connector, 'readMethodResponse');
+            createMethodResponseStub = sinon.stub(apiGw.connector, 'createMethodResponse');
+            deleteMethodResponseStub = sinon.stub(apiGw.connector, 'deleteMethodResponse');
+
             readIntegrationStub = sinon.stub(apiGw.connector, 'readIntegration');
             createIntegrationStub = sinon.stub(apiGw.connector, 'createIntegration');
             deleteIntegrationStub = sinon.stub(apiGw.connector, 'deleteIntegration');
+
+            readIntegrationResponseStub = sinon.stub(apiGw.connector, 'readIntegrationResponse');
+            createIntegrationResponseStub = sinon.stub(apiGw.connector, 'createIntegrationResponse');
+            deleteIntegrationResponseStub = sinon.stub(apiGw.connector, 'deleteIntegrationResponse');
 
             props = new Promise(resolve => {
                 setImmediate(
@@ -115,6 +133,7 @@ describe('ApiGatewayController', () => {
                     setImmediate(
                         resolve,
                         {
+                            "new": {},
                             "clients": {
                                 "ANY": {
                                     "type": "AWS_PROXY",
@@ -125,7 +144,13 @@ describe('ApiGatewayController', () => {
                                         "lambda": "FunctionArn",
                                         "awsProperties": {
                                             "description": "STRING_VALUE"
+                                        },
+                                        "responses": {
+
                                         }
+                                    },
+                                    "responses": {
+
                                     }
                                 },
                                 "resources" : {
@@ -139,7 +164,13 @@ describe('ApiGatewayController', () => {
                                                 "lambda": "FunctionArn",
                                                 "awsProperties": {
                                                     "description": "STRING_VALUE"
+                                                },
+                                                "responses": {
+
                                                 }
+                                            },
+                                            "responses": {
+
                                             }
                                         }
                                     }
@@ -157,6 +188,7 @@ describe('ApiGatewayController', () => {
                 {id: 'id2', name: 'name2'}
             ]}));
             createStub.returns(connectorResponse({id: 'id', name: 'name', description: 'STRING_VALUE'}));
+
             listResourcesStub.returns(connectorResponse({items: [
                 {id: 'resId', pathPart: '/', path: '/'},
                 {id: 'clientsId', pathPart: 'clients', path: '/clients', parentId: 'resId', resourceMethods: {"ANY": {
@@ -173,13 +205,36 @@ describe('ApiGatewayController', () => {
                 }}},
                 {id: 'testResId', pathPart: 'orphan', path: '/orphan', parentId: 'resId'}
             ]}));
-            createResourceStub
-                // .onFirstCall().returns(connectorResponse({id: 'resId1', pathPart: 'clients', path: '/clients'}))
-                // .onSecondCall()
-                .returns(connectorResponse({id: 'resId2', pathPart: 'test', path: '/clients/test'}));
 
+            createResourceStub
+                .withArgs('id', 'resId', 'new')
+                    .returns(connectorResponse({id: 'newResId1', pathPart: 'new', path: '/new'}))
+                .withArgs('id', 'clientsId', 'test')
+                    .returns(connectorResponse({id: 'resId2', pathPart: 'test', path: '/clients/test'}));
+
+            // updateResourceStub.returns({id: 'clientsId', pathPart: 'clients', path: '/clients',
+            // });
             deleteResourceStub.returns(connectorResponse({request: 'done'}));
+
+            createMethodStub.returns(connectorResponse({httpMethod: 'ANY', authorizationType: 'NONE',
+                // requestParameters: {},
+                // requestModels: {},
+                // methodResponses: {}
+            }));
+            // updateMethodStub.returns({ "statusCode": "200" });
+
             deleteMethodStub.returns(connectorResponse({request: 'done'}));
+
+
+            createMethodResponseStub.returns(connectorResponse({statusCode: '200', smth: 'NONE',
+                // requestParameters: {},
+                // requestModels: {},
+                // methodResponses: {}
+            }));
+            // updateMethodStub.returns({ "statusCode": "200" });
+
+            deleteMethodStub.returns(connectorResponse({request: 'done'}));
+
 
 
             const entity = await apiGw.deploy('name', props, opts, group);
@@ -187,9 +242,12 @@ describe('ApiGatewayController', () => {
             expect(createStub.args[0][0]).to.deep.include({
                 name: 'name', description: 'STRING_VALUE'
             });
-            expect(createResourceStub.args[0]).eql(['id', 'resId', 'clients']);
-            expect(createResourceStub.args[1]).eql(['id', 'resId1', 'test']);
+            expect(createResourceStub.args[0]).eql(['id', 'clientsId', 'test']);
+            expect(createResourceStub.args[1]).eql(['id', 'resId', 'new']);
             expect(deleteResourceStub.args[0]).eql(['id', 'testResId']);
+
+            expect(createMethodStub.args[0]).eql(['id', 'resId2', 'ANY', {"description": "STRING_VALUE"}]);
+
         });
     });
 });

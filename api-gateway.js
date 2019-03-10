@@ -54,47 +54,46 @@ class ApiGateway {
         }
     }
 
-    async deployIntegration(method, current) {
+    async deployResponse(entity, response, current) {
         return await 1;
     }
 
-    async deployMethod(res, method, current, methods) {
+    async deployIntegration(method, integration, current) {
+        return await 1;
+    }
+
+    async deployMethod(res, method, current) {
         let meth = null;
 
         try {
             if (current) {
                 meth = ApiGwMethodEntity.createEntity(current, res, ApiGwMethodEntity);
+
+                // await meth.update(method.awsProperties)
+
             } else {
-                //add method
-                // const props = Object.assign({type: method.type}, method.awsProperties);
-                // if (props.type === '')
                 meth = await res.addMethod(method.httpMethod, method.awsProperties);
             }
 
-            let responseTransition = null;
             //method response
-            if (method.methodResponses) {
-                let curResponses = meth.val('methodResponses') || {};
-                curResponses = Object.keys(curResponses).map(code => {
-                    return Object.assign({statusCode: code}, curResponses[code]);
-                });
-                let responses = Object.keys(method).map(code => {
-                    return Object.assign({statusCode: code}, method[code]);
-                });
+            let curResponses = meth.val('responses') || {};
+            curResponses = Object.keys(curResponses).map(code => {
+                return Object.assign({statusCode: code}, curResponses[code]);
+            });
+            let responses = Object.keys(method).map(code => {
+                return Object.assign({statusCode: code}, method[code]);
+            });
 
-                const responseTransition = new Transition((oldItem, newItem) => oldItem.pathPart === newItem.pathPart)
-                    .setRemover(oldItem => method.deleteResponse(oldItem.statusCode))
-                    .setAdjustor((oldItem, newItem) => {
-                        return method.updateResponse(newItem, oldItem)
-                    })
-                    .setCreator(newItem => this.deployMethod(res, newItem, null, curMethods))
-                    .perform(curResponses, responses);
+            const responseTransition = new Transition((oldItem, newItem) => oldItem.pathPart === newItem.pathPart)
+                .setRemover(oldItem => method.deleteResponse(oldItem.statusCode))
+                .setAdjustor((oldItem, newItem) => this.deployResponse(res, newItem, oldItem))
+                .setCreator(newItem => this.deployResponse(res, newItem))
+                .perform(curResponses, responses);
 
-            }
 
             //integration
             if (method.methodIntegration) {
-                await this.deployIntegration(meth, method.methodIntegration);
+                await this.deployIntegration(meth, meth.val('integration') || {}, method.methodIntegration);
             }
 
             //thin: transition is a set of callbacks and we wait for it here even after had waited for deployResources
@@ -112,6 +111,9 @@ class ApiGateway {
         try {
             if (currentResource) {
                 res = ApiGwResourceEntity.createEntity(currentResource, entity, ApiGwResourceEntity);
+
+                // await res.update(resource.awsProperties)
+
             } else {
                 //add resource
                 res = await entity.addResource(resource.pathPart, resource.awsProperties);
@@ -129,9 +131,9 @@ class ApiGateway {
             const transition = new Transition((oldItem, newItem) => oldItem.pathPart === newItem.pathPart)
                 .setRemover(oldItem => res.deleteMethod(oldItem.httpMethod))
                 .setAdjustor((oldItem, newItem) => {
-                    return this.deployMethod(res, newItem, oldItem, curMethods)
+                    return this.deployMethod(res, newItem, oldItem)
                 })
-                .setCreator(newItem => this.deployMethod(res, newItem, null, curMethods))
+                .setCreator(newItem => this.deployMethod(res, newItem))
                 .perform(curMethods, methods);
 
             //deploy subresources
@@ -145,6 +147,7 @@ class ApiGateway {
             throw e;
         }
     }
+
 
     /**
      *

@@ -22,7 +22,7 @@ class ApiGwResourceEntity extends Entity {
      * @param {string} id
      */
     async delete () {
-        return await ApiGwResourceEntity.deleteResource(this.id, this);
+        return await ApiGwResourceEntity.deleteResource(this.id.id, this);
     }
 
     /**
@@ -98,9 +98,9 @@ class ApiGwResourceEntity extends Entity {
         try {
             const result = await instance._informCall(
                 instance.connector.deleteResource,
-                'Delete rest-api-resource ' + id.id,
-                id.restApiId,
-                id.id
+                'Delete rest-api-resource ' + id,
+                instance.id.restApiId,
+                id
             );
             return result;
         } catch (e) {
