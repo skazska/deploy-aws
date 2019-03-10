@@ -315,10 +315,10 @@ describe('API Method Controller', () => {
             expect(informer).to.be.called;
         });
 
-        it('#getResponse() should return promise, invoke getMethodResponse, addInformer which fires change and complete', async () => {
+        it('#readResponse() should return promise, invoke getMethodResponse, addInformer which fires change and complete', async () => {
             sinon.replace(entity.connector.api, 'getMethodResponse', apiCall);
             try {
-                responseEntity = await entity.getResponse('200');
+                responseEntity = await entity.readResponse('200');
             } catch (e) {
                 throw e;
             }

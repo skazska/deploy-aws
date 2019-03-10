@@ -2,6 +2,7 @@ const Connector = require('./api-gateway/connector');
 const RestApi = require('./api-gateway/rest-api');
 const { Transition } = require('./utils/arraysProcessor');
 const ApiGwResourceEntity = require('./api-gateway/resource-entity');
+const ApiGwMethodEntity = require('./api-gateway/method-entity');
 
 const RESOURCE_LIST_LIMIT = 200;
 const HTTP_METHODS = ['ANY', 'GET', 'POST', 'PUT', 'HEAD', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE', 'CONNECT'];
@@ -53,8 +54,56 @@ class ApiGateway {
         }
     }
 
-    async deployMethod(res, method, current, methods) {
+    async deployIntegration(method, current) {
         return await 1;
+    }
+
+    async deployMethod(res, method, current, methods) {
+        let meth = null;
+
+        try {
+            if (current) {
+                meth = ApiGwMethodEntity.createEntity(current, res, ApiGwMethodEntity);
+            } else {
+                //add method
+                // const props = Object.assign({type: method.type}, method.awsProperties);
+                // if (props.type === '')
+                meth = await res.addMethod(method.httpMethod, method.awsProperties);
+            }
+
+            let responseTransition = null;
+            //method response
+            if (method.methodResponses) {
+                let curResponses = meth.val('methodResponses') || {};
+                curResponses = Object.keys(curResponses).map(code => {
+                    return Object.assign({statusCode: code}, curResponses[code]);
+                });
+                let responses = Object.keys(method).map(code => {
+                    return Object.assign({statusCode: code}, method[code]);
+                });
+
+                const responseTransition = new Transition((oldItem, newItem) => oldItem.pathPart === newItem.pathPart)
+                    .setRemover(oldItem => method.deleteResponse(oldItem.statusCode))
+                    .setAdjustor((oldItem, newItem) => {
+                        return method.updateResponse(newItem, oldItem)
+                    })
+                    .setCreator(newItem => this.deployMethod(res, newItem, null, curMethods))
+                    .perform(curResponses, responses);
+
+            }
+
+            //integration
+            if (method.methodIntegration) {
+                await this.deployIntegration(meth, method.methodIntegration);
+            }
+
+            //thin: transition is a set of callbacks and we wait for it here even after had waited for deployResources
+            return await responseTransition
+                ? Promise.all(Object.values(responseTransition).map(set => Promise.all(set)))
+                : true;
+        } catch (e) {
+            throw e;
+        }
     }
 
     async deployResource(entity, resource, currentResource, allResources) {

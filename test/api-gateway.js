@@ -131,11 +131,11 @@ describe('ApiGatewayController', () => {
                                 "resources" : {
                                     "test": {
                                         "ANY": {
-                                            "type": "AWS_PROXY",
                                             "awsProperties": {
                                                 "description": "STRING_VALUE"
                                             },
                                             "integration": {
+                                                "type": "AWS_PROXY",
                                                 "lambda": "FunctionArn",
                                                 "awsProperties": {
                                                     "description": "STRING_VALUE"
