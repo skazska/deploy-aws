@@ -1,21 +1,6 @@
-const ApiGwResponseEntity = require('./response-entity-base');
 const ApiGwMethodEntityAbstract = require('./method-entity-base');
 const ApiGwIntegration = require('./integration');
-const ApiGwResponse = require('./response-base');
-
-class ApiGwMethodResponseEntity extends ApiGwResponseEntity {
-    constructor (properties, connector, informer, options) {
-        super(properties, connector, informer, options);
-        this.entityName = 'MethodResponse';
-    }
-}
-
-class ApiGwMethodResponse extends ApiGwResponse {
-    constructor (properties, connector, informer) {
-        super(properties, connector, informer, ApiGwMethodResponseEntity);
-        this.entityName = 'MethodResponse';
-    }
-}
+const {ApiGwMethodResponseEntity, ApiGwMethodResponse} = require('./response');
 
 class ApiGwMethodEntity extends ApiGwMethodEntityAbstract {
 

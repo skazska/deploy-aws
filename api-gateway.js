@@ -3,14 +3,18 @@ const RestApi = require('./api-gateway/rest-api');
 const { Transition } = require('./utils/arraysProcessor');
 const ApiGwResourceEntity = require('./api-gateway/resource-entity');
 const ApiGwMethodEntity = require('./api-gateway/method-entity');
+const { ApiGwMethodResponseEntity, ApiGwIntegrationResponseEntity } = require('./api-gateway/response');
+const ApiGwIntegrationEntity = require('./api-gateway/integration-entity');
 
 const RESOURCE_LIST_LIMIT = 200;
 const HTTP_METHODS = ['ANY', 'GET', 'POST', 'PUT', 'HEAD', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE', 'CONNECT'];
 
 class ApiGateway {
 
-    constructor () {
+    constructor (region, accountId) {
         this.connector = new Connector();
+        this.region = region;
+        this.accountId = accountId;
     }
 
     /**
@@ -54,12 +58,91 @@ class ApiGateway {
         }
     }
 
-    async deployResponse(entity, response, current) {
-        return await 1;
+    async deployIntegrationResponse(entity, response, current) {
+        let resp = null;
+
+        try {
+            if (current) {
+                resp = ApiGwIntegrationResponseEntity.createEntity(current, entity, ApiGwIntegrationResponseEntity);
+
+                // await resp.update(response)
+
+            } else {
+                resp = await entity.addResponse(response.statusCode, response);
+            }
+            return resp;
+        } catch (e) {
+            throw e;
+        }
+    }
+
+    async deployMethodResponse(entity, response, current) {
+        let resp = null;
+
+        try {
+            if (current) {
+                resp = ApiGwMethodResponseEntity.createEntity(current, entity, ApiGwMethodResponseEntity);
+
+                // await resp.update(response)
+
+            } else {
+                resp = await entity.addResponse(response.statusCode, response);
+            }
+            return resp;
+        } catch (e) {
+            throw e;
+        }
     }
 
     async deployIntegration(method, integration, current) {
-        return await 1;
+        let intgr = null;
+
+        const compileIntegration = integration => {
+            const props = Object.assign({type: integration.type}, integration.awsProperties);
+            if (props.type === 'AWS_PROXY') {
+                props.integrationHttpMethod = 'POST';
+                props.uri = 'arn:aws:apigateway:' + this.region + ':lambda:path/2015-03-31/functions/' +
+                    integration.lambda + '/invocations';
+            }
+            return props
+        };
+
+        try {
+            if (current) {
+                intgr = ApiGwIntegrationEntity.createEntity(current, method, ApiGwIntegrationEntity);
+
+                // await intgr.update(compileIntegration(integration))
+
+            } else {
+                intgr = await method.addIntegration(compileIntegration(integration));
+            }
+
+            //method response
+            let curResponses = intgr.val('integrationResponses') || {};
+            curResponses = Object.keys(curResponses || {}).map(code => {
+                return Object.assign({statusCode: code}, curResponses[code]);
+            });
+            let responses = Object.keys(integration.responses || {}).map(code => {
+                return Object.assign({statusCode: code}, integration.responses[code]);
+            });
+
+
+
+
+            const responseTransition = new Transition((oldItem, newItem) => oldItem.statusCode === newItem.statusCode)
+                .setRemover(oldItem => intgr.deleteResponse(oldItem.statusCode))
+                .setAdjustor((oldItem, newItem) => this.deployIntegrationResponse(intgr, newItem, oldItem))
+                .setCreator(newItem => this.deployIntegrationResponse(intgr, newItem))
+                .perform(curResponses, responses);
+
+
+            //thin: transition is a set of callbacks and we wait for it here even after had waited for deployResources
+            return await responseTransition
+                ? Promise.all(Object.values(responseTransition).map(set => Promise.all(set)))
+                : true;
+        } catch (e) {
+            throw e;
+        }
     }
 
     async deployMethod(res, method, current) {
@@ -67,7 +150,7 @@ class ApiGateway {
 
         try {
             if (current) {
-                meth = ApiGwMethodEntity.createEntity(current, res, ApiGwMethodEntity);
+                meth = ApiGwMethodEntity.createEntity(current, res.methodApi, ApiGwMethodEntity);
 
                 // await meth.update(method.awsProperties)
 
@@ -76,25 +159,22 @@ class ApiGateway {
             }
 
             //method response
-            let curResponses = meth.val('responses') || {};
-            curResponses = Object.keys(curResponses).map(code => {
+            let curResponses = meth.val('methodResponses') || {};
+            curResponses = Object.keys(curResponses || {}).map(code => {
                 return Object.assign({statusCode: code}, curResponses[code]);
             });
-            let responses = Object.keys(method).map(code => {
-                return Object.assign({statusCode: code}, method[code]);
+            let responses = Object.keys(method.responses || {}).map(code => {
+                return Object.assign({statusCode: code}, method.responses[code]);
             });
 
-            const responseTransition = new Transition((oldItem, newItem) => oldItem.pathPart === newItem.pathPart)
-                .setRemover(oldItem => method.deleteResponse(oldItem.statusCode))
-                .setAdjustor((oldItem, newItem) => this.deployResponse(res, newItem, oldItem))
-                .setCreator(newItem => this.deployResponse(res, newItem))
+            const responseTransition = new Transition((oldItem, newItem) => oldItem.statusCode === newItem.statusCode)
+                .setRemover(oldItem => meth.deleteResponse(oldItem.statusCode))
+                .setAdjustor((oldItem, newItem) => this.deployMethodResponse(meth, newItem, oldItem))
+                .setCreator(newItem => this.deployMethodResponse(meth, newItem))
                 .perform(curResponses, responses);
 
 
-            //integration
-            if (method.methodIntegration) {
-                await this.deployIntegration(meth, meth.val('integration') || {}, method.methodIntegration);
-            }
+            await this.deployIntegration(meth, method.integration || {}, meth.val('methodIntegration'));
 
             //thin: transition is a set of callbacks and we wait for it here even after had waited for deployResources
             return await responseTransition

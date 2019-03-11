@@ -28,7 +28,7 @@ const connectorResponse = (response) => {
 describe('ApiGatewayController', () => {
     describe('#create', () => {
         it('should instantiate Connector ', () => {
-            const apiGw = new ApiGw();
+            const apiGw = new ApiGw('eu-west-1');
             expect(apiGw).to.have.property('connector');
             expect(apiGw.connector).to.be.instanceof(Connector);
             // expect(apiGw).to.have.property('restApi');
@@ -92,7 +92,7 @@ describe('ApiGatewayController', () => {
                     resolve(handler);
                 });
             });
-            apiGw = new ApiGw();
+            apiGw = new ApiGw('eu-west-1');
 
             listStub = sinon.stub(apiGw.connector, 'listRestApis');
             createStub = sinon.stub(apiGw.connector, 'createRestApi');
@@ -136,21 +136,39 @@ describe('ApiGatewayController', () => {
                             "new": {},
                             "clients": {
                                 "ANY": {
-                                    "type": "AWS_PROXY",
                                     "awsProperties": {
                                         "description": "STRING_VALUE"
                                     },
                                     "integration": {
+                                        "type": "AWS_PROXY",
                                         "lambda": "FunctionArn",
                                         "awsProperties": {
                                             "description": "STRING_VALUE"
                                         },
                                         "responses": {
-
+                                            "200": {
+                                                "contentHandling": "CONVERT_TO_TEXT",
+                                                "responseParameters": {"p1":  "v1"},
+                                                "responseTemplates": {"t1":  "t"},
+                                                "selectionPattern": "s"
+                                            },
+                                            "412": {
+                                                "contentHandling": "CONVERT_TO_BINARY",
+                                                "responseParameters": {"par1":  "val1"},
+                                                "responseTemplates": {"tpl1":  "tpl"},
+                                                "selectionPattern": "sp"
+                                            }
                                         }
                                     },
                                     "responses": {
-
+                                        "200": {
+                                            "Models": {"model1":  "model"},
+                                            "Parameters": {"par1": true, "par2":  false}
+                                        },
+                                        "319": {
+                                            "Models": {"model1":  "model"},
+                                            "Parameters": {"par1": true, "par2":  false}
+                                        }
                                     }
                                 },
                                 "resources" : {
@@ -164,13 +182,9 @@ describe('ApiGatewayController', () => {
                                                 "lambda": "FunctionArn",
                                                 "awsProperties": {
                                                     "description": "STRING_VALUE"
-                                                },
-                                                "responses": {
-
                                                 }
                                             },
                                             "responses": {
-
                                             }
                                         }
                                     }
@@ -193,16 +207,16 @@ describe('ApiGatewayController', () => {
                 {id: 'resId', pathPart: '/', path: '/'},
                 {id: 'clientsId', pathPart: 'clients', path: '/clients', parentId: 'resId', resourceMethods: {"ANY": {
                     "httpMethod": "ANY", "authorizationType": "NONE", "apiKeyRequired": false,
-                    methodResponses: { "200": { "statusCode": "200" }},
+                    methodResponses: { "200": { "statusCode": "200" },  "300": { "statusCode": "300" }},
                     methodIntegration: {
                         "type": "AWS_PROXY", "httpMethod": "POST",
                         "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:266895356213:function:aws-deploy-test-function-integral/invocations",
                         "passthroughBehavior": "WHEN_NO_MATCH",  "timeoutInMillis": 29000,
                         "cacheNamespace": "ak8465",
                         "cacheKeyParameters": [],
-                        integrationResponses: { "200": { "statusCode": "200" } }
+                        integrationResponses: { "200": { "statusCode": "200" },  "300": { "statusCode": "300" } }
                     }
-                }}},
+                }, GET: { "httpMethod": "GET" }}},
                 {id: 'testResId', pathPart: 'orphan', path: '/orphan', parentId: 'resId'}
             ]}));
 
@@ -231,10 +245,28 @@ describe('ApiGatewayController', () => {
                 // requestModels: {},
                 // methodResponses: {}
             }));
+            // updateMethodResponseStub.returns({ "statusCode": "200" });
+
+            deleteMethodResponseStub.returns(connectorResponse({request: 'done'}));
+
+            createIntegrationStub.returns(connectorResponse({httpMethod: 'ANY', authorizationType: 'NONE',
+                // requestParameters: {},
+                // requestModels: {},
+                // methodResponses: {}
+            }));
             // updateMethodStub.returns({ "statusCode": "200" });
 
-            deleteMethodStub.returns(connectorResponse({request: 'done'}));
+            deleteIntegrationStub.returns(connectorResponse({request: 'done'}));
 
+
+            createIntegrationResponseStub.returns(connectorResponse({statusCode: '200', smth: 'NONE',
+                // requestParameters: {},
+                // requestModels: {},
+                // methodResponses: {}
+            }));
+            // updateMethodResponseStub.returns({ "statusCode": "200" });
+
+            deleteIntegrationResponseStub.returns(connectorResponse({request: 'done'}));
 
 
             const entity = await apiGw.deploy('name', props, opts, group);
@@ -247,6 +279,34 @@ describe('ApiGatewayController', () => {
             expect(deleteResourceStub.args[0]).eql(['id', 'testResId']);
 
             expect(createMethodStub.args[0]).eql(['id', 'resId2', 'ANY', {"description": "STRING_VALUE"}]);
+            expect(deleteMethodStub.args[0]).eql(['id', 'clientsId', 'GET']);
+
+            expect(createMethodResponseStub.args[0]).eql(['id', 'clientsId', 'ANY', '319', {
+                "Models": {"model1":  "model"},
+                "Parameters": {"par1": true, "par2":  false},
+                "statusCode": '319'
+            }]);
+            expect(deleteMethodResponseStub.args[0]).eql(['id', 'clientsId', 'ANY', '300']);
+
+            expect(createIntegrationStub.args[0]).eql(['id', 'resId2', 'ANY', {
+                "type": "AWS_PROXY",
+                "description": "STRING_VALUE",
+                "integrationHttpMethod": "POST",
+                "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/FunctionArn/invocations"
+            }]);
+
+            expect(deleteIntegrationStub.args.length).equal(0);
+            // expect(deleteIntegrationStub.args[0]).eql(['id', 'clientsId', 'GET']);
+
+            expect(createIntegrationResponseStub.args[0]).eql(['id', 'clientsId', 'ANY', '412', {
+                "contentHandling": "CONVERT_TO_BINARY",
+                "responseParameters": {"par1":  "val1"},
+                "responseTemplates": {"tpl1":  "tpl"},
+                "selectionPattern": "sp",
+                "statusCode": '412'
+            }]);
+            expect(deleteIntegrationResponseStub.args[0]).eql(['id', 'clientsId', 'ANY', '300']);
+
 
         });
     });
