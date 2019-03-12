@@ -15,7 +15,7 @@ class ApiGwResponseEntity extends Entity {
      * updates entity
      * @param properties
      */
-    update (properties) {
+    async update (properties) {
         const ops = this._ops(properties);
         try {
             const resp = await this._informCall(

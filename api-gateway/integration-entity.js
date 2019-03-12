@@ -19,9 +19,9 @@ class ApiGwIntegrationEntity extends ApiGwMethodEntityAbstract {
         // integrationHttpMethod's value is returned in httpMethod from service in both put and get responses as well as
         // in embedded data of getResource/getResources
         const methodHttpMethod = instance.defaults.httpMethod || instance.properties.httpMethod;
-        if (methodHttpMethod) {
+        if (methodHttpMethod && properties.httpMethod) {
             properties.integrationHttpMethod = properties.httpMethod;
-            properties.httpMethod = methodHttpMethod;
+            delete properties.httpMethod;
         }
         return super.createEntity(properties, instance, constructor, defaults);
     }
