@@ -17,8 +17,21 @@ class ApiGwMethodEntityAbstract extends Entity {
      * updates entity
      * @param properties
      */
-    update (properties) {
-
+    async update (properties) {
+        const ops = this._ops(properties);
+        try {
+            const resp = await this._informCall(
+                this.connector['update' + this.entityName],
+                'Update ' + this.entityName + ' ' + this.id.restApi + ', ' + this.id.resourceId + ', ' + this.id.httpMethod,
+                this.id.restApi, this.id.resourceId, this.id.httpMethod, ops);
+            return resp;
+        } catch (e) {
+            if (e.code === 'ResourceNotFoundException') {
+                return null;
+            } else {
+                throw e;
+            }
+        }
     }
 
     /**

@@ -14,8 +14,20 @@ class RestApiEntity extends Entity {
      * updates entity
      * @param properties
      */
-    update (properties) {
-
+    async update (properties) {
+        const ops = this._ops(properties);
+        try {
+            const resp = await this._informCall(
+                this.connector.updateRestApi, 'Update rest-api ' + this.id,
+                this.id, ops);
+            return resp;
+        } catch (e) {
+            if (e.code === 'ResourceNotFoundException') {
+                return null;
+            } else {
+                throw e;
+            }
+        }
     }
 
     /**

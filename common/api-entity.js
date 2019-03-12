@@ -56,12 +56,35 @@ class ApiEntity extends ApiBase {
         return this.properties[propName];
     }
 
+
+    /**
+     * returns _ops for update
+     * @param props
+     * @return {Array}
+     */
+    _ops (props) {
+        const genOps = (pathPrefix, props) => {
+            let ops = [];
+            Object.keys(props).forEach(propName => {
+                const val = props[propName];
+                const path = pathPrefix + '/' + propName.replace('/', '~1');
+                if (val === null || typeof val === 'undefined') {
+                    ops.push({op: 'remove', path: path})
+                } else if (Object.isObject(val)) {
+                    ops = ops.concat(genOps(path, val))
+                }
+            });
+            return ops;
+        };
+        return genOps('', props);
+    }
+
     /**
      * updates entity
      * @param {Object} properties
      */
     update (properties) {
-        this.properties = properties;
+        const ops = this._ops(properties);
     }
 
     /**
