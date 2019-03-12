@@ -15,6 +15,9 @@ class ApiGwIntegration extends ApiGwMethodAbstract {
         this.entityName = 'Integration';
     }
 
+    _createEntity (properties, addProps) {
+        return ApiGwIntegrationEntity.createEntity(properties, this, this.entityConstructor, addProps);
+    }
 
     // async create (name, properties) {
     //     return await super.create(this.defaults.httpMethod, properties);

@@ -20,9 +20,7 @@ class ApiGwMethodEntity extends ApiGwMethodEntityAbstract {
      * @return {Promise<*|void>}
      */
     async addIntegration(integrationOptions) {
-        //add new
-        const result = await this.integrationApi.create(this.id.httpMethod, integrationOptions);
-        return result;
+        return await this.integrationApi.create(this.id.httpMethod, integrationOptions);
     }
 
     /**
@@ -31,9 +29,7 @@ class ApiGwMethodEntity extends ApiGwMethodEntityAbstract {
      * @return {Promise<*|void>}
      */
     async readIntegration() {
-        //add new
-        const result = await this.integrationApi.read(this.id.httpMethod);
-        return result;
+        return await this.integrationApi.read(this.id.httpMethod);
     }
 
     /**
