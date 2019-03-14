@@ -97,6 +97,24 @@ describe('REST API Controller', () => {
             informer = await informer;
             expect(informer).to.be.called;
         });
+
+        it('#delete(id) should return promise invoke rest-api(deleteRestApi), addInformer which fires change and complete', async () => {
+            sinon.replace(connector.api, 'deleteRestApi', apiCall);
+            const result = await restApi.delete('1');
+            expect(result).to.be.eql({id: 'id', prop: 'response'});
+
+            expect(apiCall).to.be.calledOnce;
+            expect(apiCall.args[0][0]).to.be.eql({
+                "restApiId": "1"
+            });
+
+            // expect(group.informer).to.be.equal(group);
+
+            expect(group.informers.length).to.equal(1);
+            informer = await informer;
+            expect(informer).to.be.called;
+        });
+
         it('#list() should return promise invoke rest-api(listRestApis), addInformer which fires change and complete', async () => {
             sinon.replace(connector.api, 'getRestApis', apiCall);
             const result = await restApi.list({position: 1, limit: 2});
@@ -145,7 +163,7 @@ describe('REST API Controller', () => {
 
             restApi = new RestApi({}, connector, group);
             entity = restApi._createEntity({name: 'name', prop: 'val', id: '1'});
-            apiCall = sinon.fake(() => { return awsResponse('response'); });
+            apiCall = sinon.fake(() => { return awsResponse({id: 'id', prop: 'response'}); });
         });
         it('#_createEntity(properties) should return an RestApiEntity instance with properties', () => {
             expect(entity).to.be.instanceof(ApiEntity);
@@ -155,23 +173,23 @@ describe('REST API Controller', () => {
             expect(entity.informer).to.be.equal(group);
         });
         it('#update(properties) should return promise, invoke rest-api(updateRestApi), addInformer which fires change and complete', async () => {
-            //TODO further way to implement update method and correct test
-            //sinon.replace(connector.api, 'updateRestApi', apiCall);
-            sinon.replace(entity, 'update', apiCall);
+            sinon.replace(entity.connector.api, 'updateRestApi', apiCall);
+            // sinon.replace(entity, 'update', apiCall);
 
-            //TODO further way to implement update method and correct test (.promice() wrong here)
-            const result = await entity.update({prop: 'val1'}).promise();
-            expect(result).to.be.equal('response');
+            const result = await entity.update({prop1: 'val1'});
+            expect(result.properties).to.be.eql({id: 'id', prop: 'response'});
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
-                "prop": "val1"
+                restApiId: '1',
+                patchOperations: [
+                    {op: 'add', path: 'prop1', value: 'val1'}
+                ]
             });
 
-            //TODO further way to implement update method and correct test
-            // expect(group.informers.length).to.equal(1);
-            // informer = await informer;
-            // expect(informer).to.be.called;
+            expect(group.informers.length).to.equal(1);
+            informer = await informer;
+            expect(informer).to.be.called;
         });
 
         it('#readRoot() should return promise, invoke resource(getResource), addInformer which fires change and complete', async () => {
@@ -203,22 +221,22 @@ describe('REST API Controller', () => {
             expect(informer).to.be.called;
         });
 
-        it('#delete() should return promise invoke rest-api(deleteRestApi), addInformer which fires change and complete', async () => {
-            sinon.replace(entity.connector.api, 'deleteRestApi', apiCall);
-            const result = await entity.delete();
-            expect(result).to.be.equal('response');
-
-            expect(apiCall).to.be.calledOnce;
-            expect(apiCall.args[0][0]).to.be.eql({
-                "restApiId": "1"
-            });
-
-            expect(entity.informer).to.be.equal(group);
-
-            expect(group.informers.length).to.equal(1);
-            informer = await informer;
-            expect(informer).to.be.called;
-        });
+        // it('#delete() should return promise invoke rest-api(deleteRestApi), addInformer which fires change and complete', async () => {
+        //     sinon.replace(entity.connector.api, 'deleteRestApi', apiCall);
+        //     const result = await entity.delete();
+        //     expect(result).to.be.equal('response');
+        //
+        //     expect(apiCall).to.be.calledOnce;
+        //     expect(apiCall.args[0][0]).to.be.eql({
+        //         "restApiId": "1"
+        //     });
+        //
+        //     expect(entity.informer).to.be.equal(group);
+        //
+        //     expect(group.informers.length).to.equal(1);
+        //     informer = await informer;
+        //     expect(informer).to.be.called;
+        // });
         afterEach(() => {
             sinon.restore();
         });

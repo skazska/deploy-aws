@@ -24,7 +24,7 @@ class ApiGwMethodEntityAbstract extends Entity {
                 this.connector['update' + this.entityName],
                 'Update ' + this.entityName + ' ' + this.id.restApi + ', ' + this.id.resourceId + ', ' + this.id.httpMethod,
                 this.id.restApi, this.id.resourceId, this.id.httpMethod, ops);
-            return resp;
+            return this._updateEntity(resp);
         } catch (e) {
             if (e.code === 'ResourceNotFoundException') {
                 return null;

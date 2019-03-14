@@ -160,34 +160,37 @@ describe('API Resource Controller', () => {
             });
 
             resource = new Resource({restApiId: '1'}, connector, group);
-            entity = resource._createEntity({name: 'name', prop: 'val', id: '2'}, {restApiId: '1'});
+            entity = resource._createEntity({pathPart: 'pathPart', id: '2', parentId: 'parentId'}, {restApiId: '1'});
             apiCall = sinon.fake(() => { return awsResponse({id: 'resourceId', pathPart: 'pathPart', parentId: 'parentId'}); });
         });
         it('#_createEntity(properties) should return an RestApiEntity instance with properties', () => {
             expect(entity).to.be.instanceof(ApiEntity);
-            expect(entity.id).to.eql({ restApiId: '1', id: '2' });
-            expect(entity.val('prop')).to.eql('val');
+            expect(entity.id).to.eql({ restApiId: '1', id: '2'});
+            expect(entity.val('pathPart')).to.eql('pathPart');
             expect(entity.informer).to.be.equal(group);
             expect(entity).to.have.property('methodApi').to.have.property('defaults').eql({restApiId: '1', resourceId: '2'});
         });
         it('#update(properties) should return promise, invoke rest-api(updateRestApi), addInformer which fires change and complete', async () => {
-            //TODO further way to implement update method and correct test
-            //sinon.replace(connector.api, 'updateRestApi', apiCall);
-            sinon.replace(entity, 'update', apiCall);
+            sinon.replace(connector.api, 'updateResource', apiCall);
 
             //TODO further way to implement update method and correct test
-            const result = await entity.update({prop: 'val1'}).promise();
-            expect(result).to.be.eql({id: 'resourceId', pathPart: 'pathPart', parentId: 'parentId'});
+            const result = await entity.update({prop: 'val1', parentId: 'parentId1', pathPart: null});
+            expect(result.properties).to.be.eql({id: 'resourceId', parentId: 'parentId', pathPart: 'pathPart'});
 
             expect(apiCall).to.be.calledOnce;
             expect(apiCall.args[0][0]).to.be.eql({
-                "prop": "val1"
+                restApiId: '1',
+                resourceId: '2',
+                patchOperations: [
+                    {op: 'add', path: 'prop', value: 'val1'},
+                    {op: 'replace', path: 'parentId', value: 'parentId1'},
+                    {op: 'remove', path: 'pathPart'}
+                ]
             });
 
-            //TODO further way to implement update method and correct test
-            // expect(group.informers.length).to.equal(1);
-            // informer = await informer;
-            // expect(informer).to.be.called;
+            expect(group.informers.length).to.equal(1);
+            informer = await informer;
+            expect(informer).to.be.called;
         });
 
         it('#addResource(pathPart) should return promise, invoke resource(createResource), addInformer which fires change and complete', async () => {

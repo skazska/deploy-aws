@@ -20,7 +20,7 @@ class RestApiEntity extends Entity {
             const resp = await this._informCall(
                 this.connector.updateRestApi, 'Update rest-api ' + this.id,
                 this.id, ops);
-            return resp;
+            return this._updateEntity(resp);
         } catch (e) {
             if (e.code === 'ResourceNotFoundException') {
                 return null;
@@ -30,21 +30,21 @@ class RestApiEntity extends Entity {
         }
     }
 
-    /**
-     * delete entity
-     */
-    async delete () {
-        try {
-            const resp = await this._informCall(this.connector.deleteRestApi, 'Delete rest-api ' + this.id, this.id);
-            return resp;
-        } catch (e) {
-            if (e.code === 'ResourceNotFoundException') {
-                return null;
-            } else {
-                throw e;
-            }
-        }
-    }
+    // /**
+    //  * delete entity
+    //  */
+    // async delete () {
+    //     try {
+    //         const resp = await this._informCall(this.connector.deleteRestApi, 'Delete rest-api ' + this.id, this.id);
+    //         return resp;
+    //     } catch (e) {
+    //         if (e.code === 'ResourceNotFoundException') {
+    //             return null;
+    //         } else {
+    //             throw e;
+    //         }
+    //     }
+    // }
 
     /**
      * @return {Promise<ApiGwResourceEntity>}
@@ -129,6 +129,23 @@ class RestApi extends Api {
             }
         }
     }
+
+    /**
+     * delete rest api
+     */
+    async delete (id) {
+        try {
+            const resp = await this._informCall(this.connector.deleteRestApi, 'Delete rest-api ' + id, id);
+            return resp;
+        } catch (e) {
+            if (e.code === 'ResourceNotFoundException') {
+                return null;
+            } else {
+                throw e;
+            }
+        }
+    }
+
 
     /**
      * gets list of entities

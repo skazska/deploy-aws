@@ -28,7 +28,21 @@ class ApiEntity extends ApiBase {
      * @protected
      */
     _updateEntity (properties) {
-        Object.assign(this.properties, properties); //TODO possibly need check for property removal
+        const updateObj = (obj, newObj) => {
+            Object.keys(obj).forEach(propName => {
+                if (newObj.hasOwnProperty(propName)) {
+                    let val = newObj[propName];
+                    if (typeof  val === 'object') {
+                        updateObj(obj[propName], val);
+                    } else {
+                        obj[propName] = newObj[propName];
+                    }
+                } else {
+                    delete obj[propName];
+                }
+            });
+        };
+        updateObj(this.properties, properties);
         return this;
     }
 
@@ -67,11 +81,17 @@ class ApiEntity extends ApiBase {
             let ops = [];
             Object.keys(props).forEach(propName => {
                 const val = props[propName];
-                const path = pathPrefix + '/' + propName.replace('/', '~1');
-                if (val === null || typeof val === 'undefined') {
+                const path = (pathPrefix ? pathPrefix + '/' : '') + propName.replace('/', '~1');
+                if (val === null || typeof val === 'undefined' && this.properties.hasOwnProperty(propName)) {
                     ops.push({op: 'remove', path: path})
-                } else if (Object.isObject(val)) {
-                    ops = ops.concat(genOps(path, val))
+                } else {
+                    if (typeof val === 'object') {
+                        ops = ops.concat(genOps(path, val))
+                    } else if (this.properties.hasOwnProperty(propName)) {
+                        ops.push({op: 'replace', path: path, value: val});
+                    } else {
+                        ops.push({op: 'add', path: path, value: val});
+                    }
                 }
             });
             return ops;

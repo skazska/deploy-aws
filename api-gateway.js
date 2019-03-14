@@ -109,7 +109,7 @@ class ApiGateway {
 
         try {
             if (current) {
-                intgr = ApiGwIntegrationEntity.createEntity(current, method, ApiGwIntegrationEntity);
+                intgr = ApiGwIntegrationEntity.createEntity(current, method.integrationApi, ApiGwIntegrationEntity);
 
                 // await intgr.update(compileIntegration(integration))
 

@@ -17,9 +17,9 @@ class ApiGwResourceEntity extends Entity {
         const ops = this._ops(properties);
         try {
             const resp = await this._informCall(
-                this.connector.updateResource, 'Update resource ' + this.id.restApi + ', ' + this.id.id,
-                this.id.restApi, this.id.id, ops);
-            return resp;
+                this.connector.updateResource, 'Update resource ' + this.id.restApiId + ', ' + this.id.id,
+                this.id.restApiId, this.id.id, ops);
+            return this._updateEntity(resp);
         } catch (e) {
             if (e.code === 'ResourceNotFoundException') {
                 return null;
