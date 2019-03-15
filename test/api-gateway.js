@@ -198,7 +198,7 @@ describe('ApiGatewayController', () => {
         });
         it('should call RestApi method create if list result did not contain item with restApi name', async () => {
             listStub.returns(connectorResponse({items: [
-                {id: 'id1', name: 'name1'},
+                {id: 'id1', name: 'name'},
                 {id: 'id2', name: 'name2'}
             ]}));
             createStub.returns(connectorResponse({id: 'id', name: 'name', description: 'STRING_VALUE'}));

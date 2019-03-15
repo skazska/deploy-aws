@@ -1,6 +1,7 @@
+const { Transition } = require('./utils/arraysProcessor');
+const { hasDifferences } = require('./utils/properties');
 const Connector = require('./api-gateway/connector');
 const RestApi = require('./api-gateway/rest-api');
-const { Transition } = require('./utils/arraysProcessor');
 const ApiGwResourceEntity = require('./api-gateway/resource-entity');
 const ApiGwMethodEntity = require('./api-gateway/method-entity');
 const { ApiGwMethodResponseEntity, ApiGwIntegrationResponseEntity } = require('./api-gateway/response');
@@ -38,21 +39,34 @@ class ApiGateway {
         informGroup.addInformer(properties, {text: 'Waiting dependencies to complete'});
 
         try {
-            const [params, resources] = await Promise.all([
+            const results = [];
+            let [rest, params, resources] = await Promise.all([
+                restApi.find(name),
                 properties,
                 options.resources
             ]);
+            let currentResourcesDef, rootDef;
 
-            const rest = await restApi.findOrCreate(name, params);
 
-            const [currentResources, root] = await Promise.all([
-                rest.listResources({limit: options.resourceListLimit || RESOURCE_LIST_LIMIT}),
-                rest.readRoot()
-            ]);
+            if (rest) {
+                if (hasDifferences(params, rest.properties, [])) {
+                    results.push(rest.update(params));
+                } else {
+                    results.push(null);
+                }
+                currentResourcesDef = rest.listResources({limit: options.resourceListLimit || RESOURCE_LIST_LIMIT});
+            } else {
+                rest = await restApi.create(name, params);
+                results.push(null);
+                currentResourcesDef = {items: []};
+            }
+            rootDef = rest.readRoot();
 
-            await this.deployResources(root, resources, currentResources.items);
+            const [currentResources, root] = await Promise.all([currentResourcesDef, rootDef]);
 
-            return rest;
+            results.push(this.deployResources(root, resources, currentResources.items));
+
+            return await Promise.all(results);
         } catch (e) {
             throw e;
         }

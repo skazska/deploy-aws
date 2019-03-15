@@ -266,8 +266,11 @@ describe('REST API Controller', () => {
             sinon.replace(connector.api, 'getRestApis', apiCall);
             // sinon.replace(restApi, 'list', apiCall);
 
-            const result = await restApi.find('second');
+            let result = await restApi.find('second');
             expect(result).to.be.eql({name: 'second'});
+
+            result = await restApi.find('third');
+            expect(result).to.be.undefined;
         });
         it('should call list with next position until name found', async () => {
             apiCall = sinon.stub();
