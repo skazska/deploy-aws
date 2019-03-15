@@ -119,7 +119,7 @@ describe('LambdaController', () => {
             preparePackageStub.resolves('code1');
             readStub.returns(awsResponse({FunctionName: 'name', Role: 'role', CodeSha256: 'xxx'}));
             updateStub.returns(awsResponse({FunctionName: 'name', Role: 'role'}));
-            updateCodeStub.returns(awsResponse({FunctionName: 'name', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcC1='}));
+            updateCodeStub.returns(awsResponse({FunctionName: 'name', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcC1=', Role: 'role'}));
             const result = await lambda.deploy('name', props, opts, group);
             expect(result.properties).to.eql({
                 FunctionName: 'name',

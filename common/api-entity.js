@@ -3,6 +3,8 @@
  */
 
 const ApiBase = require('./api-base');
+const { Transition } = require('../utils/arraysProcessor');
+
 
 /**
  * Represents entity API
@@ -29,18 +31,20 @@ class ApiEntity extends ApiBase {
      */
     _updateEntity (properties) {
         const updateObj = (obj, newObj) => {
-            Object.keys(obj).forEach(propName => {
-                if (newObj.hasOwnProperty(propName)) {
-                    let val = newObj[propName];
-                    if (typeof  val === 'object') {
-                        updateObj(obj[propName], val);
-                    } else {
-                        obj[propName] = newObj[propName];
-                    }
+            const set = (key, val) => {
+                if (val && typeof val === 'object') {
+                    if (!obj[key]) obj[key] = {};
+                    updateObj(obj[key], val);
                 } else {
-                    delete obj[propName];
+                    obj[key] = newObj[key];
                 }
-            });
+            };
+
+            new Transition((oldKey, newKey) => oldKey === newKey)
+                .setRemover(oldKey => { delete obj[oldKey]; })
+                .setAdjustor((oldKey, newKey) => { set(oldKey, newObj[newKey]); })
+                .setCreator(newKey => { set(newKey, newObj[newKey]); })
+                .perform(Object.keys(obj), Object.keys(newObj));
         };
         updateObj(this.properties, properties);
         return this;
