@@ -173,8 +173,8 @@ class RestApi extends Api {
         if (position) options.position = position;
         let result = await this.list(options);
         let api = result.items.find(api => api.name === name ? api : undefined);
-        if (!result.position) return api;
-        return api || this.find(name, result.position, options.limit);
+        if (!result.position) return api ? this._createEntity(api) : api;
+        return api ? this._createEntity(api) : this.find(name, result.position, options.limit);
     }
 
     /**
@@ -199,7 +199,7 @@ class RestApi extends Api {
         if (!api) {
             return await this.create(name, params);
         } else {
-            return await this._createEntity(api);
+            return api;
         }
     }
 }

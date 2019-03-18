@@ -262,24 +262,24 @@ describe('REST API Controller', () => {
             restApi = new RestApi({}, connector, group);
         });
         it('should resolve record with given name', async () => {
-            apiCall = sinon.fake(() => { return awsResponse({items: [{name: 'first'}, {name: 'second'}]}); });
+            apiCall = sinon.fake(() => { return awsResponse({items: [{id: 'id', name: 'first'}, {id: 'id1', name: 'second'}]}); });
             sinon.replace(connector.api, 'getRestApis', apiCall);
             // sinon.replace(restApi, 'list', apiCall);
 
             let result = await restApi.find('second');
-            expect(result).to.be.eql({name: 'second'});
+            expect(result.properties).to.be.eql({id: 'id1', name: 'second'});
 
             result = await restApi.find('third');
             expect(result).to.be.undefined;
         });
         it('should call list with next position until name found', async () => {
             apiCall = sinon.stub();
-            apiCall.onFirstCall().returns(awsResponse({position: '1', items: [{name: 'first'}, {name: 'second'}]}));
-            apiCall.onSecondCall().returns(awsResponse({items: [{name: 'third'}, {name: 'forth'}]}));
+            apiCall.onFirstCall().returns(awsResponse({position: '1', items: [{id: 'id', name: 'first'}, {id: 'id1', name: 'second'}]}));
+            apiCall.onSecondCall().returns(awsResponse({items: [{id: 'id2', name: 'third'}, {id: 'id3', name: 'forth'}]}));
             sinon.replace(connector.api, 'getRestApis', apiCall);
 
             const result = await restApi.find('third', 0, 2);
-            expect(result).to.be.eql({name: 'third'});
+            expect(result.properties).to.be.eql({id: 'id2', name: 'third'});
             expect(apiCall.args[0][0]).to.eql({limit: 2});
             expect(apiCall.args[1][0]).to.eql({limit: 2, position: '1'});
         });

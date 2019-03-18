@@ -198,10 +198,13 @@ describe('ApiGatewayController', () => {
         });
         it('should call RestApi method create if list result did not contain item with restApi name', async () => {
             listStub.returns(connectorResponse({items: [
-                {id: 'id1', name: 'name'},
+                {id: 'id', name: 'name'},
+                // {id: 'id1', name: 'name1'},
                 {id: 'id2', name: 'name2'}
             ]}));
             createStub.returns(connectorResponse({id: 'id', name: 'name', description: 'STRING_VALUE'}));
+
+            updateStub.returns(connectorResponse({id: 'id', name: 'name', description: 'STRING_VALUE'}));
 
             listResourcesStub.returns(connectorResponse({items: [
                 {id: 'resId', pathPart: '/', path: '/'},
@@ -271,9 +274,17 @@ describe('ApiGatewayController', () => {
 
             const entity = await apiGw.deploy('name', props, opts, group);
             expect(entity.properties).to.eql({id: 'id', name: 'name', description: 'STRING_VALUE'});
-            expect(createStub.args[0][0]).to.deep.include({
-                name: 'name', description: 'STRING_VALUE'
+
+            expect(updateStub.args[0][0]).to.equal('id');
+            expect(updateStub.args[0][1]).to.deep.include({
+                "op": "add",
+                "path": "description",
+                "value": "STRING_VALUE"
             });
+            // expect(createStub.args[0][0]).to.deep.include({
+            //     name: 'name', description: 'STRING_VALUE'
+            // });
+
             expect(createResourceStub.args[0]).eql(['id', 'clientsId', 'test']);
             expect(createResourceStub.args[1]).eql(['id', 'resId', 'new']);
             expect(deleteResourceStub.args[0]).eql(['id', 'testResId']);

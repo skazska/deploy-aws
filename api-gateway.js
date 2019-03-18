@@ -66,7 +66,8 @@ class ApiGateway {
 
             results.push(this.deployResources(root, resources, currentResources.items));
 
-            return await Promise.all(results);
+            await Promise.all(results);
+            return rest;
         } catch (e) {
             throw e;
         }
