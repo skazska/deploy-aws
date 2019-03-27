@@ -42,14 +42,14 @@ class ApiGateway {
             const results = [];
             let [rest, params, resources] = await Promise.all([
                 restApi.find(name),
-                properties,
-                options.resources
+                properties || {},
+                options.resources || {}
             ]);
             let currentResourcesDef, rootDef;
 
 
             if (rest) {
-                if (hasDifferences(params, rest.properties, [])) {
+                if (hasDifferences(params, rest.properties, ['id'])) {
                     results.push(rest.update(params));
                 } else {
                     results.push(null);

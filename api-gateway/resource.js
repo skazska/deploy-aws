@@ -81,8 +81,8 @@ class ApiGwResource extends Api {
 
         if (position) options.position = position;
         let result = await this.list(options);
-        let resource = result.items.find(resource => resource.path === path ? resource : undefined);
-        if (!result.position) return this._createEntity(resource);
+        let resource = (result && result.items || []).find(resource => resource.path === path ? resource : undefined);
+        if (!(result && result.position)) return resource ? this._createEntity(resource) : resource;
         return this._createEntity(resource) || this.find(path, result.position, options.limit);
     }
 

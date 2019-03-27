@@ -82,6 +82,10 @@ describe('ApiGatewayController', () => {
 
         let group;
         let informer;
+
+        let restApiEntity;
+
+
         before(() => {
             infoCall = sinon.fake();
             group = createInformer(infoCall);
@@ -196,13 +200,117 @@ describe('ApiGatewayController', () => {
             };
 
         });
-        it('should call RestApi method create if list result did not contain item with restApi name', async () => {
+
+        xit('should call RestApi method create if list result contain no item with restApi name', async () => {
+            const opts = {};
+            listStub.returns(connectorResponse({
+                items: [
+                    {id: 'id1', name: 'name1'},
+                    {id: 'id2', name: 'name2'}
+                ]
+            }));
+
+            createStub.returns(connectorResponse({id: 'id', name: 'name', description: 'STRING_VALUE'}));
+
+            restApiEntity = await apiGw.deploy('name', props, opts, group);
+
+            expect(restApiEntity.properties).to.eql({id: 'id', name: 'name', description: 'STRING_VALUE'});
+
+            expect(createStub.args[0][0]).to.deep.include({
+                name: 'name', description: 'STRING_VALUE'
+            });
+        });
+
+
+        it('should call RestApi method update if list result contain item with restApi name', async () => {
+            const props = new Promise(resolve => {
+                setImmediate(
+                    resolve,
+                    {
+                        apiKeySource: 'HEADER',
+                        binaryMediaTypes: ['VALUE'],
+                        cloneFrom: 'STRING_VALUE',
+                        description: 'STRING_VALUE',
+                        endpointConfiguration: {types: ['REGIONAL']},
+                        minimumCompressionSize: 0,
+                        policy: 'STRING_VALUE',
+                        version: 'STRING_VALUE'
+                    }
+                )
+            });
+
+            const opts = {
+                resources: new Promise(resolve => {
+                    setImmediate(
+                        resolve,
+                        {}
+                    );
+                })
+            };
+
             listStub.returns(connectorResponse({items: [
-                {id: 'id', name: 'name'},
-                // {id: 'id1', name: 'name1'},
+                {
+                    id: 'id', name: 'name',
+                    apiKeySource: 'HEADER',
+                    binaryMediaTypes: ['STRING_VALUE'],
+                    cloneFrom: 'STRING_VALUE',
+                    endpointConfiguration: {types: ['REGIONAL']},
+                    minimumCompressionSize: 0,
+                    policy: 'STRING_VALUE',
+                    version: 'STRING_VALUE'
+                },
                 {id: 'id2', name: 'name2'}
             ]}));
-            createStub.returns(connectorResponse({id: 'id', name: 'name', description: 'STRING_VALUE'}));
+
+            listResourcesStub.returns(connectorResponse({items: []}));
+
+            updateStub.returns(connectorResponse({
+                id: 'id', name: 'name',
+                apiKeySource: 'HEADER',
+                binaryMediaTypes: ['VALUE'],
+                cloneFrom: 'STRING_VALUE',
+                description: 'STRING_VALUE',
+                endpointConfiguration: {types: ['REGIONAL']},
+                minimumCompressionSize: 0,
+                policy: 'STRING_VALUE',
+                version: 'STRING_VALUE'
+            }));
+
+            restApiEntity = await apiGw.deploy('name', props, opts, group);
+
+            expect(restApiEntity.properties).to.eql({
+                id: 'id', name: 'name',
+                apiKeySource: 'HEADER',
+                binaryMediaTypes: ['VALUE'],
+                cloneFrom: 'STRING_VALUE',
+                description: 'STRING_VALUE',
+                endpointConfiguration: {types: ['REGIONAL']},
+                minimumCompressionSize: 0,
+                policy: 'STRING_VALUE',
+                version: 'STRING_VALUE'
+            });
+
+            expect(updateStub.args[0][0]).to.equal('id');
+            expect(updateStub.args[0][1]).to.deep.include([
+                {
+                    "op": "replace",
+                    "path": "binaryMediaTypes/0",
+                    "value": "VALUE"
+                },
+                {
+                    "op": "add",
+                    "path": "description",
+                    "value": "STRING_VALUE"
+                },
+            ]);
+
+        });
+
+        xit('should call RestApi method update, and other methods to create/update/delete resources, methods, integrations ', async () => {
+            listStub.returns(connectorResponse({items: [
+                {id: 'id', name: 'name'},
+                {id: 'id2', name: 'name2'}
+            ]}));
 
             updateStub.returns(connectorResponse({id: 'id', name: 'name', description: 'STRING_VALUE'}));
 
@@ -272,8 +380,14 @@ describe('ApiGatewayController', () => {
             deleteIntegrationResponseStub.returns(connectorResponse({request: 'done'}));
 
 
-            const entity = await apiGw.deploy('name', props, opts, group);
-            expect(entity.properties).to.eql({id: 'id', name: 'name', description: 'STRING_VALUE'});
+
+            //update
+            await apiGw.deploy('name', props, opts, group);
+
+        });
+
+        it('should call RestApi method update, and other methods to create/update/delete resources, methods, integrations ', async () => {
+
 
             expect(updateStub.args[0][0]).to.equal('id');
             expect(updateStub.args[0][1]).to.deep.include({
@@ -281,9 +395,6 @@ describe('ApiGatewayController', () => {
                 "path": "description",
                 "value": "STRING_VALUE"
             });
-            // expect(createStub.args[0][0]).to.deep.include({
-            //     name: 'name', description: 'STRING_VALUE'
-            // });
 
             expect(createResourceStub.args[0]).eql(['id', 'clientsId', 'test']);
             expect(createResourceStub.args[1]).eql(['id', 'resId', 'new']);

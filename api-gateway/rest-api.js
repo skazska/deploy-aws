@@ -172,8 +172,8 @@ class RestApi extends Api {
 
         if (position) options.position = position;
         let result = await this.list(options);
-        let api = result.items.find(api => api.name === name ? api : undefined);
-        if (!result.position) return api ? this._createEntity(api) : api;
+        let api = (result && result.items || []).find(api => api.name === name ? api : undefined);
+        if (!(result && result.position)) return api ? this._createEntity(api) : api;
         return api ? this._createEntity(api) : this.find(name, result.position, options.limit);
     }
 
