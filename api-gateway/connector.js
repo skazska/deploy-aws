@@ -283,6 +283,19 @@ class ApiGatewayConnector extends CommonAwsConnector {
         return this.api.getMethodResponse(params).promise();
     }
 
+    updateMethodResponse (restApiId, resourceId, httpMethod, statusCode, changes) {
+        const params = {
+            resourceId: resourceId, /* required */
+            restApiId: restApiId, /* required */
+            httpMethod: httpMethod,  /* required */
+            statusCode: statusCode  /* required */
+        };
+        if (changes) {
+            params.patchOperations = changes;
+        }
+        return this.api.updateMethodResponse(params).promise();
+    }
+
     testMethod  (restApiId, resourceId, httpMethod, properties) {
         const defaults = {
             // httpMethod: 'STRING_VALUE', /* required */
@@ -445,6 +458,18 @@ class ApiGatewayConnector extends CommonAwsConnector {
         return this.api.deleteIntegrationResponse(params).promise();
     }
 
+    updateIntegrationResponse (restApiId, resourceId, httpMethod, statusCode, changes) {
+        const params = {
+            resourceId: resourceId, /* required */
+            restApiId: restApiId, /* required */
+            httpMethod: httpMethod,  /* required */
+            statusCode: statusCode  /* required */
+        };
+        if (changes) {
+            params.patchOperations = changes;
+        }
+        return this.api.updateIntegrationResponse(params).promise();
+    }
 
 }
 

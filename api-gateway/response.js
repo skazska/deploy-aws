@@ -18,6 +18,8 @@ class ApiGwResponseEntity extends Entity {
     async update (properties) {
         const ops = this._ops(properties);
         try {
+            if (!ops.length) return this;
+
             const resp = await this._informCall(
                 this.connector['update' + this.entityName],
                 'Update ' + this.entityName + ' ' + this.id.restApiId + ', ' + this.id.resourceId + ', ' + this.id.httpMethod + ', ' + this.id.statusCode,

@@ -111,7 +111,11 @@ describe('Integral scenarios', function() {
         try {
             meth = await resource1.addMethod('ANY');
             expect(meth).not.to.be.empty;
-            methResponse = await meth.addResponse('200', {});
+            methResponse = await meth.addResponse('200',
+                {
+                    responseModels: {'application/json': 'Empty'},
+                    responseParameters: {'method.response.header.MY_HEADER': false}
+                });
             expect(methResponse).not.to.be.empty;
 
         } catch (e) {
@@ -146,7 +150,13 @@ describe('Integral scenarios', function() {
             //         "apiKeyRequired": false,
             //         "methodResponses": {
             //             "200": {
-            //                 "statusCode": "200"
+            //                 "statusCode": "200",
+            //                 "responseParameters": {
+            //                     "method.response.header.MY_HEADER": false
+            //                 },
+            //                 "responseModels": {
+            //                     "application/json": "Empty"
+            //                 }
             //             }
             //         },
             //         "methodIntegration": {

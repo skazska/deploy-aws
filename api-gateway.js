@@ -79,9 +79,7 @@ class ApiGateway {
         try {
             if (current) {
                 resp = ApiGwIntegrationResponseEntity.createEntity(current, entity, ApiGwIntegrationResponseEntity);
-
-                // await resp.update(response)
-
+                await resp.update(response)
             } else {
                 resp = await entity.addResponse(response.statusCode, response);
             }
@@ -96,10 +94,8 @@ class ApiGateway {
 
         try {
             if (current) {
-                resp = ApiGwMethodResponseEntity.createEntity(current, entity, ApiGwMethodResponseEntity);
-
-                // await resp.update(response)
-
+                resp = ApiGwMethodResponseEntity.createEntity(current, entity.responseApi, ApiGwMethodResponseEntity);
+                await resp.update(response)
             } else {
                 resp = await entity.addResponse(response.statusCode, response);
             }
@@ -116,8 +112,10 @@ class ApiGateway {
             const props = Object.assign({type: integration.type}, integration.awsProperties);
             if (props.type === 'AWS_PROXY') {
                 props.integrationHttpMethod = 'POST';
-                props.uri = 'arn:aws:apigateway:' + this.region + ':lambda:path/2015-03-31/functions/' +
-                    integration.lambda + '/invocations';
+                if (integration.lambda) {
+                    props.uri = 'arn:aws:apigateway:' + this.region + ':lambda:path/2015-03-31/functions/' +
+                        integration.lambda + '/invocations';
+                }
             }
             return props
         };
@@ -125,9 +123,7 @@ class ApiGateway {
         try {
             if (current) {
                 intgr = ApiGwIntegrationEntity.createEntity(current, method.integrationApi, ApiGwIntegrationEntity);
-
-                // await intgr.update(compileIntegration(integration))
-
+                await intgr.update(compileIntegration(integration))
             } else {
                 intgr = await method.addIntegration(compileIntegration(integration));
             }
@@ -166,9 +162,7 @@ class ApiGateway {
         try {
             if (current) {
                 meth = ApiGwMethodEntity.createEntity(current, res.methodApi, ApiGwMethodEntity);
-
-                // await meth.update(method.awsProperties)
-
+                await meth.update(method.awsProperties)
             } else {
                 meth = await res.addMethod(method.httpMethod, method.awsProperties);
             }
@@ -188,7 +182,6 @@ class ApiGateway {
                 .setCreator(newItem => this.deployMethodResponse(meth, newItem))
                 .perform(curResponses, responses);
 
-
             await this.deployIntegration(meth, method.integration || {}, meth.val('methodIntegration'));
 
             //thin: transition is a set of callbacks and we wait for it here even after had waited for deployResources
@@ -207,7 +200,7 @@ class ApiGateway {
             if (currentResource) {
                 res = ApiGwResourceEntity.createEntity(currentResource, entity, ApiGwResourceEntity);
 
-                // await res.update(resource.awsProperties)
+                // await res.update(resource.awsProperties) - no updates for resource
 
             } else {
                 //add resource

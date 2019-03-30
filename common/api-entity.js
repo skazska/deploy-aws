@@ -33,7 +33,13 @@ class ApiEntity extends ApiBase {
         const updateObj = (obj, newObj) => {
             const set = (key, val) => {
                 if (val && typeof val === 'object') {
-                    if (!obj[key]) obj[key] = {};
+                    if (!obj[key]) {
+                        if (Array.isArray(val)) {
+                            obj[key] = [];
+                        } else {
+                            obj[key] = {};
+                        }
+                    }
                     updateObj(obj[key], val);
                 } else {
                     obj[key] = newObj[key];
@@ -81,18 +87,22 @@ class ApiEntity extends ApiBase {
      * @return {Array}
      */
     _ops (props) {
-        const genOps = (pathPrefix, props) => {
+        const genOps = (pathPrefix, props, origin) => {
             let ops = [];
             Object.keys(props).forEach(propName => {
                 const val = props[propName];
                 const path = (pathPrefix ? pathPrefix + '/' : '') + propName.replace('/', '~1');
-                if (val === null || typeof val === 'undefined' && this.properties.hasOwnProperty(propName)) {
+                if (val === null || typeof val === 'undefined' && origin.hasOwnProperty(propName)) {
                     ops.push({op: 'remove', path: path})
                 } else {
+                    const originVal = origin[propName];
+
                     if (typeof val === 'object') {
-                        ops = ops.concat(genOps(path, val))
-                    } else if (this.properties.hasOwnProperty(propName)) {
-                        ops.push({op: 'replace', path: path, value: val});
+                        ops = ops.concat(genOps(path, val, originVal || {}))
+                    } else if (origin.hasOwnProperty(propName)) {
+                        if (originVal !== val) {
+                            ops.push({op: 'replace', path: path, value: val});
+                        }
                     } else {
                         ops.push({op: 'add', path: path, value: val});
                     }
@@ -100,7 +110,7 @@ class ApiEntity extends ApiBase {
             });
             return ops;
         };
-        return genOps('', props);
+        return genOps('', props, this.properties);
     }
 
     /**

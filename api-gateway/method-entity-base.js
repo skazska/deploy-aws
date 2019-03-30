@@ -23,7 +23,7 @@ class ApiGwMethodEntityAbstract extends Entity {
             const resp = await this._informCall(
                 this.connector['update' + this.entityName],
                 'Update ' + this.entityName + ' ' + this.id.restApi + ', ' + this.id.resourceId + ', ' + this.id.httpMethod,
-                this.id.restApi, this.id.resourceId, this.id.httpMethod, ops);
+                this.id.restApiId, this.id.resourceId, this.id.httpMethod, ops);
             return this._updateEntity(resp);
         } catch (e) {
             if (e.code === 'ResourceNotFoundException') {

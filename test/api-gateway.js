@@ -113,18 +113,22 @@ describe('ApiGatewayController', () => {
             readMethodStub = sinon.stub(apiGw.connector, 'readMethod');
             createMethodStub = sinon.stub(apiGw.connector, 'createMethod');
             deleteMethodStub = sinon.stub(apiGw.connector, 'deleteMethod');
+            updateMethodStub = sinon.stub(apiGw.connector, 'updateMethod');
 
             readMethodResponseStub = sinon.stub(apiGw.connector, 'readMethodResponse');
             createMethodResponseStub = sinon.stub(apiGw.connector, 'createMethodResponse');
             deleteMethodResponseStub = sinon.stub(apiGw.connector, 'deleteMethodResponse');
+            updateMethodResponseStub = sinon.stub(apiGw.connector, 'updateMethodResponse');
 
             readIntegrationStub = sinon.stub(apiGw.connector, 'readIntegration');
             createIntegrationStub = sinon.stub(apiGw.connector, 'createIntegration');
             deleteIntegrationStub = sinon.stub(apiGw.connector, 'deleteIntegration');
+            updateIntegrationStub = sinon.stub(apiGw.connector, 'updateIntegration');
 
             readIntegrationResponseStub = sinon.stub(apiGw.connector, 'readIntegrationResponse');
             createIntegrationResponseStub = sinon.stub(apiGw.connector, 'createIntegrationResponse');
             deleteIntegrationResponseStub = sinon.stub(apiGw.connector, 'deleteIntegrationResponse');
+            updateIntegrationResponseStub = sinon.stub(apiGw.connector, 'updateIntegrationResponse');
 
             props = new Promise(resolve => {
                 setImmediate(
@@ -141,20 +145,16 @@ describe('ApiGatewayController', () => {
                             "clients": {
                                 "ANY": {
                                     "awsProperties": {
-                                        "description": "STRING_VALUE"
+                                        "authorizationType": "HEADER"
                                     },
                                     "integration": {
                                         "type": "AWS_PROXY",
                                         "lambda": "FunctionArn",
                                         "awsProperties": {
-                                            "description": "STRING_VALUE"
+                                            "passthroughBehavior": "NEVER"
                                         },
                                         "responses": {
                                             "200": {
-                                                "contentHandling": "CONVERT_TO_TEXT",
-                                                "responseParameters": {"p1":  "v1"},
-                                                "responseTemplates": {"t1":  "t"},
-                                                "selectionPattern": "s"
                                             },
                                             "412": {
                                                 "contentHandling": "CONVERT_TO_BINARY",
@@ -166,12 +166,20 @@ describe('ApiGatewayController', () => {
                                     },
                                     "responses": {
                                         "200": {
-                                            "Models": {"model1":  "model"},
-                                            "Parameters": {"par1": true, "par2":  false}
+                                            "responseParameters": {
+                                                "method.response.header.MY_HEADER": false
+                                            },
+                                            "responseModels": {
+                                                "application/json": "Empty"
+                                            }
                                         },
                                         "319": {
-                                            "Models": {"model1":  "model"},
-                                            "Parameters": {"par1": true, "par2":  false}
+                                            "responseParameters": {
+                                                "method.response.header.MY_HEADER": false
+                                            },
+                                            "responseModels": {
+                                                "application/json": "Empty"
+                                            }
                                         }
                                     }
                                 },
@@ -198,9 +206,7 @@ describe('ApiGatewayController', () => {
                     )
                 })
             };
-
         });
-
         xit('should call RestApi method create if list result contain no item with restApi name', async () => {
             const opts = {};
             listStub.returns(connectorResponse({
@@ -219,22 +225,23 @@ describe('ApiGatewayController', () => {
             expect(createStub.args[0][0]).to.deep.include({
                 name: 'name', description: 'STRING_VALUE'
             });
+
+            sinon.restore();
+
         });
-
-
-        it('should call RestApi method update if list result contain item with restApi name', async () => {
+        xit('should call RestApi method update if list result contain item with restApi name', async () => {
             const props = new Promise(resolve => {
                 setImmediate(
                     resolve,
                     {
                         apiKeySource: 'HEADER',
                         binaryMediaTypes: ['VALUE'],
-                        cloneFrom: 'STRING_VALUE',
+                        cloneFrom: null,
                         description: 'STRING_VALUE',
                         endpointConfiguration: {types: ['REGIONAL']},
-                        minimumCompressionSize: 0,
-                        policy: 'STRING_VALUE',
-                        version: 'STRING_VALUE'
+                        minimumCompressionSize: 0
+                        // policy: 'STRING_VALUE',
+                        // version: 'STRING_VALUE'
                     }
                 )
             });
@@ -254,7 +261,7 @@ describe('ApiGatewayController', () => {
                     apiKeySource: 'HEADER',
                     binaryMediaTypes: ['STRING_VALUE'],
                     cloneFrom: 'STRING_VALUE',
-                    endpointConfiguration: {types: ['REGIONAL']},
+                    // endpointConfiguration: {types: ['REGIONAL']},
                     minimumCompressionSize: 0,
                     policy: 'STRING_VALUE',
                     version: 'STRING_VALUE'
@@ -268,7 +275,6 @@ describe('ApiGatewayController', () => {
                 id: 'id', name: 'name',
                 apiKeySource: 'HEADER',
                 binaryMediaTypes: ['VALUE'],
-                cloneFrom: 'STRING_VALUE',
                 description: 'STRING_VALUE',
                 endpointConfiguration: {types: ['REGIONAL']},
                 minimumCompressionSize: 0,
@@ -282,7 +288,6 @@ describe('ApiGatewayController', () => {
                 id: 'id', name: 'name',
                 apiKeySource: 'HEADER',
                 binaryMediaTypes: ['VALUE'],
-                cloneFrom: 'STRING_VALUE',
                 description: 'STRING_VALUE',
                 endpointConfiguration: {types: ['REGIONAL']},
                 minimumCompressionSize: 0,
@@ -291,22 +296,32 @@ describe('ApiGatewayController', () => {
             });
 
             expect(updateStub.args[0][0]).to.equal('id');
-            expect(updateStub.args[0][1]).to.deep.include([
+            expect(updateStub.args[0][1]).to.eql([
                 {
                     "op": "replace",
                     "path": "binaryMediaTypes/0",
                     "value": "VALUE"
                 },
                 {
+                    "op": "remove",
+                    "path": "cloneFrom"
+                },
+                {
                     "op": "add",
                     "path": "description",
                     "value": "STRING_VALUE"
                 },
+                {
+                    "op": "add",
+                    "path": "endpointConfiguration/types/0",
+                    "value": "REGIONAL"
+                }
             ]);
 
-        });
+            sinon.restore();
 
-        xit('should call RestApi method update, and other methods to create/update/delete resources, methods, integrations ', async () => {
+        });
+        it('should process complex configuration causing create/update/delete resources, methods, integrations ', async () => {
             listStub.returns(connectorResponse({items: [
                 {id: 'id', name: 'name'},
                 {id: 'id2', name: 'name2'}
@@ -318,7 +333,8 @@ describe('ApiGatewayController', () => {
                 {id: 'resId', pathPart: '/', path: '/'},
                 {id: 'clientsId', pathPart: 'clients', path: '/clients', parentId: 'resId', resourceMethods: {"ANY": {
                     "httpMethod": "ANY", "authorizationType": "NONE", "apiKeyRequired": false,
-                    methodResponses: { "200": { "statusCode": "200" },  "300": { "statusCode": "300" }},
+                    methodResponses: { "200": { "statusCode": "200", "responseModels": {"application/json": "Error"}},
+                        "300": { "statusCode": "300" }},
                     methodIntegration: {
                         "type": "AWS_PROXY", "httpMethod": "POST",
                         "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:266895356213:function:aws-deploy-test-function-integral/invocations",
@@ -337,7 +353,7 @@ describe('ApiGatewayController', () => {
                 .withArgs('id', 'clientsId', 'test')
                     .returns(connectorResponse({id: 'resId2', pathPart: 'test', path: '/clients/test'}));
 
-            // updateResourceStub.returns({id: 'clientsId', pathPart: 'clients', path: '/clients',
+            //no update updateResourceStub.returns({id: 'clientsId', pathPart: 'clients', path: '/clients',
             // });
             deleteResourceStub.returns(connectorResponse({request: 'done'}));
 
@@ -346,7 +362,21 @@ describe('ApiGatewayController', () => {
                 // requestModels: {},
                 // methodResponses: {}
             }));
-            // updateMethodStub.returns({ "statusCode": "200" });
+
+            updateMethodStub
+                .returns(connectorResponse({
+                    "httpMethod": "ANY", "authorizationType": "HEADER", "apiKeyRequired": false,
+                    methodResponses: {"200": {"statusCode": "200", "responseModels": {"application/json": "Error"}},
+                        "300": {"statusCode": "300"}},
+                    methodIntegration: {
+                        "type": "AWS_PROXY", "httpMethod": "POST",
+                        "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:266895356213:function:aws-deploy-test-function-integral/invocations",
+                        "passthroughBehavior": "WHEN_NO_MATCH", "timeoutInMillis": 29000,
+                        "cacheNamespace": "ak8465",
+                        "cacheKeyParameters": [],
+                        integrationResponses: {"200": {"statusCode": "200"}, "300": {"statusCode": "300"}}
+                    }
+                }));
 
             deleteMethodStub.returns(connectorResponse({request: 'done'}));
 
@@ -356,7 +386,15 @@ describe('ApiGatewayController', () => {
                 // requestModels: {},
                 // methodResponses: {}
             }));
-            // updateMethodResponseStub.returns({ "statusCode": "200" });
+            updateMethodResponseStub.returns(connectorResponse({
+                "statusCode": "200",
+                "responseParameters": {
+                    "method.response.header.MY_HEADER": false
+                },
+                "responseModels": {
+                    "application/json": "Empty"
+                }
+            }));
 
             deleteMethodResponseStub.returns(connectorResponse({request: 'done'}));
 
@@ -365,7 +403,17 @@ describe('ApiGatewayController', () => {
                 // requestModels: {},
                 // methodResponses: {}
             }));
-            // updateMethodStub.returns({ "statusCode": "200" });
+
+            updateIntegrationStub
+                .returns(connectorResponse({
+                    "type": "AWS_PROXY", "httpMethod": "POST",
+                    "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:266895356213:function:aws-deploy-test-function-integral/invocations",
+                    "passthroughBehavior": "NEVER", "timeoutInMillis": 29000,
+                    "cacheNamespace": "ak8465",
+                    "cacheKeyParameters": [],
+                    integrationResponses: {"200": {"statusCode": "200"},
+                        "300": {"statusCode": "300"}}
+                }));
 
             deleteIntegrationStub.returns(connectorResponse({request: 'done'}));
 
@@ -375,41 +423,91 @@ describe('ApiGatewayController', () => {
                 // requestModels: {},
                 // methodResponses: {}
             }));
-            // updateMethodResponseStub.returns({ "statusCode": "200" });
+            updateIntegrationResponseStub.returns(connectorResponse({
+                "statusCode": "200",
+                "responseParameters": {
+                    "method.response.header.MY_HEADER": false
+                },
+                "responseModels": {
+                    "application/json": "Empty"
+                }
+            }));
 
             deleteIntegrationResponseStub.returns(connectorResponse({request: 'done'}));
 
-
-
-            //update
+            //deploy
             await apiGw.deploy('name', props, opts, group);
-
         });
-
-        it('should call RestApi method update, and other methods to create/update/delete resources, methods, integrations ', async () => {
-
-
+        it('should call RestApi method update', async () => {
             expect(updateStub.args[0][0]).to.equal('id');
             expect(updateStub.args[0][1]).to.deep.include({
                 "op": "add",
                 "path": "description",
                 "value": "STRING_VALUE"
             });
-
+        });
+        it('should call Resource methods', async () => {
+            // /clients/test - created
             expect(createResourceStub.args[0]).eql(['id', 'clientsId', 'test']);
+            // /new - created
             expect(createResourceStub.args[1]).eql(['id', 'resId', 'new']);
+            // /orphan - deleted
             expect(deleteResourceStub.args[0]).eql(['id', 'testResId']);
+        });
+        it('should call Method methods', async () => {
+            // /clients/ANY - updated
+            expect(updateMethodStub.args[0][0]).to.equal('id');
+            expect(updateMethodStub.args[0][1]).to.equal('clientsId');
+            expect(updateMethodStub.args[0][2]).to.equal('ANY');
+            expect(updateMethodStub.args[0][3]).to.eql([
+                {
+                    "op": "replace",
+                    "path": "authorizationType",
+                    "value": "HEADER"
+                }
+            ]);
 
-            expect(createMethodStub.args[0]).eql(['id', 'resId2', 'ANY', {"description": "STRING_VALUE"}]);
+            // /clients/GET - deleted
             expect(deleteMethodStub.args[0]).eql(['id', 'clientsId', 'GET']);
+            // /clients/test/ANY - created
+            expect(createMethodStub.args[0]).eql(['id', 'resId2', 'ANY', {"description": "STRING_VALUE"}]);
+        });
+        it('should call MethodResponse methods', async () => {
+            // /clients/ANY - updated
+            expect(updateMethodResponseStub.args[0][0]).to.equal('id');
+            expect(updateMethodResponseStub.args[0][1]).to.equal('clientsId');
+            expect(updateMethodResponseStub.args[0][2]).to.equal('ANY');
+            expect(updateMethodResponseStub.args[0][3]).to.equal('200');
+            expect(updateMethodResponseStub.args[0][4]).to.eql([
+                {
+                    "op": "add",
+                    "path": "responseParameters/method.response.header.MY_HEADER",
+                    "value": false
+                },
+                {
+                    "op": "replace",
+                    "path": "responseModels/application~1json",
+                    "value": "Empty"
+                }
+            ]);
 
+            // /clients/ANY response 319 - created
             expect(createMethodResponseStub.args[0]).eql(['id', 'clientsId', 'ANY', '319', {
-                "Models": {"model1":  "model"},
-                "Parameters": {"par1": true, "par2":  false},
+                "responseParameters": {
+                    "method.response.header.MY_HEADER": false
+                },
+                "responseModels": {
+                    "application/json": "Empty"
+                },
                 "statusCode": '319'
             }]);
+            // /clients/ANY response 300 - deleted
             expect(deleteMethodResponseStub.args[0]).eql(['id', 'clientsId', 'ANY', '300']);
 
+        });
+
+        it('should call Integrations methods', async () => {
+            // /clients/test/ANY integration - created
             expect(createIntegrationStub.args[0]).eql(['id', 'resId2', 'ANY', {
                 "type": "AWS_PROXY",
                 "description": "STRING_VALUE",
@@ -420,6 +518,26 @@ describe('ApiGatewayController', () => {
             expect(deleteIntegrationStub.args.length).equal(0);
             // expect(deleteIntegrationStub.args[0]).eql(['id', 'clientsId', 'GET']);
 
+            // /clients/ANY integration - updated
+            expect(updateIntegrationStub.args[0][0]).to.equal('id');
+            expect(updateIntegrationStub.args[0][1]).to.equal('clientsId');
+            expect(updateIntegrationStub.args[0][2]).to.equal('ANY');
+            expect(updateIntegrationStub.args[0][3]).to.eql([
+                {
+                    "op": "replace",
+                    "path": "passthroughBehavior",
+                    "value": "NEVER"
+                },
+                {
+                    "op": "replace",
+                    "path": "uri",
+                    "value": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/FunctionArn/invocations"
+                }
+            ]);
+        });
+
+        it('should call IntegrationResponse methods', async () => {
+
             expect(createIntegrationResponseStub.args[0]).eql(['id', 'clientsId', 'ANY', '412', {
                 "contentHandling": "CONVERT_TO_BINARY",
                 "responseParameters": {"par1":  "val1"},
@@ -428,6 +546,7 @@ describe('ApiGatewayController', () => {
                 "statusCode": '412'
             }]);
             expect(deleteIntegrationResponseStub.args[0]).eql(['id', 'clientsId', 'ANY', '300']);
+            expect(updateIntegrationResponseStub.args.length).equal(0);
 
 
         });
