@@ -22,7 +22,7 @@ class ApiGwMethodEntityAbstract extends Entity {
         try {
             const resp = await this._informCall(
                 this.connector['update' + this.entityName],
-                'Update ' + this.entityName + ' ' + this.id.restApi + ', ' + this.id.resourceId + ', ' + this.id.httpMethod,
+                'Update ' + this.entityName + ' ' + this.id.restApiId + ', ' + this.id.resourceId + ', ' + this.id.httpMethod,
                 this.id.restApiId, this.id.resourceId, this.id.httpMethod, ops);
             return this._updateEntity(resp);
         } catch (e) {

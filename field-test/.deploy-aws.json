@@ -1,0 +1,123 @@
+{
+  "role": {
+    "aws-deploy-field-test": {
+      "inlinePolicy": [
+        {
+          "PolicyName": "aws-deploy-field-test-inline",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "dynamodb:BatchGetItem",
+                  "dynamodb:BatchWriteItem",
+                  "dynamodb:PutItem",
+                  "dynamodb:DeleteItem",
+                  "dynamodb:GetItem",
+                  "dynamodb:UpdateItem"
+                ],
+                "Resource": "arn:aws:dynamodb:eu-west-1:266895356213:table/aws-deploy-field-test"
+              }
+            ]
+          }
+        }
+      ],
+      "policies": [
+        "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      ],
+      "awsProperties": {
+        "Path": "/service-role/aws-deploy-field-test/",
+        "RoleName": "aws-deploy-field-test"
+      }
+    }
+  },
+  "lambda": {
+    "aws-deploy-field-test": {
+      "codeEntries": [
+        "index.js"
+      ],
+      "awsProperties": {
+        "Handler": "aws.handler",
+        "Timeout": 10,
+        "Role": {
+          "aws-deploy": "role.aws-deploy-field-test"
+        }
+      }
+    }
+  },
+  "restApi": {
+    "aws-deploy-field-test": {
+      "awsProperties": {
+        "description": "STRING_VALUE"
+      },
+      "resources": {
+        "clients": {
+          "ANY": {
+            "awsProperties": {
+              "authorizationType": "NONE"
+            },
+            "integration": {
+              "type": "AWS_PROXY",
+              "lambda": {
+                "aws-deploy": "lambda.aws-deploy-field-test"
+              },
+              "awsProperties": {
+                "passthroughBehavior": "NEVER"
+              },
+              "responses": {
+                "200": {
+                },
+                "412": {
+                  "contentHandling": "CONVERT_TO_BINARY",
+                  "responseParameters": {"par1":  "val1"},
+                  "responseTemplates": {"tpl1":  "tpl"},
+                  "selectionPattern": "sp"
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "responseParameters": {
+                  "method.response.header.MY_HEADER": false
+                },
+                "responseModels": {
+                  "application/json": "Empty"
+                }
+              },
+              "319": {
+                "responseParameters": {
+                  "method.response.header.MY_HEADER": false
+                },
+                "responseModels": {
+                  "application/json": "Empty"
+                }
+              }
+            }
+          },
+          "resources" : {
+            "test": {
+              "ANY": {
+                "awsProperties": {
+                  "description": "STRING_VALUE"
+                },
+                "integration": {
+                  "type": "AWS_PROXY",
+                  "lambda": {
+                    "aws-deploy": "lambda.aws-deploy-field-test"
+                  },
+                  "awsProperties": {
+                    "description": "STRING_VALUE"
+                  }
+                },
+                "responses": {
+                }
+              }
+            }
+          }
+
+        }
+      }
+    }
+  }
+}

@@ -113,8 +113,9 @@ class ApiGateway {
             if (props.type === 'AWS_PROXY') {
                 props.integrationHttpMethod = 'POST';
                 if (integration.lambda) {
+                    let lambda = typeof integration.lambda === 'string' ? integration.lambda : integration.lambda.val('FunctionArn');
                     props.uri = 'arn:aws:apigateway:' + this.region + ':lambda:path/2015-03-31/functions/' +
-                        integration.lambda + '/invocations';
+                        lambda + '/invocations';
                 }
             }
             return props
