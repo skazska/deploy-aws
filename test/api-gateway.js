@@ -18,7 +18,7 @@ const groupOptions = {
     text: 'it'
 };
 function createInformer(renderer) {
-    return new Inform(renderer, 'Deploy service').addGroup(null, groupOptions);
+    return new Inform('Deploy service', renderer).addGroup(null, groupOptions);
 }
 const connectorResponse = (response) => {
     return new Promise(resolve => setImmediate(resolve, response));
@@ -299,21 +299,21 @@ describe('ApiGatewayController', () => {
             expect(updateStub.args[0][1]).to.eql([
                 {
                     "op": "replace",
-                    "path": "binaryMediaTypes/0",
+                    "path": "/binaryMediaTypes/0",
                     "value": "VALUE"
                 },
                 {
                     "op": "remove",
-                    "path": "cloneFrom"
+                    "path": "/cloneFrom"
                 },
                 {
                     "op": "add",
-                    "path": "description",
+                    "path": "/description",
                     "value": "STRING_VALUE"
                 },
                 {
                     "op": "add",
-                    "path": "endpointConfiguration/types/0",
+                    "path": "/endpointConfiguration/types/0",
                     "value": "REGIONAL"
                 }
             ]);
@@ -442,7 +442,7 @@ describe('ApiGatewayController', () => {
             expect(updateStub.args[0][0]).to.equal('id');
             expect(updateStub.args[0][1]).to.deep.include({
                 "op": "add",
-                "path": "description",
+                "path": "/description",
                 "value": "STRING_VALUE"
             });
         });
@@ -462,7 +462,7 @@ describe('ApiGatewayController', () => {
             expect(updateMethodStub.args[0][3]).to.eql([
                 {
                     "op": "replace",
-                    "path": "authorizationType",
+                    "path": "/authorizationType",
                     "value": "HEADER"
                 }
             ]);
@@ -481,12 +481,12 @@ describe('ApiGatewayController', () => {
             expect(updateMethodResponseStub.args[0][4]).to.eql([
                 {
                     "op": "add",
-                    "path": "responseParameters/method.response.header.MY_HEADER",
+                    "path": "/responseParameters/method.response.header.MY_HEADER",
                     "value": false
                 },
                 {
                     "op": "replace",
-                    "path": "responseModels/application~1json",
+                    "path": "/responseModels/application~1json",
                     "value": "Empty"
                 }
             ]);
@@ -525,12 +525,12 @@ describe('ApiGatewayController', () => {
             expect(updateIntegrationStub.args[0][3]).to.eql([
                 {
                     "op": "replace",
-                    "path": "passthroughBehavior",
+                    "path": "/passthroughBehavior",
                     "value": "NEVER"
                 },
                 {
                     "op": "replace",
-                    "path": "uri",
+                    "path": "/uri",
                     "value": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/FunctionArn/invocations"
                 }
             ]);

@@ -26,7 +26,7 @@ const groupOptions = {
     text: 'it'
 };
 function createInformer(renderer) {
-    return new Inform(renderer, 'Deploy service').addGroup(null, groupOptions);
+    return new Inform('Deploy service', renderer).addGroup(null, groupOptions);
 }
 
 describe('REST API Controller', () => {
@@ -183,7 +183,7 @@ describe('REST API Controller', () => {
             expect(apiCall.args[0][0]).to.be.eql({
                 restApiId: '1',
                 patchOperations: [
-                    {op: 'add', path: 'prop1', value: 'val1'}
+                    {op: 'add', path: '/prop1', value: 'val1'}
                 ]
             });
 

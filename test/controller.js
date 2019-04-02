@@ -5,7 +5,7 @@ chai.use(sinonChai);
 
 const expect = chai.expect;
 
-const Inform = require('@skazska/inform');
+const Inform = require('@skazska/inform', );
 const Controller = require('../controller');
 const { readFromFile } = require('../utils/config');
 // const awsCfg = __dirname + '/.aws-cfg.json';
@@ -47,7 +47,7 @@ describe('deploy-aws Controller', () => {
             sinon.restore();
         });
         beforeEach(() => {
-            inform = new Inform(sinon.fake(), 'Deploy service');
+            inform = new Inform('Deploy service', sinon.fake());
             sinon.spy(inform, 'addGroup');
             Controller.DPKO.forEach(entry => {
                 sinon.replace(controller, Controller.deployMethodName(entry), sinon.fake(

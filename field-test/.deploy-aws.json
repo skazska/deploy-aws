@@ -99,7 +99,6 @@
             "test": {
               "ANY": {
                 "awsProperties": {
-                  "description": "STRING_VALUE"
                 },
                 "integration": {
                   "type": "AWS_PROXY",
@@ -107,7 +106,6 @@
                     "aws-deploy": "lambda.aws-deploy-field-test"
                   },
                   "awsProperties": {
-                    "description": "STRING_VALUE"
                   }
                 },
                 "responses": {

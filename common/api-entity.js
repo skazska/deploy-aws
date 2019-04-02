@@ -91,7 +91,7 @@ class ApiEntity extends ApiBase {
             let ops = [];
             Object.keys(props).forEach(propName => {
                 const val = props[propName];
-                const path = (pathPrefix ? pathPrefix + '/' : '') + propName.replace('/', '~1');
+                const path = (pathPrefix ? pathPrefix : '') + '/' + propName.replace('/', '~1');
                 if (val === null || typeof val === 'undefined' && origin.hasOwnProperty(propName)) {
                     ops.push({op: 'remove', path: path})
                 } else {

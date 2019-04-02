@@ -27,7 +27,7 @@ const groupOptions = {
     text: 'it'
 };
 function createInformer(renderer) {
-    return new Inform(renderer, 'Deploy service').addGroup(null, groupOptions);
+    return new Inform('Deploy service', renderer).addGroup(null, groupOptions);
 }
 
 describe('API Resource Controller', () => {
@@ -182,9 +182,9 @@ describe('API Resource Controller', () => {
                 restApiId: '1',
                 resourceId: '2',
                 patchOperations: [
-                    {op: 'add', path: 'prop', value: 'val1'},
-                    {op: 'replace', path: 'parentId', value: 'parentId1'},
-                    {op: 'remove', path: 'pathPart'}
+                    {op: 'add', path: '/prop', value: 'val1'},
+                    {op: 'replace', path: '/parentId', value: 'parentId1'},
+                    {op: 'remove', path: '/pathPart'}
                 ]
             });
 

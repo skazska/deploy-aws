@@ -4,6 +4,8 @@
  * @param {*} properties
  * @return {*}
  */
+
+/** TODO extended syntax for pointing properties of dependencies like {aws-deploy: 'something.item/json/point'} **/
 function collect (properties) {
     if (Array.isArray(properties)) {
         return properties.reduce((dependencies, properties) => {

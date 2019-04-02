@@ -17,7 +17,7 @@ const groupOptions = {
     text: 'it'
 };
 function createInformer(renderer) {
-    return new Inform(renderer, 'Deploy service').addGroup(null, groupOptions);
+    return new Inform('Deploy service', renderer).addGroup(null, groupOptions);
 }
 const awsResponse = (response) => {
     return {
