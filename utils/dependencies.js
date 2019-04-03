@@ -1,11 +1,30 @@
+const pointer = require('json-pointer');
+
+/**
+ * splits dependency access key to dependency id and pointer
+ * @param {string} key in form of dep.id/json/pointer
+ * @return Object
+ */
+function depKeys (key) {
+    let pos = key.indexOf('/');
+    if (pos > 0) {
+        return {
+            dep: key.substr(0, pos),
+            pointer: key.substring(pos)
+        }
+    } else {
+        return {
+            dep: key
+        }
+    }
+}
+
 /**
  * return object with keys equal to values of 'aws-deploy' keys of value in @param properties those keys should have a
  * true values
  * @param {*} properties
  * @return {*}
  */
-
-/** TODO extended syntax for pointing properties of dependencies like {aws-deploy: 'something.item/json/point'} **/
 function collect (properties) {
     if (Array.isArray(properties)) {
         return properties.reduce((dependencies, properties) => {
@@ -14,9 +33,11 @@ function collect (properties) {
     }
     if (typeof properties !== 'object') return {};
     return Object.keys(properties).reduce((dependencies, key) => {
-        if (key === 'aws-deploy') dependencies[properties[key]] = true;
+        if (key === 'aws-deploy') {
+            dependencies[depKeys(properties[key]).dep] = true;
+        }
         if (properties[key]['aws-deploy']) {
-            dependencies[properties[key]['aws-deploy']] = true;
+            dependencies[depKeys(properties[key]['aws-deploy']).dep] = true;
         } else {
             dependencies = Object.assign(dependencies, collect(properties[key]));
         }
@@ -35,11 +56,12 @@ function bind (properties, deployment) {
     const dependencies =  collect(properties);
     const orphaned = [];
     Object.keys(dependencies).forEach(key => {
-        if (!deployment[key]) {
-            orphaned.push(key);
-            delete dependencies[key];
+        let dep = depKeys(key).dep;
+        if (!deployment[dep]) {
+            orphaned.push(dep);
+            delete dependencies[dep];
         } else {
-            dependencies[key] = deployment[key];
+            dependencies[dep] = deployment[dep];
         }
     });
     return {
@@ -63,9 +85,15 @@ function fill (properties, deployment) {
     }
     if (typeof properties !== 'object') return properties;
     return Object.keys(properties).reduce((result, key) => {
-        if (key === 'aws-deploy') return deployment[properties[key]];
+        if (key === 'aws-deploy') {
+            let dep = depKeys(properties[key]);
+            return dep.pointer ? pointer.get(deployment[dep.dep], dep.pointer) : deployment[dep.dep];
+            // return deployment[properties[key]];
+        }
         if (properties[key]['aws-deploy']) {
-            let val = deployment[properties[key]['aws-deploy']];
+            let dep = depKeys(properties[key]['aws-deploy']);
+            let val = dep.pointer ? pointer.get(deployment[dep.dep], dep.pointer) : deployment[dep.dep];
+            // let val = deployment[properties[key]['aws-deploy']];
             if (typeof val !== 'undefined') result[key] = val;
         } else {
             result[key] = fill(properties[key], deployment);

@@ -62,9 +62,9 @@ class LambdaController {
             }
             params['FunctionName'] = name;
 
-            if (params.Role && typeof params.Role !== 'string') {
-                params.Role = params.Role.Arn;
-            }
+            // if (params.Role && typeof params.Role !== 'string') {
+            //     params.Role = params.Role.Arn;
+            // }
 
             if (existing) {
                 //function exists
@@ -95,13 +95,15 @@ class LambdaController {
                     if (results[1]) {
                         Object.assign(result, results[1]);
                     }
-                    return result;
+                    return existing;
                 });
             } else {
                 params.Code = {ZipFile: codeBuffer};
                 result = lambda.create(name, params);
             }
-            return result;
+            return result.then(lambdaEntity => {
+                return lambdaEntity.plain;
+            });
         } catch (e) {
             throw e;
         }

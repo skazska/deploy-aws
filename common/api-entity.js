@@ -72,6 +72,14 @@ class ApiEntity extends ApiBase {
     }
 
     /**
+     *
+     * @return {any}
+     */
+    get plain () {
+        return Object.assign({}, this.defaults || {}, this.properties || {});
+    }
+
+    /**
      * returns property value
      * @param {String} propName
      * @return {*}
