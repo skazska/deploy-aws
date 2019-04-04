@@ -38,7 +38,7 @@
         "index.js"
       ],
       "awsProperties": {
-        "Handler": "aws.handler",
+        "Handler": "index.handler",
         "Timeout": 10,
         "Role": {
           "aws-deploy": "role.aws-deploy-field-test/Arn"
@@ -60,12 +60,12 @@
             "integration": {
               "type": "AWS_PROXY",
               "lambda": {
-                "aws-deploy": "lambda.aws-deploy-field-test"
+                "aws-deploy": "lambda.aws-deploy-field-test/FunctionArn"
               },
               "awsProperties": {
                 "passthroughBehavior": "NEVER"
               },
-              "responses": {
+              "responses": {   <--  can not be configured for AWS_PROXY
                 "200": {
                 },
                 "412": {

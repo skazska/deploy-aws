@@ -23,6 +23,7 @@ program
     .option('-cfg, --deploy-config-file <s>')
     .option('-acf, --aws-config-file <s>', 'aws config file')
     .option('-ar, --aws-region <s>', 'aws region')
+    .option('-acc, --aws-accountId <s>', 'aws region')
     .option('-aak, --aws-accessKeyId <s>', 'aws access key')
     .option('-ask, --aws-secretAccessKey <s>', 'aws secret key')
     .description('Deploy lambda-function from workdir [wd] - (string)')
@@ -31,6 +32,8 @@ program
 
         //prepare aws config
         let config = cmd['awsConfigFile'] || {};
+        let region = cmd['awsRegion'];
+        let accId = cmd['awsAccountId'];
 
         if (typeof config !== 'string') {
             Object.keys(cmd).forEach(key => {
@@ -47,7 +50,7 @@ program
         let cfgPath = resolvePath(wd, cmd['deploy-config-file'] || defaultConfigFilePath + '.json');
 
         //deploy
-        const controller = new Controller(config);
+        const controller = new Controller(config, region, accId);
         const inform = new Inform('Deploy service from location ' + wd);
 
         try {

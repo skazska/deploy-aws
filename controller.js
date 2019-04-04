@@ -18,16 +18,18 @@ const DPKO = [
 ];
 
 class Controller {
-    constructor(config) {
+    constructor(config, region, accountId) {
         if (typeof config === 'string') {
             AWSGlobal.config.loadFromPath(config);
         } else if (typeof config === 'object') {
             AWSGlobal.config.update(Object.assign({}, awsDefaultConfig, config));
         }
 
+        if (!region) region = AWSGlobal.config.region;
+
         this.lambdaController = new LambdaController();
         this.roleController = new RoleController();
-        this.restApiController = new RestApiController()
+        this.restApiController = new RestApiController(region, accountId)
     }
 
     static get DPKO () { return DPKO; }
