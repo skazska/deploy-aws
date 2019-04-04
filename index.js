@@ -4,6 +4,7 @@
 const resolvePath = require('path').resolve;
 const statSync = require('fs').statSync;
 const readFileSync = require('fs').readFileSync;
+const { readFromFile } = require('./utils/config');
 
 const program = require('commander');
 
@@ -22,6 +23,7 @@ program
     .option('-cfg, --deploy-config-file <s>')
     .option('-acf, --aws-config-file <s>', 'aws config file')
     .option('-ar, --aws-region <s>', 'aws region')
+    .option('-acc, --aws-accountId <s>', 'aws region')
     .option('-aak, --aws-accessKeyId <s>', 'aws access key')
     .option('-ask, --aws-secretAccessKey <s>', 'aws secret key')
     .description('Deploy lambda-function from workdir [wd] - (string)')
@@ -30,6 +32,8 @@ program
 
         //prepare aws config
         let config = cmd['awsConfigFile'] || {};
+        let region = cmd['awsRegion'];
+        let accId = cmd['awsAccountId'];
 
         if (typeof config !== 'string') {
             Object.keys(cmd).forEach(key => {
@@ -46,40 +50,22 @@ program
         let cfgPath = resolvePath(wd, cmd['deploy-config-file'] || defaultConfigFilePath + '.json');
 
         //deploy
-        const controller = new Controller(config);
+        const controller = new Controller(config, region, accId);
         const inform = new Inform('Deploy service from location ' + wd);
 
-        const p = statSync(cfgPath);
-        if (p.isFile()) {
-            //deployment params from file
-            let deployParams = readFileSync(cfgPath, 'utf8');
-            if (!deployParams) {
-                console.error('can\'t read from ' + cfgPath);
+        try {
+            const deployParams = await readFromFile(cfgPath);
+
+            await controller.deploy(deployParams, {wd: wd}, inform);
+
+            await inform.promise;
+            console.log('all done');
+        } catch (e) {
+            if (e) {
+                console.error(e);
             } else {
-                try {
-                    deployParams = JSON.parse(deployParams);
-
-                    await controller.deploy(deployParams, {wd: wd}, inform);
-
-                    await inform.promise();
-                    console.log('all done');
-                } catch (e) {
-                    if (e) {
-                        console.error(e);
-                    } else {
-                        console.error('can\'t parse ' + cfgPath);
-                    }
-                }
+                console.error('can\'t parse ' + cfgPath);
             }
-        } else {
-            //deployment params interactively
-            console.error('can\'t find ' + config);
-
-            // try {
-            //     params = await createLambdaPrompt(params);
-            // } catch ( err ) {
-            //     console.error(err);
-            // }
         }
     });
 

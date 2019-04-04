@@ -1,0 +1,92 @@
+{
+  "role": {
+    "aws-deploy-test": {
+      "inlinePolicy": [
+        {
+          "PolicyName": "aws-deploy-test-inline",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "dynamodb:BatchGetItem",
+                  "dynamodb:BatchWriteItem",
+                  "dynamodb:PutItem",
+                  "dynamodb:DeleteItem",
+                  "dynamodb:GetItem",
+                  "dynamodb:UpdateItem"
+                ],
+                "Resource": "arn:aws:dynamodb:eu-west-1:266895356213:table/timetables-clients"
+              }
+            ]
+          }
+        }
+      ],
+      "policies": [
+        "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      ],
+      "awsProperties": {
+        "Path": "/service-role/timetables/",
+        "RoleName": "timetables-api-clients"
+      }
+    }
+  },
+  "lambda": {
+    "aws-deploy-test": {
+      "codeEntries": [
+        "methods",
+        "schemas",
+        "services",
+        "node_modules",
+        "aws.js",
+        "index.js"
+      ],
+      "awsProperties": {
+        "FunctionName": "aws-deploy-test",
+        "Handler": "aws.handler",
+        "Timeout": 10,
+        "Role": {
+          "aws-deploy": "roles.timetables-api-clients"
+        }
+      }
+    }
+  },
+  "restApi": {
+    "timetables-api-clients": {
+      "awsProperties": {
+        "description": "STRING_VALUE"
+      },
+      "resources": {
+        "clients": {
+          "ANY": {
+            "awsProperties": {
+              "description": "STRING_VALUE"
+            },
+            "responses": {
+              "412": {
+                "Models": {"model1":  "model"},
+                "Parameters": {"par1": true, "par2":  false}
+              }
+            },
+            "integration": {
+              "type": "AWS_PROXY",
+              "lambda": { "aws-deploy": "lambda.aws-deploy-test", "aws-deploy-prop": "FunctionArn" },
+              "awsProperties": {
+                "description": "STRING_VALUE"
+              },
+              "responses": {
+                "329": {
+                  "contentHandling": "CONVERT_TO_BINARY | CONVERT_TO_TEXT",
+                  "responseParameters": {"par1":  "val1"},
+                  "responseTemplates": {"tpl1":  "tpl"},
+                  "selectionPattern": ""
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

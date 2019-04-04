@@ -1,0 +1,7 @@
+language: node_js
+node_js:
+  - "lts/*"
+git:
+  depth: 3
+before_script:
+  - git clone --depth=1 --branch=master https://github.com/skazska/adm-zip.git custom_modules/adm-zip
