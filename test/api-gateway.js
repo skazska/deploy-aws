@@ -207,8 +207,16 @@ describe('ApiGatewayController', () => {
                 })
             };
         });
-        xit('should call RestApi method create if list result contain no item with restApi name', async () => {
+
+        after(() => {
+            sinon.restore();
+        });
+
+        it('should call RestApi method create if list result contain no item with restApi name', async () => {
             const opts = {};
+
+            // listStub.restore();
+            // listStub = sinon.stub(apiGw.connector, 'listRestApis');
             listStub.returns(connectorResponse({
                 items: [
                     {id: 'id1', name: 'name1'},
@@ -216,20 +224,22 @@ describe('ApiGatewayController', () => {
                 ]
             }));
 
+            // createStub.restore();
+            // createStub = sinon.stub(apiGw.connector, 'createRestApi');
             createStub.returns(connectorResponse({id: 'id', name: 'name', description: 'STRING_VALUE'}));
 
             restApiEntity = await apiGw.deploy('name', props, opts, group);
 
-            expect(restApiEntity.properties).to.eql({id: 'id', name: 'name', description: 'STRING_VALUE'});
+            expect(restApiEntity).to.eql({id: 'id', name: 'name', description: 'STRING_VALUE'});
 
             expect(createStub.args[0][0]).to.deep.include({
                 name: 'name', description: 'STRING_VALUE'
             });
 
-            sinon.restore();
+            // sinon.restore();
 
         });
-        xit('should call RestApi method update if list result contain item with restApi name', async () => {
+        it('should call RestApi method update if list result contain item with restApi name', async () => {
             const props = new Promise(resolve => {
                 setImmediate(
                     resolve,
@@ -255,6 +265,8 @@ describe('ApiGatewayController', () => {
                 })
             };
 
+            // listStub.restore();
+            // listStub = sinon.stub(apiGw.connector, 'listRestApis');
             listStub.returns(connectorResponse({items: [
                 {
                     id: 'id', name: 'name',
@@ -269,8 +281,12 @@ describe('ApiGatewayController', () => {
                 {id: 'id2', name: 'name2'}
             ]}));
 
+            // listResourcesStub.restore();
+            // listResourcesStub = sinon.stub(apiGw.connector, 'listResources');
             listResourcesStub.returns(connectorResponse({items: []}));
 
+            // updateStub.restore();
+            // updateStub = sinon.stub(apiGw.connector, 'updateRestApi');
             updateStub.returns(connectorResponse({
                 id: 'id', name: 'name',
                 apiKeySource: 'HEADER',
@@ -284,7 +300,7 @@ describe('ApiGatewayController', () => {
 
             restApiEntity = await apiGw.deploy('name', props, opts, group);
 
-            expect(restApiEntity.properties).to.eql({
+            expect(restApiEntity).to.eql({
                 id: 'id', name: 'name',
                 apiKeySource: 'HEADER',
                 binaryMediaTypes: ['VALUE'],
@@ -318,17 +334,23 @@ describe('ApiGatewayController', () => {
                 }
             ]);
 
-            sinon.restore();
+            // sinon.restore();
 
         });
         it('should process complex configuration causing create/update/delete resources, methods, integrations ', async () => {
+            listStub.restore();
+            listStub = sinon.stub(apiGw.connector, 'listRestApis');
             listStub.returns(connectorResponse({items: [
                 {id: 'id', name: 'name'},
                 {id: 'id2', name: 'name2'}
             ]}));
 
+            updateStub.restore();
+            updateStub = sinon.stub(apiGw.connector, 'updateRestApi');
             updateStub.returns(connectorResponse({id: 'id', name: 'name', description: 'STRING_VALUE'}));
 
+            listResourcesStub.restore();
+            listResourcesStub = sinon.stub(apiGw.connector, 'listResources');
             listResourcesStub.returns(connectorResponse({items: [
                 {id: 'resId', pathPart: '/', path: '/'},
                 {id: 'clientsId', pathPart: 'clients', path: '/clients', parentId: 'resId', resourceMethods: {"ANY": {
@@ -436,7 +458,9 @@ describe('ApiGatewayController', () => {
             deleteIntegrationResponseStub.returns(connectorResponse({request: 'done'}));
 
             //deploy
-            await apiGw.deploy('name', props, opts, group);
+            const result = await apiGw.deploy('name', props, opts, group);
+
+            expect(result).not.empty;
         });
         it('should call RestApi method update', async () => {
             expect(updateStub.args[0][0]).to.equal('id');

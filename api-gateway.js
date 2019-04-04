@@ -39,7 +39,7 @@ class ApiGateway {
         informGroup.addInformer(properties, {text: 'Waiting dependencies to complete'});
 
         try {
-            const results = [];
+            let results = [];
             let [rest, params, resources] = await Promise.all([
                 restApi.find(name),
                 properties || {},
@@ -66,8 +66,10 @@ class ApiGateway {
 
             results.push(this.deployResources(root, resources, currentResources.items));
 
-            await Promise.all(results);
-            return rest;
+            results = await Promise.all(results);
+
+
+            return rest.plain;
         } catch (e) {
             throw e;
         }
@@ -227,11 +229,15 @@ class ApiGateway {
 
             //deploy subresources
             if (resource.resources) {
-                await this.deployResources(res, resource.resources, allResources);
+                let resources = await this.deployResources(res, resource.resources, allResources);
             }
 
             //thin: transition is a set of callbacks and we wait for it here even after had waited for deployResources
-            return await Promise.all(Object.values(transition).map(set => Promise.all(set)));
+            await Promise.all(Object.values(transition).map(set => Promise.all(set)));
+
+            /** TODO check for fresh methods and resources are presented in return value and accessible in deployment**/
+
+            return res.plain;
         } catch (e) {
             throw e;
         }
@@ -245,7 +251,7 @@ class ApiGateway {
      * @param currentResources
      * @return {Promise<[*]>}
      */
-    deployResources(parent, resources, currentResources) {
+    async deployResources(parent, resources, currentResources) {
         const newRes = Object.keys(resources).map(key => {
             resources[key].pathPart = key; return resources[key];
         });
@@ -259,7 +265,11 @@ class ApiGateway {
             .setCreator(newItem => this.deployResource(parent, newItem, null, currentResources))
             .perform(oldRes, newRes);
 
-        return Promise.all(Object.values(transition).map(set => Promise.all(set)));
+        await Promise.all(Object.values(transition).map(set => {
+            return Promise.all(set)
+        }));
+
+        return transition;
     }
 }
 
