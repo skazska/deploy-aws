@@ -85,6 +85,11 @@ describe('ApiGatewayController', () => {
 
         let restApiEntity;
 
+        let pseudoLambda = {
+            val: () => "FunctionArn",
+            removePermission: () => connectorResponse({'ok': 'done'}),
+            addPermission: () => connectorResponse({'ok': 'done'})
+        };
 
         before(() => {
             infoCall = sinon.fake();
@@ -149,7 +154,7 @@ describe('ApiGatewayController', () => {
                                     },
                                     "integration": {
                                         "type": "AWS_PROXY",
-                                        "lambda": "FunctionArn",
+                                        "lambda": pseudoLambda,
                                         "awsProperties": {
                                             "passthroughBehavior": "NEVER"
                                         },
@@ -191,7 +196,7 @@ describe('ApiGatewayController', () => {
                                             },
                                             "integration": {
                                                 "type": "AWS_PROXY",
-                                                "lambda": "FunctionArn",
+                                                "lambda": pseudoLambda,
                                                 "awsProperties": {
                                                     "description": "STRING_VALUE"
                                                 }
@@ -230,7 +235,7 @@ describe('ApiGatewayController', () => {
 
             restApiEntity = await apiGw.deploy('name', props, opts, group);
 
-            expect(restApiEntity).to.eql({id: 'id', name: 'name', description: 'STRING_VALUE'});
+            expect(restApiEntity.properties).to.eql({id: 'id', name: 'name', description: 'STRING_VALUE'});
 
             expect(createStub.args[0][0]).to.deep.include({
                 name: 'name', description: 'STRING_VALUE'
@@ -300,7 +305,7 @@ describe('ApiGatewayController', () => {
 
             restApiEntity = await apiGw.deploy('name', props, opts, group);
 
-            expect(restApiEntity).to.eql({
+            expect(restApiEntity.properties).to.eql({
                 id: 'id', name: 'name',
                 apiKeySource: 'HEADER',
                 binaryMediaTypes: ['VALUE'],
@@ -438,7 +443,6 @@ describe('ApiGatewayController', () => {
                 }));
 
             deleteIntegrationStub.returns(connectorResponse({request: 'done'}));
-
 
             createIntegrationResponseStub.returns(connectorResponse({statusCode: '200', smth: 'NONE',
                 // requestParameters: {},

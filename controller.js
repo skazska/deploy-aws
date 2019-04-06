@@ -99,6 +99,11 @@ class Controller {
             }
         });
 
+        //TODO solve a problem: api-gw method integration, may require api-gw resource and method to be processed as
+        // well as thing to integrate with (i.e. lambda) before adding integration-related policies (i.e. lambda access
+        // policy), so need implement special part of deploy config named "integrations" which will be processed after
+        // all DPKO, and all entities available to pick their propertied for creating integrations
+
         return Promise.all(Object.keys(deployment).map(key => deployment[key]));
     }
 

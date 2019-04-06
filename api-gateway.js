@@ -69,7 +69,7 @@ class ApiGateway {
             results = await Promise.all(results);
 
 
-            return rest.plain;
+            return rest;
         } catch (e) {
             throw e;
         }
@@ -107,7 +107,7 @@ class ApiGateway {
         }
     }
 
-    async deployIntegration(method, integration, current) {
+    async deployIntegration(method, integration, current, res) {
         let intgr = null;
 
         const compileIntegration = integration => {
@@ -117,7 +117,7 @@ class ApiGateway {
                 if (integration.lambda) {
                     // let lambda = typeof integration.lambda === 'string' ? integration.lambda : integration.lambda.properties.FunctionArn;
                     props.uri = 'arn:aws:apigateway:' + this.region + ':lambda:path/2015-03-31/functions/' +
-                        integration.lambda + '/invocations';
+                        integration.lambda.val('FunctionArn') + '/invocations';
                 }
             }
             return props
@@ -129,6 +129,15 @@ class ApiGateway {
                 await intgr.update(compileIntegration(integration))
             } else {
                 intgr = await method.addIntegration(compileIntegration(integration));
+            }
+
+            //TODO this is a temporary solutions, plans to move whole integrations creating to special DPKO
+            // "integrations"
+            if (integration.type === 'AWS_PROXY') {
+                let sourceArn = 'arn:aws:execute-api:'+this.region+':'+this.accountId+':'+intgr.id.restApiId+'/*/*' + res.val('path');
+
+                await integration.lambda.removePermission(null, 'test');
+                await integration.lambda.addPermission(null, 'test', {SourceArn: sourceArn});
             }
 
             //method response
@@ -185,7 +194,7 @@ class ApiGateway {
                 .setCreator(newItem => this.deployMethodResponse(meth, newItem))
                 .perform(curResponses, responses);
 
-            await this.deployIntegration(meth, method.integration || {}, meth.val('methodIntegration'));
+            await this.deployIntegration(meth, method.integration || {}, meth.val('methodIntegration'), res);
 
             //thin: transition is a set of callbacks and we wait for it here even after had waited for deployResources
             return await responseTransition
@@ -237,7 +246,7 @@ class ApiGateway {
 
             /** TODO check for fresh methods and resources are presented in return value and accessible in deployment**/
 
-            return res.plain;
+            return res;
         } catch (e) {
             throw e;
         }

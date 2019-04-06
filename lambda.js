@@ -102,7 +102,7 @@ class LambdaController {
                 result = lambda.create(name, params);
             }
             return result.then(lambdaEntity => {
-                return lambdaEntity.plain;
+                return lambdaEntity;
             });
         } catch (e) {
             throw e;

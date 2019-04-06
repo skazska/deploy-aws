@@ -55,14 +55,64 @@
         "clients": {
           "ANY": {
             "awsProperties": {
+              "authorizationType": "NONE"
             },
             "integration": {
               "type": "AWS_PROXY",
               "lambda": {
-                "aws-deploy": "lambda.aws-deploy-field-test"
+                "aws-deploy": "lambda.aws-deploy-field-test/FunctionArn"
+              },
+              "awsProperties": {
+                "passthroughBehavior": "NEVER"
               },
               "responses": {
                 "200": {
+                },
+                "412": {
+                  "contentHandling": "CONVERT_TO_BINARY",
+                  "responseParameters": {"par1":  "val1"},
+                  "responseTemplates": {"tpl1":  "tpl"},
+                  "selectionPattern": "sp"
+                }
+
+              }
+            },
+            "responses": {
+              "200": {
+                "responseParameters": {
+                  "method.response.header.MY_HEADER": false
+                },
+                "responseModels": {
+                  "application/json": "Empty"
+                }
+              },
+              "319": {
+                "responseParameters": {
+                  "method.response.header.MY_HEADER": false
+                },
+                "responseModels": {
+                  "application/json": "Empty"
+                }
+              }
+            }
+          },
+          "resources" : {
+            "test": {
+              "ANY": {
+                "awsProperties": {
+                },
+                "integration": {
+                  "type": "AWS_PROXY",
+                  "lambda": {
+                    "aws-deploy": "lambda.aws-deploy-field-test/FunctionArn"
+                  },
+                  "responses": {
+                    "200": {}
+                  },
+                  "awsProperties": {
+                  }
+                },
+                "responses": {
                 }
               }
             }
@@ -71,8 +121,5 @@
         }
       }
     }
-  },
-  "integrations": {
-
   }
 }
