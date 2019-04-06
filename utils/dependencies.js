@@ -78,6 +78,14 @@ function bind (properties, deployment) {
  * @return {*}
  */
 function fill (properties, deployment) {
+    const getDepVal = (property) => {
+        let dep = depKeys(property);
+        let data = deployment[dep.dep];
+        return dep.pointer
+            ? pointer.get(data.plain || data, dep.pointer)
+            : data;
+    };
+
     if (Array.isArray(properties)) {
         return properties.map(properties => {
             return fill(properties, deployment);
@@ -86,14 +94,17 @@ function fill (properties, deployment) {
     if (typeof properties !== 'object') return properties;
     return Object.keys(properties).reduce((result, key) => {
         if (key === 'aws-deploy') {
-            let dep = depKeys(properties[key]);
-            return dep.pointer ? pointer.get(deployment[dep.dep], dep.pointer) : deployment[dep.dep];
-            // return deployment[properties[key]];
+            return getDepVal(properties[key]);
+            // let dep = depKeys(properties[key]);
+            // let data = deployment[dep.dep];
+            // return dep.pointer
+            //     ? pointer.get(data.plain || data, dep.pointer)
+            //     : data;
         }
         if (properties[key]['aws-deploy']) {
-            let dep = depKeys(properties[key]['aws-deploy']);
-            let val = dep.pointer ? pointer.get(deployment[dep.dep], dep.pointer) : deployment[dep.dep];
-            // let val = deployment[properties[key]['aws-deploy']];
+            let val = getDepVal(properties[key]['aws-deploy']);
+            // let dep = depKeys(properties[key]['aws-deploy']);
+            // let val = dep.pointer ? pointer.get(deployment[dep.dep], dep.pointer) : deployment[dep.dep];
             if (typeof val !== 'undefined') result[key] = val;
         } else {
             result[key] = fill(properties[key], deployment);

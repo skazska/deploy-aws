@@ -78,7 +78,7 @@ describe('LambdaController', () => {
             preparePackageStub.resolves('code');
             createStub.returns(awsResponse({FunctionName: 'name', Role: 'role'}));
             const entity = await lambda.deploy('name', props, opts, group);
-            expect(entity).to.eql({FunctionName: 'name', Role: 'role'});
+            expect(entity.properties).to.eql({FunctionName: 'name', Role: 'role'});
             expect(createStub.args[0][0]).to.deep.include({
                 "Description": "",
                 "FunctionName": "name",
@@ -97,7 +97,7 @@ describe('LambdaController', () => {
             updateStub.returns(awsResponse({FunctionName: 'name', Role: 'role', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcCs='}));
             updateCodeStub.returns(awsResponse({FunctionName: 'name', Role: 'role', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcCs='}));
             const result = await lambda.deploy('name', props, opts, group);
-            expect(result).to.eql({FunctionName: 'name', Role: 'role', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcCs='});
+            expect(result.properties).to.eql({FunctionName: 'name', Role: 'role', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcCs='});
             expect(preparePackageStub.args[0][0]).to.be.eql('wd');
             expect(preparePackageStub.args[0][1]).to.be.eql(['1']);
             expect(updateStub.args[0][0]).to.be.eql({
@@ -121,7 +121,7 @@ describe('LambdaController', () => {
             updateStub.returns(awsResponse({FunctionName: 'name', Role: 'role'}));
             updateCodeStub.returns(awsResponse({FunctionName: 'name', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcC1=', Role: 'role'}));
             const result = await lambda.deploy('name', props, opts, group);
-            expect(result).to.eql({
+            expect(result.properties).to.eql({
                 FunctionName: 'name',
                 Role: 'role',
                 CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcC1='
@@ -141,7 +141,7 @@ describe('LambdaController', () => {
             updateStub.returns(awsResponse({FunctionName: 'name', Role: 'role', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcCs='}));
             updateCodeStub.returns(awsResponse({FunctionName: 'name', Role: 'role', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcCs='}));
             const result = await lambda.deploy('name', props, opts, group);
-            expect(result).to.eql({FunctionName: 'name', Role: 'role', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcCs='});
+            expect(result.properties).to.eql({FunctionName: 'name', Role: 'role', CodeSha256: 'VpTQii5T/8rgwxA+Wtb2B2q9lg6x+KVldwQLwQKPcCs='});
             expect(preparePackageStub.args[0][0]).to.be.eql('wd');
             expect(preparePackageStub.args[0][1]).to.be.eql(['1']);
             expect(updateCodeStub).not.to.be.called;
