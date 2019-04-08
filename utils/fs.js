@@ -1,5 +1,6 @@
 const { statSync, readdirSync } = require('fs');
-const AdmZip = require('../custom_modules/adm-zip');
+const path = require('path');
+const AdmZip = require(path.resolve( __dirname, '../custom_modules/adm-zip'));
 //const AdmZip = require('adm-zip');
 
 /**
