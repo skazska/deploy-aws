@@ -3,7 +3,7 @@
  */
 
 const ApiBase = require('./api-base');
-const { Transition } = require('../utils/arraysProcessor');
+const { Transition } = require('@skazska/tools-data-transform');
 
 
 /**

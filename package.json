@@ -24,6 +24,7 @@
   "homepage": "https://github.com/skazska/deploy-aws#readme",
   "dependencies": {
     "@skazska/inform": "^0.0.10",
+    "@skazska/tools-data-transform": "0.0.1",
     "adm-zip": "^0.4.13",
     "aws-sdk": "^2.432.0",
     "commander": "^2.19.0",

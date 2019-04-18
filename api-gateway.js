@@ -1,4 +1,4 @@
-const { Transition } = require('./utils/arraysProcessor');
+const { Transition } = require('@skazska/tools-data-transform');
 const { hasDifferences } = require('./utils/properties');
 const Connector = require('./api-gateway/connector');
 const RestApi = require('./api-gateway/rest-api');

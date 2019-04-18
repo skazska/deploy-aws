@@ -1,7 +1,7 @@
 const AWSGlobal = require('aws-sdk/global');
 const Iam = require('aws-sdk/clients/iam');
 
-const { Transition } = require('../../utils/arraysProcessor');
+const { Transition } = require('@skazska/tools-data-transform');
 
 
 let defaultConfig = {
