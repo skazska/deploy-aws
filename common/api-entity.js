@@ -3,7 +3,7 @@
  */
 
 const ApiBase = require('./api-base');
-const { Transition } = require('@skazska/tools-data-transform');
+const { object } = require('@skazska/tools-data-transform');
 
 
 /**
@@ -30,29 +30,7 @@ class ApiEntity extends ApiBase {
      * @protected
      */
     _updateEntity (properties) {
-        const updateObj = (obj, newObj) => {
-            const set = (key, val) => {
-                if (val && typeof val === 'object') {
-                    if (!obj[key]) {
-                        if (Array.isArray(val)) {
-                            obj[key] = [];
-                        } else {
-                            obj[key] = {};
-                        }
-                    }
-                    updateObj(obj[key], val);
-                } else {
-                    obj[key] = newObj[key];
-                }
-            };
-
-            new Transition((oldKey, newKey) => oldKey === newKey)
-                .setRemover(oldKey => { delete obj[oldKey]; })
-                .setAdjustor((oldKey, newKey) => { set(oldKey, newObj[newKey]); })
-                .setCreator(newKey => { set(newKey, newObj[newKey]); })
-                .perform(Object.keys(obj), Object.keys(newObj));
-        };
-        updateObj(this.properties, properties);
+        object.update(this.properties, properties);
         return this;
     }
 

@@ -24,11 +24,11 @@
   "homepage": "https://github.com/skazska/deploy-aws#readme",
   "dependencies": {
     "@skazska/inform": "^0.0.10",
-    "@skazska/tools-data-transform": "0.0.1",
+    "@skazska/tools-data-transform": "^0.0.3",
     "adm-zip": "^0.4.13",
-    "aws-sdk": "^2.432.0",
-    "commander": "^2.19.0",
-    "inquirer": "^6.2.2",
+    "aws-sdk": "^2.439.0",
+    "commander": "^2.20.0",
+    "inquirer": "^6.3.1",
     "json-pointer": "^0.6.0",
     "log-update": "^2.3.0"
   },
@@ -36,7 +36,7 @@
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "mocha": "^5.2.0",
-    "sinon": "^7.3.1",
+    "sinon": "^7.3.2",
     "sinon-chai": "^3.3.0"
   }
 }
