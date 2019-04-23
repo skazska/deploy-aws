@@ -3,8 +3,6 @@
  */
 
 const ApiBase = require('./api-base');
-const { object } = require('@skazska/tools-data-transform');
-
 
 /**
  * Represents entity API
@@ -30,7 +28,7 @@ class ApiEntity extends ApiBase {
      * @protected
      */
     _updateEntity (properties) {
-        object.update(this.properties, properties);
+        this.properties = Object.assign({}, properties);
         return this;
     }
 

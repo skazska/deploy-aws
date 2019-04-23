@@ -1,5 +1,13 @@
-.aws-cfg.json
 .idea
+.gitignore
+.aws-cfg.json
+.travis.yml
+.npmignore
+
+src
+test
+test-int
+field-test
 
 # Logs
 logs
@@ -32,16 +40,9 @@ bower_components
 # node-waf configuration
 .lock-wscript
 
-# Compiled binary addons (https://nodejs.org/api/addons.html)
-build/Release
-dist
 
-# Dependency directories
 node_modules/
 jspm_packages/
-
-# TypeScript v1 declaration files
-typings/
 
 # Optional npm cache directory
 .npm
@@ -54,12 +55,3 @@ typings/
 
 # Output of 'npm pack'
 *.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variables file
-.env
-
-# next.js build output
-.next
